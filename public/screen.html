@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clong</title>
+
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <canvas id="clong-canvas"></canvas>
+
+    <script>
+    var ws = new WebSocket('ws://' + window.location.host + '/ws/screen');
+
+    var balls = [];
+
+    var w = 0;
+    var h = 0;
+
+    function init() {
+        ws.addEventListener('message', function(e) {
+            var msg = JSON.parse(e.data);
+            balls.push(msg);
+        });
+
+        window.requestAnimationFrame(draw);
+    }
+
+    function rel(percentage) {
+        return Math.max(w, h) * (percentage/100);
+    }
+    function relH(percentage) {
+        return h * (percentage/100);
+    }
+    function relW(percentage) {
+        return w * (percentage/100);
+    }
+
+    function draw() {
+        var canvas = document.getElementById("clong-canvas");
+        var ctx = canvas.getContext("2d");
+
+        w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
+
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
+
+        for (i = 0; i < balls.length; i++) {
+            var b = balls[i];
+            ctx.fillStyle = b.color;
+            ctx.beginPath();
+            ctx.arc(relW(b.posX), relH(100-b.posY), rel(1.5), 0, 2*Math.PI);
+            ctx.fill();
+
+            balls[i].posX += b.speedX;
+            balls[i].posY += b.speedY;
+
+            if (balls[i].posY > 110) {
+                balls.splice(i, 1);
+            }
+        }
+
+        window.requestAnimationFrame(draw);
+    }
+
+    init();
+    </script>
+</body>
