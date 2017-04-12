@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clong</title>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Clong Screen</title>
 
     <link rel="stylesheet" href="/styles.css">
 </head>
@@ -10,7 +13,11 @@
     <canvas id="clong-canvas"></canvas>
 
     <script>
-    var ws = new WebSocket('ws://' + window.location.host + '/ws/screen');
+    var wsProtocol = 'ws';
+    if (window.location.protocol === "https:") {
+        wsProtocol = 'wss';
+    }
+    var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/screen');
 
     var balls = [];
 
@@ -26,13 +33,13 @@
         window.requestAnimationFrame(draw);
     }
 
-    function rel(percentage) {
+    function abs(percentage) {
         return Math.max(w, h) * (percentage/100);
     }
-    function relH(percentage) {
+    function absH(percentage) {
         return h * (percentage/100);
     }
-    function relW(percentage) {
+    function absW(percentage) {
         return w * (percentage/100);
     }
 
@@ -53,11 +60,11 @@
             var b = balls[i];
             ctx.fillStyle = b.color;
             ctx.beginPath();
-            ctx.arc(relW(b.posX), relH(100-b.posY), rel(1.5), 0, 2*Math.PI);
+            ctx.arc(absW(b.posX), absH(100-b.posY), abs(1.5), 0, 2*Math.PI);
             ctx.fill();
 
-            balls[i].posX += b.speedX;
-            balls[i].posY += b.speedY;
+            balls[i].posX += b.velocityX;
+            balls[i].posY += b.velocityY;
 
             if (balls[i].posY > 110) {
                 balls.splice(i, 1);
