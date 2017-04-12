@@ -2,13 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="msapplication-tap-highlight" content="no" />
+
     <title>Clong</title>
 
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+    <div id="clong-main"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script>
-    var ws = new WebSocket('ws://' + window.location.host + '/ws/client');
+    var wsProtocol = 'ws';
+    if (window.location.protocol === "https:") {
+        wsProtocol = 'wss';
+    }
+    var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/client');
+    var clong = document.getElementById('clong-main');
+    var mc = new Hammer(clong);
+    var myColor = '#fff';
+    var w = 0;
+    var h = 0;
+
+    function relW(val) {
+        return (val / w) * 100;
+    }
+    function relH(val) {
+        return (val / h) * -100;
+    }
+    function rel(val) {
+        return (val / Math.max(w,h)) * 100;
+    }
 
     function randomColor() {
         var letters = '0123456789ABCDEF';
@@ -21,17 +47,26 @@
         return color;
     }
 
-    var myColor = randomColor();
+    function init() {
+        w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        myColor = randomColor();
+        clong.style.backgroundColor = myColor;
 
-    var msg = {
-        color: myColor,
-        posX: 50,
-        speedX: 0.1,
-        speedY: 0.5,
-    };
+        mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+        mc.on('swipe', function(e) {
+            var msg = {
+                color: myColor,
+                posX: relW(e.center.x),
+                velocityX: rel(e.deltaX) * 0.01,
+                velocityY: relH(e.deltaY) * 0.02,
+            };
+            console.log(msg);
 
-    setInterval(function() {
-        ws.send(JSON.stringify(msg));
-    }, 1000);
+            ws.send(JSON.stringify(msg));
+        });
+    }
+
+    init();
     </script>
 </body>

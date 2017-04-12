@@ -4,6 +4,7 @@ body {
     padding: 0;
 }
 
+#clong-main,
 #clong-canvas {
     height: 100vh;
     width: 100vw;
