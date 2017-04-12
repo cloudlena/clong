@@ -52,6 +52,7 @@ func messageHub() {
 	}
 }
 
+// broadcasting manages the broadcasting activities of a client or screen
 func broadcasting(ws *websocket.Conn, screen bool) {
 	defer ws.Close()
 
