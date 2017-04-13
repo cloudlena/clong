@@ -19,37 +19,40 @@
     }
     var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/screen');
 
-    var balls = [];
-    var targets = [];
-
     var w = 0;
     var h = 0;
 
-    function init() {
-        ws.addEventListener('message', function(e) {
-            var msg = JSON.parse(e.data);
-            balls.push(msg);
-        });
+    var maxTargets = 4;
+    var balls = [];
+    var targets = [];
+    var targetTypes = [
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg',
+            sizeRatio: 1,
+        },
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/elk.svg',
+            sizeRatio: 1,
+        },
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/redis.svg',
+            sizeRatio: 1,
+        },
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/rabbitmq.svg',
+            sizeRatio: 1,
+        },
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mariadb.svg',
+            sizeRatio: 1,
+        },
+        {
+            imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mongodb.svg',
+            sizeRatio: 1,
+        },
+    ];
 
-        targets = [
-            {
-                imgUrl: 'https://cdn.worldvectorlogo.com/logos/react.svg',
-                posX: 10,
-                posY: 90,
-                velocityX: 0.4,
-                velocityY: 0,
-                width: 6,
-                height: 6,
-            },
-        ];
-        for (i = 0; i < targets.length; i++) {
-            targets[i].img = new Image();
-            targets[i].img.src = targets[i].imgUrl;
-        }
-
-        window.requestAnimationFrame(draw);
-    }
-
+    // Helper functions
     function abs(percentage) {
         return Math.max(w, h) * (percentage/100);
     }
@@ -60,12 +63,66 @@
         return w * (percentage/100);
     }
 
-    function dist(a, b) {
-        var dX = a.posX - b.posX;
-        var dY = a.posY - b.posY;
-        return Math.sqrt( dX*dX + dY*dY );
+    function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+    function doCollide(t, b) {
+        var xMatch = false;
+        var yMatch = false;
+
+        if (b.posX+b.radius >= t.posX && b.posX-b.radius <= t.posX+t.width) {
+            xMatch = true;
+        }
+        if (b.posY+b.radius >= t.posY && b.posY-b.radius <= t.posY+t.height) {
+            yMatch = true;
+        }
+
+        if (xMatch && yMatch) {
+            return true;
+        } else {
+            return false
+        }
     }
 
+    // Initialize system
+    function init() {
+        ws.addEventListener('message', function(e) {
+            var msg = JSON.parse(e.data);
+            msg.radius = 1;
+            balls.push(msg);
+        });
+
+        for (i = 0; i < targetTypes.length; i++) {
+            targetTypes[i].img = new Image();
+            targetTypes[i].img.src = targetTypes[i].imgUrl;
+        }
+
+        spawn(randInt(3000,5000));
+        window.requestAnimationFrame(draw);
+    }
+
+    // Regularly spawn new targets
+    function spawn(ms) {
+        setTimeout(function() {
+            if (targets.length < maxTargets) {
+                var type = targetTypes[randInt(0, targetTypes.length)];
+                var size = randInt(2,13);
+                targets.push({
+                    img: type.img,
+                    posX: randInt(20,80),
+                    posY: randInt(40,100),
+                    velocityX: Math.random() - 0.5,
+                    velocityY: 0,
+                    width: size,
+                    height: size*type.sizeRatio,
+                });
+            }
+
+            spawn(randInt(3000,5000));
+        }, ms);
+    }
+
+    // Draw current status onto canvas
     function draw() {
         var canvas = document.getElementById("clong-canvas");
         var ctx = canvas.getContext("2d");
@@ -79,6 +136,7 @@
         ctx.globalCompositeOperation = 'destination-over';
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
 
+        // Draw targets
         for (i = 0; i < targets.length; i++) {
             var t = targets[i];
 
@@ -93,17 +151,19 @@
 
             for (j = 0; j < balls.length; j++) {
                 var b = balls[j];
-                if (dist(b, t) < (t.width/2)+1) {
+                if (doCollide(t, b)) {
                     targets.splice(i, 1);
+                    balls.splice(j, 1);
                 }
             }
         }
 
+        // Draw balls
         for (i = 0; i < balls.length; i++) {
             var b = balls[i];
             ctx.fillStyle = b.color;
             ctx.beginPath();
-            ctx.arc(absW(b.posX), absH(100-b.posY), abs(1.5), 0, 2*Math.PI);
+            ctx.arc(absW(b.posX), absH(100-b.posY), abs(b.radius), 0, 2*Math.PI);
             ctx.fill();
 
             balls[i].posX += b.velocityX;
