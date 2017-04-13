@@ -20,6 +20,7 @@
     var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/screen');
 
     var balls = [];
+    var targets = [];
 
     var w = 0;
     var h = 0;
@@ -29,6 +30,22 @@
             var msg = JSON.parse(e.data);
             balls.push(msg);
         });
+
+        targets = [
+            {
+                imgUrl: 'https://cdn.worldvectorlogo.com/logos/react.svg',
+                posX: 10,
+                posY: 90,
+                velocityX: 0.4,
+                velocityY: 0,
+                width: 6,
+                height: 6,
+            },
+        ];
+        for (i = 0; i < targets.length; i++) {
+            targets[i].img = new Image();
+            targets[i].img.src = targets[i].imgUrl;
+        }
 
         window.requestAnimationFrame(draw);
     }
@@ -43,6 +60,12 @@
         return w * (percentage/100);
     }
 
+    function dist(a, b) {
+        var dX = a.posX - b.posX;
+        var dY = a.posY - b.posY;
+        return Math.sqrt( dX*dX + dY*dY );
+    }
+
     function draw() {
         var canvas = document.getElementById("clong-canvas");
         var ctx = canvas.getContext("2d");
@@ -55,6 +78,26 @@
 
         ctx.globalCompositeOperation = 'destination-over';
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
+
+        for (i = 0; i < targets.length; i++) {
+            var t = targets[i];
+
+            ctx.drawImage(t.img, absW(t.posX), absH(100-t.posY), abs(t.width), abs(t.height));
+
+            if (t.posX < 2 || t.posX > (98-(t.width))) {
+                targets[i].velocityX = -t.velocityX;
+            }
+
+            targets[i].posX += t.velocityX;
+            targets[i].posY += t.velocityY;
+
+            for (j = 0; j < balls.length; j++) {
+                var b = balls[j];
+                if (dist(b, t) < (t.width/2)+1) {
+                    targets.splice(i, 1);
+                }
+            }
+        }
 
         for (i = 0; i < balls.length; i++) {
             var b = balls[i];

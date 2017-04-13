@@ -26,6 +26,11 @@
     var w = 0;
     var h = 0;
 
+    function calcScreenSize() {
+        w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    }
+
     function relW(val) {
         return (val / w) * 100;
     }
@@ -48,8 +53,11 @@
     }
 
     function init() {
-        w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        calcScreenSize();
+        window.addEventListener('resize', (e) => {
+            calcScreenSize();
+        });
+
         myColor = randomColor();
         clong.style.backgroundColor = myColor;
 
