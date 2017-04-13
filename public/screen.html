@@ -7,17 +7,14 @@
 
     <title>Clong Screen</title>
 
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body>
     <canvas id="clong-canvas"></canvas>
 
+    <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var wsProtocol = 'ws';
-    if (window.location.protocol === "https:") {
-        wsProtocol = 'wss';
-    }
-    var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/screen');
+    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
 
     var w = 0;
     var h = 0;
@@ -52,39 +49,6 @@
         },
     ];
 
-    // Helper functions
-    function abs(percentage) {
-        return Math.max(w, h) * (percentage/100);
-    }
-    function absH(percentage) {
-        return h * (percentage/100);
-    }
-    function absW(percentage) {
-        return w * (percentage/100);
-    }
-
-    function randInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
-    function doCollide(t, b) {
-        var xMatch = false;
-        var yMatch = false;
-
-        if (b.posX+b.radius >= t.posX && b.posX-b.radius <= t.posX+t.width) {
-            xMatch = true;
-        }
-        if (b.posY+b.radius >= t.posY && b.posY-b.radius <= t.posY+t.height) {
-            yMatch = true;
-        }
-
-        if (xMatch && yMatch) {
-            return true;
-        } else {
-            return false
-        }
-    }
-
-    // Initialize system
     function init() {
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);

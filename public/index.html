@@ -8,49 +8,20 @@
 
     <title>Clong</title>
 
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body>
     <div id="clong-main"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var wsProtocol = 'ws';
-    if (window.location.protocol === "https:") {
-        wsProtocol = 'wss';
-    }
-    var ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws/client');
+    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/client');
     var clong = document.getElementById('clong-main');
     var mc = new Hammer(clong);
     var myColor = '#fff';
     var w = 0;
     var h = 0;
-
-    function calcScreenSize() {
-        w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    }
-
-    function relW(val) {
-        return (val / w) * 100;
-    }
-    function relH(val) {
-        return (val / h) * -100;
-    }
-    function rel(val) {
-        return (val / Math.max(w,h)) * 100;
-    }
-
-    function randomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-
-        for (var i = 0; i < 6; i++ ) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-
-        return color;
-    }
 
     function init() {
         calcScreenSize();
@@ -69,7 +40,6 @@
                 velocityX: rel(e.deltaX) * 0.01,
                 velocityY: relH(e.deltaY) * 0.02,
             };
-            console.log(msg);
 
             ws.send(JSON.stringify(msg));
         });
