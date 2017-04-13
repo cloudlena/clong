@@ -17,11 +17,13 @@
     <script src="/assets/scripts/helpers.js"></script>
     <script>
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/client');
+
+    var w = 0;
+    var h = 0;
+
     var clong = document.getElementById('clong-main');
     var mc = new Hammer(clong);
     var myColor = '#fff';
-    var w = 0;
-    var h = 0;
 
     function init() {
         calcScreenSize();
