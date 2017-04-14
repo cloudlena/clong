@@ -16,13 +16,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/client');
+    const ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/client');
+    const clong = document.getElementById('clong-main');
+    const mc = new Hammer(clong);
 
     var w = 0;
     var h = 0;
-
-    var clong = document.getElementById('clong-main');
-    var mc = new Hammer(clong);
     var myColor = '#fff';
 
     function init() {
@@ -31,16 +30,18 @@
             calcScreenSize();
         });
 
+        // Set player color
         myColor = randomColor();
         clong.style.backgroundColor = myColor;
 
+        // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
         mc.on('swipe', function(e) {
-            var msg = {
+            const msg = {
                 color: myColor,
                 posX: relW(e.center.x),
-                velocityX: rel(e.deltaX) * 0.01,
-                velocityY: relH(e.deltaY) * 0.02,
+                velocityX: rel(e.velocityX),
+                velocityY: relH(e.velocityY),
             };
 
             ws.send(JSON.stringify(msg));
