@@ -78,8 +78,8 @@ func broadcasting(ws *websocket.Conn, screen bool) {
 	}
 }
 
-// handleClientConnections handles websocket connections coming from clients
-func handleClientConnections(w http.ResponseWriter, r *http.Request) {
+// handleClientConnection handles a WebSocket connection coming from a client
+func handleClientConnection(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		msg := fmt.Sprintf("error upgrading connection: %s", err.Error())
@@ -94,8 +94,8 @@ func handleClientConnections(w http.ResponseWriter, r *http.Request) {
 	go broadcasting(ws, false)
 }
 
-// handleScreenConnections handles websocket connections coming from screens
-func handleScreenConnections(w http.ResponseWriter, r *http.Request) {
+// handleScreenConnection handles a WebSocket connections coming from a screen
+func handleScreenConnection(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		msg := fmt.Sprintf("error upgrading connection: %s", err.Error())
@@ -120,8 +120,8 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.HandleFunc("/screen", handleScreen)
-	http.HandleFunc("/ws/client", handleClientConnections)
-	http.HandleFunc("/ws/screen", handleScreenConnections)
+	http.HandleFunc("/ws/client", handleClientConnection)
+	http.HandleFunc("/ws/screen", handleScreenConnection)
 
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
