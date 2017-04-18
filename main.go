@@ -19,7 +19,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.Handle("/screen", ScreenViewHandler())
-	http.Handle("/ws/client", ClientConnHandler(hub, up))
+	http.Handle("/ws/controller", ControllerConnHandler(hub, up))
 	http.Handle("/ws/screen", ScreenConnHandler(hub, up))
 
 	port := os.Getenv("PORT")

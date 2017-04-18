@@ -14,13 +14,13 @@
 
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    const ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
+    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
 
-    const ballRadius = 1;
-    const maxTargets = 4;
-    const targetSpawnIntervalMin = 3000;
-    const targetSpawnIntervalMax = 5000;
-    const targetTypes = [
+    var ballRadius = 1;
+    var maxTargets = 5;
+    var targetSpawnIntervalMin = 2000;
+    var targetSpawnIntervalMax = 3000;
+    var targetTypes = [
         {
             imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg',
             sizeRatio: 1,
@@ -66,13 +66,15 @@
 
         // Listen for new balls coming in
         ws.addEventListener('message', function(e) {
-            const ball = JSON.parse(e.data);
+            var ball = JSON.parse(e.data);
 
             if (ball.velocityY > 0) {
                 ball.radius = ballRadius;
                 ball.velocityY = Math.max(ball.velocityY, 0.05) * 1.5;
 
                 balls.push(ball);
+            } else {
+                ballDone(ball.player, 0);
             }
         });
 
@@ -81,21 +83,31 @@
         window.requestAnimationFrame(draw);
     }
 
+    function ballDone(player, points) {
+        var msg = {
+            type: 'ballDone',
+            player: player,
+            points: points,
+        };
+        ws.send(JSON.stringify(msg));
+    }
+
     // Regularly spawn new targets
     function spawnTarget(ms) {
         setTimeout(function() {
             if (targets.length < maxTargets) {
-                const type = targetTypes[randInt(0, targetTypes.length)];
-                const size = randInt(2, 13);
+                var type = targetTypes[randInt(0, targetTypes.length)];
+                var width = randInt(2, 13);
+                var height = width * type.sizeRatio * (w/h);
 
                 targets.push({
                     img: type.img,
                     posX: randInt(20, 80),
-                    posY: randInt(40, 100),
+                    posY: randInt(height, 100),
                     velocityX: Math.random() - 0.5,
                     velocityY: 0,
-                    width: size,
-                    height: size * type.sizeRatio,
+                    width: width,
+                    height: height,
                 });
             }
 
@@ -105,8 +117,8 @@
 
     // Draw current status onto canvas
     function draw() {
-        const canvas = document.getElementById("clong-canvas");
-        const ctx = canvas.getContext("2d");
+        var canvas = document.getElementById("clong-canvas");
+        var ctx = canvas.getContext("2d");
 
         ctx.canvas.width = w;
         ctx.canvas.height = h;
@@ -120,13 +132,14 @@
 
             ctx.fillStyle = b.color;
             ctx.beginPath();
-            ctx.arc(absW(b.posX), absH(100 - b.posY), abs(b.radius), 0, 2 * Math.PI);
+            ctx.arc(absW(b.posX), absH(100 - b.posY), absW(b.radius), 0, 2 * Math.PI);
             ctx.fill();
 
             balls[i].posX += b.velocityX;
             balls[i].posY += b.velocityY;
 
-            if (balls[i].posY > 110) {
+            if (b.posY >= 100 || b.posX <= 0 || b.posX >= 100) {
+                ballDone(b.player, 0);
                 balls.splice(i, 1);
             }
         }
@@ -135,10 +148,10 @@
         for (i = 0; i < targets.length; i++) {
             var t = targets[i];
 
-            ctx.drawImage(t.img, absW(t.posX), absH(100 - t.posY), abs(t.width), abs(t.height));
+            ctx.drawImage(t.img, absW(t.posX), absH(100 - t.posY), absW(t.width), absH(t.height));
 
             // Invert velocity if target reaches end of screen
-            if (t.posX < 2 || t.posX > (98 - (t.width))) {
+            if (t.posX <= 0 || t.posX >= (100 - (t.width))) {
                 targets[i].velocityX = -t.velocityX;
             }
 
@@ -148,6 +161,8 @@
             for (j = 0; j < balls.length; j++) {
                 var b = balls[j];
                 if (doCollide(t, b)) {
+                    var points = calcPoints(t.posY, t.width, t.height, t.velocityX);
+                    ballDone(b.player, points);
                     targets.splice(i, 1);
                     balls.splice(j, 1);
                 }

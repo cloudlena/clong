@@ -1,8 +1,3 @@
-// Convert screen coordinates from relative to absolute
-function abs(rel) {
-    return Math.max(w, h) * (rel/100);
-}
-
 // Convert vertical screen coordinates from relative to absolute
 function absH(rel) {
     return h * (rel/100);
@@ -11,11 +6,6 @@ function absH(rel) {
 // Convert horizontal screen coordinates from relative to absolute
 function absW(rel) {
     return w * (rel/100);
-}
-
-// Convert screen coordinates from absolute to relative
-function rel(abs) {
-    return (abs / Math.max(w,h)) * 100;
 }
 
 // Convert vertical screen coordinates from absolute to relative
@@ -28,6 +18,19 @@ function relW(abs) {
     return (abs / w) * 100;
 }
 
+function calcPoints(posY, width, height, velocityX) {
+    if (velocityX < 0) {
+        velocityX = -velocityX;
+    }
+    var bias = 5;
+    var posYVal = 10 * (posY/100);
+    var widthVal = 10 * ((13-width)/11);
+    var heightVal = 10 * ((13-width)/11);
+    var velXVal = 25 * (2*velocityX);
+    var finalVal = Math.round(bias + posYVal + widthVal + heightVal + velXVal);
+    return finalVal;
+}
+
 // Calculate the current screen size
 function calcScreenSize() {
     w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -38,11 +41,12 @@ function calcScreenSize() {
 function doCollide(t, b) {
     var xMatch = false;
     var yMatch = false;
+    var verticalRadius = b.radius * (w/h);
 
     if (b.posX+b.radius >= t.posX && b.posX-b.radius <= t.posX+t.width) {
         xMatch = true;
     }
-    if (b.posY+b.radius >= t.posY-t.height && b.posY-b.radius <= t.posY) {
+    if (b.posY+verticalRadius >= t.posY-t.height && b.posY-verticalRadius <= t.posY) {
         yMatch = true;
     }
 
@@ -60,7 +64,7 @@ function randInt(min, max) {
 
 // Generate random hex color value
 function randomColor() {
-    const letters = '0123456789ABCDEF';
+    var letters = '0123456789ABCDEF';
 
     var color = '#';
 
@@ -69,6 +73,17 @@ function randomColor() {
     }
 
     return color;
+}
+
+// Generate a UUID
+function uuid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
 }
 
 // Return correct WebSocket protocol

@@ -1,7 +1,8 @@
 package main
 
-// Message is a websocket message sent from a client
-type Message struct {
+// Control is a WebSocket message sent from a controller to control a screen
+type Control struct {
+	Player    string  `json:"player"`
 	Color     string  `json:"color"`
 	PosX      float64 `json:"posX"`
 	PosY      float64 `json:"posY"`
