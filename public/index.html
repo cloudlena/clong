@@ -12,17 +12,22 @@
 </head>
 <body>
     <div id="clong-main"></div>
+    <div id="loader"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    const ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/client');
-    const clong = document.getElementById('clong-main');
-    const mc = new Hammer(clong);
+    var myID = userID();
+    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/controller');
+    var clong = document.getElementById('clong-main');
+    var loader = document.getElementById('loader');
+    var mc = new Hammer(clong);
 
     var w = 0;
     var h = 0;
     var myColor = '#fff';
+    var myPoints = 0;
+    var locked = false;
 
     function init() {
         calcScreenSize();
@@ -30,22 +35,76 @@
             calcScreenSize();
         });
 
-        // Set player color
+        // Init player
         myColor = randomColor();
         clong.style.backgroundColor = myColor;
+        loader.style.borderColor = myColor;
+        loader.style.borderTopColor = '#fff';
 
         // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
         mc.on('swipe', function(e) {
-            const msg = {
+            var msg = {
                 color: myColor,
                 posX: relW(e.center.x),
-                velocityX: rel(e.velocityX),
+                velocityX: relW(e.velocityX),
                 velocityY: relH(e.velocityY),
             };
 
-            ws.send(JSON.stringify(msg));
+            if (!locked) {
+                ws.send(JSON.stringify(msg));
+                lock();
+            }
         });
+
+                // Listen for new balls coming in
+        ws.addEventListener('message', function(e) {
+            var msg = JSON.parse(e.data);
+            if (msg.type === 'ballDone' && msg.player === myID) {
+                myPoints += msg.points;
+console.log(myPoints);
+                unlock();
+            }
+        });
+
+    }
+
+    function setCookie(name, value) {
+        document.cookie = name + "=" + value;
+    }
+
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
+        }
+
+        return null;
+    }
+
+    function userID() {
+        var userid = getCookie('userid');
+
+        if (userid === null) {
+            userid = uuid();
+            setCookie('userid', userid);
+        }
+
+        return userid;
+    }
+
+    function lock() {
+        locked = true;
+        clong.style.display = 'none';
+    }
+
+    function unlock() {
+        locked = false;
+        clong.style.display = 'block';
     }
 
     init();

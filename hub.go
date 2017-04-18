@@ -8,25 +8,27 @@ import (
 
 // Hub is a WebSocket messaging hub
 type Hub struct {
-	Clients          map[*websocket.Conn]bool
-	RegisterClient   chan *websocket.Conn
-	UnregisterClient chan *websocket.Conn
-	Screens          map[*websocket.Conn]bool
-	RegisterScreen   chan *websocket.Conn
-	UnregisterScreen chan *websocket.Conn
-	Broadcast        chan Message
+	Controllers          map[*websocket.Conn]bool
+	Screens              map[*websocket.Conn]bool
+	RegisterController   chan *websocket.Conn
+	UnregisterController chan *websocket.Conn
+	RegisterScreen       chan *websocket.Conn
+	UnregisterScreen     chan *websocket.Conn
+	Controls             chan Control
+	Events               chan Event
 }
 
 // newHub creates a new messaging hub
 func newHub() *Hub {
 	return &Hub{
-		Clients:          make(map[*websocket.Conn]bool),
-		RegisterClient:   make(chan *websocket.Conn),
-		UnregisterClient: make(chan *websocket.Conn),
-		Screens:          make(map[*websocket.Conn]bool),
-		RegisterScreen:   make(chan *websocket.Conn),
-		UnregisterScreen: make(chan *websocket.Conn),
-		Broadcast:        make(chan Message),
+		Controllers:          make(map[*websocket.Conn]bool),
+		Screens:              make(map[*websocket.Conn]bool),
+		RegisterController:   make(chan *websocket.Conn),
+		UnregisterController: make(chan *websocket.Conn),
+		RegisterScreen:       make(chan *websocket.Conn),
+		UnregisterScreen:     make(chan *websocket.Conn),
+		Controls:             make(chan Control),
+		Events:               make(chan Event),
 	}
 }
 
@@ -34,28 +36,37 @@ func newHub() *Hub {
 func (h *Hub) run() {
 	for {
 		select {
-		case c := <-h.RegisterClient:
-			h.Clients[c] = true
-			log.Printf("client added. (%v connected)", len(h.Clients))
+		case c := <-h.RegisterController:
+			h.Controllers[c] = true
+			log.Printf("controller added (%v connected)", len(h.Controllers))
 
-		case c := <-h.UnregisterClient:
-			delete(h.Clients, c)
-			log.Printf("client removed (%v connected)", len(h.Clients))
+		case c := <-h.UnregisterController:
+			delete(h.Controllers, c)
+			log.Printf("controller removed (%v connected)", len(h.Controllers))
 
 		case s := <-h.RegisterScreen:
 			h.Screens[s] = true
-			log.Printf("screen added. (%v connected)", len(h.Screens))
+			log.Printf("screen added (%v connected)", len(h.Screens))
 
 		case s := <-h.UnregisterScreen:
 			delete(h.Screens, s)
 			log.Printf("screen removed (%v connected)", len(h.Screens))
 
-		case msg := <-h.Broadcast:
+		case c := <-h.Controls:
 			for s := range h.Screens {
-				err := s.WriteJSON(msg)
+				err := s.WriteJSON(c)
 				if err != nil {
 					s.Close()
 					h.UnregisterScreen <- s
+				}
+			}
+
+		case e := <-h.Events:
+			for c := range h.Controllers {
+				err := c.WriteJSON(e)
+				if err != nil {
+					c.Close()
+					h.UnregisterController <- c
 				}
 			}
 		}
