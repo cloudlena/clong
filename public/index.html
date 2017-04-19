@@ -31,7 +31,7 @@
 
     function init() {
         calcScreenSize();
-        window.addEventListener('resize', (e) => {
+        window.addEventListener('resize', function() {
             calcScreenSize();
         });
 
