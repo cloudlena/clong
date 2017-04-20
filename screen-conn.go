@@ -15,7 +15,12 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			handleHTTPError(w, http.StatusInternalServerError, err, ErrUpgradingConnection)
 			return
 		}
-		defer ws.Close()
+		defer func() {
+			err = ws.Close()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}()
 
 		h.RegisterScreen <- ws
 
