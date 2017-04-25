@@ -58,7 +58,7 @@ func (h *Hub) run() {
 				if err != nil {
 					err = s.Close()
 					if err != nil {
-						log.Fatal(err)
+						log.Fatalln(err)
 					}
 					h.UnregisterScreen <- s
 				}
@@ -70,7 +70,7 @@ func (h *Hub) run() {
 				if err != nil {
 					err = c.Close()
 					if err != nil {
-						log.Fatal(err)
+						log.Fatalln(err)
 					}
 					h.UnregisterController <- c
 				}
