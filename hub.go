@@ -56,7 +56,10 @@ func (h *Hub) run() {
 			for s := range h.Screens {
 				err := s.WriteJSON(c)
 				if err != nil {
-					s.Close()
+					err = s.Close()
+					if err != nil {
+						log.Fatal(err)
+					}
 					h.UnregisterScreen <- s
 				}
 			}
@@ -65,7 +68,10 @@ func (h *Hub) run() {
 			for c := range h.Controllers {
 				err := c.WriteJSON(e)
 				if err != nil {
-					c.Close()
+					err = c.Close()
+					if err != nil {
+						log.Fatal(err)
+					}
 					h.UnregisterController <- c
 				}
 			}
