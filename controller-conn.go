@@ -1,4 +1,4 @@
-package main
+package clong
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// ControllerConnHandler handles a WebSocket connection coming from a controller
+// ControllerConnHandler handles a WebSocket connection coming from a controller.
 func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
@@ -46,7 +46,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	})
 }
 
-// cookieVal returns the value of a cookie
+// cookieVal returns the value of a cookie.
 func cookieVal(cookies []*http.Cookie, name string) (string, bool) {
 	for _, c := range cookies {
 		if c.Name == name {

@@ -1,6 +1,6 @@
-package main
+package clong
 
-// Event is a WebSocket message sent from a screen to control a controller
+// Event is a WebSocket message sent from a screen to control a controller.
 type Event struct {
 	Type   string `json:"type"`
 	Player string `json:"player"`
