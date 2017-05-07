@@ -1,4 +1,4 @@
-package main
+package clong
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// ScreenConnHandler handles a WebSocket connections coming from a screen
+// ScreenConnHandler handles a WebSocket connections coming from a screen.
 func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)

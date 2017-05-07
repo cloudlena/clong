@@ -1,4 +1,4 @@
-package main
+package clong
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Hub is a WebSocket messaging hub
+// Hub is a WebSocket messaging hub.
 type Hub struct {
 	Controllers          map[*websocket.Conn]bool
 	Screens              map[*websocket.Conn]bool
@@ -18,8 +18,8 @@ type Hub struct {
 	Events               chan Event
 }
 
-// newHub creates a new messaging hub
-func newHub() *Hub {
+// NewHub creates a new messaging hub.
+func NewHub() *Hub {
 	return &Hub{
 		Controllers:          make(map[*websocket.Conn]bool),
 		Screens:              make(map[*websocket.Conn]bool),
@@ -32,8 +32,8 @@ func newHub() *Hub {
 	}
 }
 
-// run runs the messaging hub in a forever loop
-func (h *Hub) run() {
+// Run runs the messaging hub in a forever loop.
+func (h *Hub) Run() {
 	for {
 		select {
 		case c := <-h.RegisterController:

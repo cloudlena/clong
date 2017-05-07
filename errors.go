@@ -1,17 +1,17 @@
-package main
+package clong
 
 import (
 	"log"
 	"net/http"
 )
 
-// Common error messages within the app
+// These are common errors used throughout the application.
 const (
 	ErrUpgradingConnection = "error upgrading connection"
 	ErrReadingMessage      = "error reading message"
 )
 
-// handleHTTPError handles HTTP errors
+// handleHTTPError handles HTTP errors.
 func handleHTTPError(w http.ResponseWriter, statusCode int, err error, msg string) {
 	extMsg := http.StatusText(statusCode)
 	if msg != "" {
