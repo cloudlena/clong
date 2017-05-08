@@ -2,4 +2,4 @@
 
 !/public
 !/clong
-!/run-cf.sh
+!/entrypoint-cf.sh
