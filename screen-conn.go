@@ -12,7 +12,7 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, http.StatusInternalServerError, err, ErrUpgradingConnection)
+			handleHTTPError(w, http.StatusInternalServerError, err, ErrUpgradingConnection.Error())
 			return
 		}
 		defer func() {

@@ -1,14 +1,15 @@
 package clong
 
 import (
+	"errors"
 	"log"
 	"net/http"
 )
 
-// These are common errors used throughout the application.
-const (
-	ErrUpgradingConnection = "error upgrading connection"
-	ErrReadingMessage      = "error reading message"
+// Error codes returned by the application.
+var (
+	ErrUpgradingConnection = errors.New("error upgrading connection")
+	ErrReadingMessage      = errors.New("error reading message")
 )
 
 // handleHTTPError handles HTTP errors.
