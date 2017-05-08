@@ -4,4 +4,4 @@ applications:
   host: clong
   memory: 64M
   buildpack: https://github.com/cloudfoundry/binary-buildpack.git
-  command: ./run-cf.sh
+  command: ./entrypoint-cf.sh
