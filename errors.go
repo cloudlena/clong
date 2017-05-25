@@ -1,28 +1,21 @@
 package clong
 
 import (
-	"errors"
 	"log"
 	"net/http"
 )
 
-// Error codes returned by the application.
-var (
-	ErrUpgradingConnection = errors.New("error upgrading connection")
-	ErrReadingMessage      = errors.New("error reading message")
+// Error codes commonly used throughout the application.
+const (
+	errUpgradingConnection = "error upgrading connection"
+	errClosingConnection   = "error closing WebSocket connection"
+	errReadingMessage      = "error reading message"
 )
 
 // handleHTTPError handles HTTP errors.
-func handleHTTPError(w http.ResponseWriter, statusCode int, err error, msg string) {
-	extMsg := http.StatusText(statusCode)
-	if msg != "" {
-		extMsg = extMsg + ": " + msg
-	}
-	http.Error(w, extMsg, statusCode)
+func handleHTTPError(w http.ResponseWriter, err error) {
+	code := http.StatusInternalServerError
 
-	logMsg := extMsg
-	if err != nil && err.Error() != msg {
-		logMsg = logMsg + ": " + err.Error()
-	}
-	log.Println(logMsg)
+	http.Error(w, http.StatusText(code), code)
+	log.Println(err)
 }
