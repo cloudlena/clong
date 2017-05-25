@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 )
 
 // ScreenConnHandler handles a WebSocket connections coming from a screen.
@@ -12,13 +13,13 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, http.StatusInternalServerError, err, ErrUpgradingConnection.Error())
+			handleHTTPError(w, errors.Wrap(err, errUpgradingConnection))
 			return
 		}
 		defer func() {
 			err = ws.Close()
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatalln(errors.Wrap(err, errClosingConnection))
 			}
 		}()
 
@@ -29,7 +30,7 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 
 			err := ws.ReadJSON(&e)
 			if err != nil {
-				log.Println(ErrReadingMessage, err.Error())
+				log.Println(errors.Wrap(err, errReadingMessage))
 				h.UnregisterScreen <- ws
 				break
 			}

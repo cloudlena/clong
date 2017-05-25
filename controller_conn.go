@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 )
 
 // ControllerConnHandler handles a WebSocket connection coming from a controller.
@@ -12,13 +13,13 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, http.StatusInternalServerError, err, ErrUpgradingConnection.Error())
+			handleHTTPError(w, errors.Wrap(err, errUpgradingConnection))
 			return
 		}
 		defer func() {
 			err = ws.Close()
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatalln(errors.Wrap(err, errClosingConnection))
 			}
 		}()
 
@@ -36,7 +37,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 
 			err := ws.ReadJSON(&c)
 			if err != nil {
-				log.Println(ErrReadingMessage, err.Error())
+				log.Println(errors.Wrap(err, errReadingMessage))
 				h.UnregisterController <- ws
 				break
 			}

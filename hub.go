@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 )
 
 // Hub is a WebSocket messaging hub.
@@ -58,7 +59,7 @@ func (h *Hub) Run() {
 				if err != nil {
 					err = s.Close()
 					if err != nil {
-						log.Fatalln(err)
+						log.Fatalln(errors.Wrap(err, "error closing screen connection"))
 					}
 					h.UnregisterScreen <- s
 				}
@@ -70,7 +71,7 @@ func (h *Hub) Run() {
 				if err != nil {
 					err = c.Close()
 					if err != nil {
-						log.Fatalln(err)
+						log.Fatalln(errors.Wrap(err, "error closing controller connection"))
 					}
 					h.UnregisterController <- c
 				}
