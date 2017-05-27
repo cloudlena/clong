@@ -33,49 +33,51 @@ func NewHub() *Hub {
 	}
 }
 
-// Run runs the messaging hub in a forever loop.
+// Run runs the messaging hub in a forever loop as a goruotine.
 func (h *Hub) Run() {
-	for {
-		select {
-		case c := <-h.RegisterController:
-			h.Controllers[c] = true
-			log.Printf("controller added (%v connected)", len(h.Controllers))
+	go func() {
+		for {
+			select {
+			case c := <-h.RegisterController:
+				h.Controllers[c] = true
+				log.Printf("controller added (%v connected)", len(h.Controllers))
 
-		case c := <-h.UnregisterController:
-			delete(h.Controllers, c)
-			log.Printf("controller removed (%v connected)", len(h.Controllers))
+			case c := <-h.UnregisterController:
+				delete(h.Controllers, c)
+				log.Printf("controller removed (%v connected)", len(h.Controllers))
 
-		case s := <-h.RegisterScreen:
-			h.Screens[s] = true
-			log.Printf("screen added (%v connected)", len(h.Screens))
+			case s := <-h.RegisterScreen:
+				h.Screens[s] = true
+				log.Printf("screen added (%v connected)", len(h.Screens))
 
-		case s := <-h.UnregisterScreen:
-			delete(h.Screens, s)
-			log.Printf("screen removed (%v connected)", len(h.Screens))
+			case s := <-h.UnregisterScreen:
+				delete(h.Screens, s)
+				log.Printf("screen removed (%v connected)", len(h.Screens))
 
-		case c := <-h.Controls:
-			for s := range h.Screens {
-				err := s.WriteJSON(c)
-				if err != nil {
-					err = s.Close()
+			case c := <-h.Controls:
+				for s := range h.Screens {
+					err := s.WriteJSON(c)
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error closing screen connection"))
+						err = s.Close()
+						if err != nil {
+							log.Fatalln(errors.Wrap(err, "error closing screen connection"))
+						}
+						h.UnregisterScreen <- s
 					}
-					h.UnregisterScreen <- s
 				}
-			}
 
-		case e := <-h.Events:
-			for c := range h.Controllers {
-				err := c.WriteJSON(e)
-				if err != nil {
-					err = c.Close()
+			case e := <-h.Events:
+				for c := range h.Controllers {
+					err := c.WriteJSON(e)
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error closing controller connection"))
+						err = c.Close()
+						if err != nil {
+							log.Fatalln(errors.Wrap(err, "error closing controller connection"))
+						}
+						h.UnregisterController <- c
 					}
-					h.UnregisterController <- c
 				}
 			}
 		}
-	}
+	}()
 }

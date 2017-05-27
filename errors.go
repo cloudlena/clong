@@ -1,6 +1,7 @@
 package clong
 
 import (
+	"errors"
 	"log"
 	"net/http"
 )
@@ -12,10 +13,23 @@ const (
 	errReadingMessage      = "error reading message"
 )
 
+// Errors commonly used throughout the application.
+var (
+	errUserIDMissing = errors.New("user ID missing")
+)
+
 // handleHTTPError handles HTTP errors.
 func handleHTTPError(w http.ResponseWriter, err error) {
 	code := http.StatusInternalServerError
 
+	if err == errUserIDMissing {
+		code = http.StatusUnauthorized
+	}
+
 	http.Error(w, http.StatusText(code), code)
-	log.Println(err)
+
+	// Log if server error
+	if code >= 500 {
+		log.Println(err)
+	}
 }
