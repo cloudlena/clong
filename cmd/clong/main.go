@@ -25,6 +25,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.Handle("/screen", clong.ScreenViewHandler())
+	http.Handle("/scoreboard", clong.ScoreboardViewHandler())
 	http.Handle("/ws/controller", clong.ControllerConnHandler(hub, up))
 	http.Handle("/ws/screen", clong.ScreenConnHandler(hub, up))
 

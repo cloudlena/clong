@@ -40,3 +40,20 @@ body {
     0% { transform: rotate(0deg);  }
     100% { transform: rotate(360deg);  }
 }
+
+#scoreboard {
+    font-family: sans-serif;
+    width 100%;
+    font-size: 3em;
+    padding-top: 2em;
+}
+
+#scoreboard table {
+    width: 100%;
+}
+
+#scoreboard td {
+    width: 50%;
+    text-align: center;
+    padding-bottom: 0.5em;
+}
