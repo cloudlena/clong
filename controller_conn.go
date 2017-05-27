@@ -29,7 +29,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			var c Control
 			id, ok := cookieVal(r.Cookies(), "userid")
 			if !ok {
-				log.Println("no userID foundresult")
+				handleHTTPError(w, errUserIDMissing)
 				h.UnregisterController <- ws
 				break
 			}
@@ -37,7 +37,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 
 			err := ws.ReadJSON(&c)
 			if err != nil {
-				log.Println(errors.Wrap(err, errReadingMessage))
+				handleHTTPError(w, errors.Wrap(err, errReadingMessage))
 				h.UnregisterController <- ws
 				break
 			}
