@@ -8,7 +8,20 @@ body {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-#clong-main,
+.hud {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+#score,
+#timer {
+    display: inline-block;
+    padding: 2em;
+}
+
+#main,
 #clong-canvas {
     z-index: 1;
     position: relative;
@@ -17,7 +30,7 @@ body {
     display: block;
 }
 
-#loader {
+#spinner {
     z-index: 0;
     position: absolute;
     margin-top: auto;
@@ -43,9 +56,8 @@ body {
 
 #scoreboard {
     font-family: sans-serif;
-    width 100%;
-    font-size: 3em;
-    padding-top: 2em;
+    font-size: 2.5em;
+    padding-top: 1em;
 }
 
 #scoreboard table {

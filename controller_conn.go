@@ -29,7 +29,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			var c Control
 			id, ok := cookieVal(r.Cookies(), "userid")
 			if !ok {
-				handleHTTPError(w, errUserIDMissing)
+				handleHTTPError(w, ErrUserIDMissing)
 				h.UnregisterController <- ws
 				break
 			}
