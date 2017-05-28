@@ -65,7 +65,6 @@ function randInt(min, max) {
 // Generate random hex color value
 function randomColor() {
     var letters = '0123456789ABCDEF';
-
     var color = '#';
 
     for (var i = 0; i < 6; i++) {

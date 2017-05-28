@@ -7,17 +7,58 @@
 
     <title>Clong Scoreboard</title>
 
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
     <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body id="scoreboard">
     <table>
-        <tr>
-            <td><span style="color:red;">&#9679; </span>Herpaderp</td>
-            <td>5723</td>
-        </tr>
-        <tr>
-            <td><span style="color:green;">&#9679; </span>Herpaderp</td>
-            <td>5723</td>
-        </tr>
+        <tr><td>No scores yet...</td></tr>
     </table>
+
+    <script src="/assets/scripts/helpers.js"></script>
+    <script>
+    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
+
+    var highScores = [];
+
+    function init() {
+        // Listen for new scores coming in
+        ws.addEventListener('message', function(e) {
+            var msg = JSON.parse(e.data);
+            if (msg.msgType === 'gameDone') {
+                highScores.push(msg);
+                drawScores();
+            }
+        });
+    }
+
+    function drawScores() {
+        // Sort by final score
+        highScores.sort(function(a, b) {
+            return b.finalScore - a.finalScore;
+        });
+
+        // Extract top 10
+        highScores = highScores.slice(0, 1)
+
+        var htmlString = '';
+        for (i = 0; i < highScores.length; i++) {
+            htmlString += '<tr><td><span style="color: ' +
+                highScores[i].color +
+                ';">&#9679; </span>' +
+                highScores[i].player +
+                '</td><td>' +
+                highScores[i].finalScore +
+                '</td></tr>';
+        }
+
+        $('#scoreboard table').html(htmlString);
+    }
+
+    init();
+    </script>
 </body>

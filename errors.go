@@ -1,7 +1,6 @@
 package clong
 
 import (
-	"errors"
 	"log"
 	"net/http"
 )
@@ -13,17 +12,29 @@ const (
 	errReadingMessage      = "error reading message"
 )
 
+// UnauthorizedError occurs when a user tries to do something they are not authorized to do.
+type UnauthorizedError struct {
+	msg string
+}
+
+// Error returns the error string.
+func (e UnauthorizedError) Error() string {
+	return e.msg
+}
+
 // Errors commonly used throughout the application.
 var (
-	errUserIDMissing = errors.New("user ID missing")
+	ErrUserIDMissing = &UnauthorizedError{"user ID missing"}
 )
 
 // handleHTTPError handles HTTP errors.
 func handleHTTPError(w http.ResponseWriter, err error) {
-	code := http.StatusInternalServerError
-
-	if err == errUserIDMissing {
+	var code int
+	switch err.(type) {
+	case *UnauthorizedError:
 		code = http.StatusUnauthorized
+	default:
+		code = http.StatusInternalServerError
 	}
 
 	http.Error(w, http.StatusText(code), code)

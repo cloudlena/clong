@@ -66,15 +66,16 @@
 
         // Listen for new balls coming in
         ws.addEventListener('message', function(e) {
-            var ball = JSON.parse(e.data);
+            var msg = JSON.parse(e.data);
+            if (msg.msgType === 'ballInit') {
+                if (msg.velocityY > 0) {
+                    msg.radius = ballRadius;
+                    msg.velocityY = Math.max(msg.velocityY, 0.05) * 1.5;
 
-            if (ball.velocityY > 0) {
-                ball.radius = ballRadius;
-                ball.velocityY = Math.max(ball.velocityY, 0.05) * 1.5;
-
-                balls.push(ball);
-            } else {
-                ballDone(ball.player, 0);
+                    balls.push(msg);
+                } else {
+                    ballDone(msg.player, 0);
+                }
             }
         });
 
@@ -85,7 +86,7 @@
 
     function ballDone(player, points) {
         var msg = {
-            type: 'ballDone',
+            msgType: 'ballDone',
             player: player,
             points: points,
         };

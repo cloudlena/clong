@@ -11,23 +11,32 @@
     <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body>
-    <div id="clong-main"></div>
-    <div id="loader"></div>
-
+    <div id="main"></div>
+    <div id="spinner"></div>
+    <div class="hud">
+        <div id="score">Score: <span id="score-num">0</span></div>
+        <div id="timer"><span id="sec-num">60</span> sec</div>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
     var myID = userID();
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/controller');
-    var clong = document.getElementById('clong-main');
-    var loader = document.getElementById('loader');
-    var mc = new Hammer(clong);
+    var main = document.getElementById('main');
+    var spinner = document.getElementById('spinner');
+    var mc = new Hammer(main);
 
     var w = 0;
     var h = 0;
     var myColor = '#fff';
-    var myPoints = 0;
+    var gameRunning = false;
     var locked = false;
+    var myPoints = 0;
+    var myTime = 0;
 
     function init() {
         calcScreenSize();
@@ -37,14 +46,15 @@
 
         // Init player
         myColor = randomColor();
-        clong.style.backgroundColor = myColor;
-        loader.style.borderColor = myColor;
-        loader.style.borderTopColor = '#fff';
+        main.style.backgroundColor = myColor;
+        spinner.style.borderColor = myColor;
+        spinner.style.borderTopColor = '#fff';
 
         // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
         mc.on('swipe', function(e) {
             var msg = {
+                msgType: 'ballInit',
                 color: myColor,
                 posX: relW(e.center.x),
                 velocityX: relW(e.velocityX),
@@ -57,30 +67,57 @@
             }
         });
 
-                // Listen for new balls coming in
+        // Listen for when ball is done to unlock screen
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            if (msg.type === 'ballDone' && msg.player === myID) {
+            if (gameRunning && msg.msgType === 'ballDone' && msg.player === myID) {
                 myPoints += msg.points;
-console.log(myPoints);
+                $('#score-num').text(myPoints);
                 unlock();
             }
         });
 
+        // Start the game
+        startGame();
     }
 
+    function startGame() {
+        gameRunning = true;
+        myTime = 60;
+        $('#sec-num').text(myTime);
+        myScore = 0;
+        $('#score-num').text(myPoints);
+        var gameLoop = setInterval(function() {
+            myTime--;
+            $('#sec-num').text(myTime);
+            if (myTime <= 0) {
+                gameRunning = false;
+                clearInterval(gameLoop);
+                msg = {
+                    msgType: 'gameDone',
+                    finalScore: myPoints,
+                    color: myColor,
+                };
+                ws.send(JSON.stringify(msg));
+            }
+        }, 1000);
+    }
+
+    // Sets a cookie in the cookie jar
     function setCookie(name, value) {
         document.cookie = name + "=" + value;
     }
 
+    // Gets a cookie from the cookie jar
     function getCookie(name) {
         var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
 
         for(var i = 0; i < ca.length; i++) {
             var c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
+            while (c.charAt(0) === ' ') { c = c.substring(1); }
+            if (c.indexOf(nameEQ) === 0) { return c.substring(nameEQ.length, c.length); }
         }
 
         return null;
@@ -99,12 +136,12 @@ console.log(myPoints);
 
     function lock() {
         locked = true;
-        clong.style.display = 'none';
+        main.style.display = 'none';
     }
 
     function unlock() {
         locked = false;
-        clong.style.display = 'block';
+        main.style.display = 'block';
     }
 
     init();
