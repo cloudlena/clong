@@ -33,7 +33,16 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 				h.UnregisterController <- ws
 				break
 			}
-			c.Player = id
+			name, ok := cookieVal(r.Cookies(), "username")
+			if !ok {
+				handleHTTPError(w, ErrUserNameMissing)
+				h.UnregisterController <- ws
+				break
+			}
+			c.Player = User{
+				ID:   id,
+				Name: name,
+			}
 
 			err := ws.ReadJSON(&c)
 			if err != nil {
