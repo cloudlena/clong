@@ -24,7 +24,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var myID = userID();
+    var myID = setUserID();
+    setUserName();
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/controller');
     var main = document.getElementById('main');
     var spinner = document.getElementById('spinner');
@@ -70,7 +71,7 @@
         // Listen for when ball is done to unlock screen
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            if (gameRunning && msg.msgType === 'ballDone' && msg.player === myID) {
+            if (gameRunning && msg.msgType === 'ballDone' && msg.player.id === myID) {
                 myPoints += msg.points;
                 $('#score-num').text(myPoints);
                 unlock();
@@ -123,7 +124,7 @@
         return null;
     }
 
-    function userID() {
+    function setUserID() {
         var userid = getCookie('userid');
 
         if (userid === null) {
@@ -132,6 +133,27 @@
         }
 
         return userid;
+    }
+
+    function getUserName() {
+        var username = prompt('What\'s your name, stranger? (2-15 characters)', '');
+
+        if (username.length < 2 || username.length > 15) {
+            username = getUserName()
+        }
+
+        return username;
+    }
+
+    function setUserName() {
+        var username = getCookie('username');
+
+        if (username === null) {
+            username = getUserName();
+            setCookie('username', username);
+        }
+
+        return username;
     }
 
     function lock() {
