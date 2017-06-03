@@ -40,19 +40,15 @@ func (h *Hub) Run() {
 			select {
 			case c := <-h.RegisterController:
 				h.Controllers[c] = true
-				log.Printf("controller added (%v connected)", len(h.Controllers))
 
 			case c := <-h.UnregisterController:
 				delete(h.Controllers, c)
-				log.Printf("controller removed (%v connected)", len(h.Controllers))
 
 			case s := <-h.RegisterScreen:
 				h.Screens[s] = true
-				log.Printf("screen added (%v connected)", len(h.Screens))
 
 			case s := <-h.UnregisterScreen:
 				delete(h.Screens, s)
-				log.Printf("screen removed (%v connected)", len(h.Screens))
 
 			case c := <-h.Controls:
 				for s := range h.Screens {

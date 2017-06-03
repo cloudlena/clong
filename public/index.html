@@ -31,6 +31,7 @@
     var spinner = document.getElementById('spinner');
     var mc = new Hammer(main);
 
+    // Initialize global variables
     var w = 0;
     var h = 0;
     var myColor = '#fff';
@@ -54,16 +55,16 @@
         // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
         mc.on('swipe', function(e) {
-            var msg = {
-                msgType: 'ballInit',
-                color: myColor,
-                posX: relW(e.center.x),
-                velocityX: relW(e.velocityX),
-                velocityY: relH(e.velocityY),
-            };
-
-            if (!locked) {
+            if (gameRunning && !locked) {
+                var msg = {
+                    msgType: 'ballInit',
+                    color: myColor,
+                    posX: relW(e.center.x),
+                    velocityX: relW(e.velocityX),
+                    velocityY: relH(e.velocityY),
+                };
                 ws.send(JSON.stringify(msg));
+
                 lock();
             }
         });
@@ -136,24 +137,24 @@
     }
 
     function getUserName() {
-        var username = prompt('What\'s your name, stranger? (2-15 characters)', '');
+        var userName = prompt('What\'s your name, stranger? (2-15 characters)', '');
 
-        if (username.length < 2 || username.length > 15) {
-            username = getUserName()
+        if (userName.length < 2 || userName.length > 15) {
+            userName = getUserName()
         }
 
-        return username;
+        return userName;
     }
 
     function setUserName() {
-        var username = getCookie('username');
+        var userName = getCookie('username');
 
-        if (username === null) {
-            username = getUserName();
-            setCookie('username', username);
+        if (userName === null) {
+            userName = getUserName();
+            setCookie('username', userName);
         }
 
-        return username;
+        return userName;
     }
 
     function lock() {

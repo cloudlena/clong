@@ -16,6 +16,7 @@
     <script>
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
 
+    // Set game settings
     var ballRadius = 1;
     var maxTargets = 5;
     var targetSpawnIntervalMin = 2000;
@@ -47,6 +48,7 @@
         },
     ];
 
+    // Initialize global variables
     var w = 0;
     var h = 0;
     var balls = [];
@@ -125,7 +127,7 @@
         ctx.canvas.height = h;
 
         // Clear canvas
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // clear canvas
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         // Draw balls
         for (i = 0; i < balls.length; i++) {
