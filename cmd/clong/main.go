@@ -10,13 +10,11 @@ import (
 )
 
 func main() {
-	var (
-		port = flag.String("port", "8080", "the port clong should listen on")
-	)
+	port := flag.String("port", "8080", "the port the app should listen on")
 	flag.Parse()
 
 	hub := clong.NewHub()
-	go hub.Run()
+	hub.Run()
 
 	up := websocket.Upgrader{
 		ReadBufferSize:  1024,
