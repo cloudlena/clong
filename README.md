@@ -8,7 +8,7 @@ A simple game where players have to throw balls at targets from their smart phon
 
 ## Run the app
 
-1. Install (Dep)[https://github.com/golang/dep]
+1. Install [Dep](https://github.com/golang/dep)
 1. Run `dep ensure`
 
 ### Run locally
