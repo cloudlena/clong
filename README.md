@@ -4,6 +4,7 @@ A simple game where players have to throw balls at targets from their smart phon
 
 1. Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets.
 1. Open `/` on any touch device and swipe forward to launch balls at the targets.
+1. Open `/scoreboard` to get a list of high scores (which updates live)
 
 ## Run the app
 
@@ -13,9 +14,11 @@ A simple game where players have to throw balls at targets from their smart phon
 ### Run locally
 
 1. Run `make`
+1. Run a local database (e.g. with `docker run -d -p "3306:3306" -e "MYSQL_ROOT_PASSWORD=pwd" -e "MYSQL_DATABASE=clong" mysql`)
 1. Execute the created binary and visit <http://localhost:8080>
 
 ### Run on Cloud Foundry
 
 1. Change `host` in `manifest.yml` to something that isn't taken yet
+1. Run `cf create-service mariadb small clong-db` to create a DB service if it doesn't exist yet
 1. Run `make deploy-cf`
