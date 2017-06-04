@@ -16,11 +16,11 @@
     <script>
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
 
-    // Set game settings
+    // Set game preferences
     var ballRadius = 1;
     var maxTargets = 5;
-    var targetSpawnIntervalMin = 2000;
-    var targetSpawnIntervalMax = 3000;
+    var targetSpawnIntervalMin = 100;
+    var targetSpawnIntervalMax = 500;
     var targetTypes = [
         {
             imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg',

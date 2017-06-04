@@ -65,7 +65,11 @@ body {
 }
 
 #scoreboard td {
-    width: 50%;
-    text-align: center;
+    width: 33.3333%;
     padding-bottom: 0.5em;
+}
+
+.rank {
+    text-align: right;
+    padding-right: 1em;
 }

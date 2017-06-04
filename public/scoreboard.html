@@ -16,17 +16,28 @@
 </head>
 <body id="scoreboard">
     <table>
-        <tr><td>No scores yet...</td></tr>
+        <tr><td style="text-align:center;">No scores yet...</td></tr>
     </table>
 
     <script src="/assets/scripts/helpers.js"></script>
     <script>
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
 
+    // Set game preferences
+    var maxScores = 10;
+
     // Initialize global variables
     var highScores = [];
 
     function init() {
+        // Get existing scores
+        $.get('/scores', function(data) {
+            if (data !== null) {
+                highScores = data;
+                drawScores();
+            }
+        });
+
         // Listen for new scores coming in
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
@@ -44,17 +55,15 @@
         });
 
         // Extract top 10
-        highScores = highScores.slice(0, 1)
+        highScores = highScores.slice(0, maxScores);
 
         var htmlString = '';
         for (i = 0; i < highScores.length; i++) {
-            htmlString += '<tr><td><span style="color: ' +
-                highScores[i].color +
-                ';">&#9679; </span>' +
-                highScores[i].player.name +
-                '</td><td>' +
-                highScores[i].finalScore +
-                '</td></tr>';
+            htmlString += '<tr>' +
+                '<td class="rank">' + (i + 1) + '.</td>' +
+                '<td>' + highScores[i].player.name + '<span style="color: ' + highScores[i].color + ';"> &#9679;</span></td>' +
+                '<td>' + highScores[i].finalScore + '</td>' +
+                '</tr>';
         }
 
         $('#scoreboard table').html(htmlString);

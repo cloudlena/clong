@@ -9,27 +9,29 @@ import (
 
 // Hub is a WebSocket messaging hub.
 type Hub struct {
-	Controllers          map[*websocket.Conn]bool
-	Screens              map[*websocket.Conn]bool
 	RegisterController   chan *websocket.Conn
 	UnregisterController chan *websocket.Conn
 	RegisterScreen       chan *websocket.Conn
 	UnregisterScreen     chan *websocket.Conn
 	Controls             chan Control
 	Events               chan Event
+	controllers          map[*websocket.Conn]bool
+	screens              map[*websocket.Conn]bool
+	db                   DB
 }
 
 // NewHub creates a new messaging hub.
-func NewHub() *Hub {
+func NewHub(db DB) *Hub {
 	return &Hub{
-		Controllers:          make(map[*websocket.Conn]bool),
-		Screens:              make(map[*websocket.Conn]bool),
 		RegisterController:   make(chan *websocket.Conn),
 		UnregisterController: make(chan *websocket.Conn),
 		RegisterScreen:       make(chan *websocket.Conn),
 		UnregisterScreen:     make(chan *websocket.Conn),
 		Controls:             make(chan Control),
 		Events:               make(chan Event),
+		controllers:          make(map[*websocket.Conn]bool),
+		screens:              make(map[*websocket.Conn]bool),
+		db:                   db,
 	}
 }
 
@@ -39,19 +41,30 @@ func (h *Hub) Run() {
 		for {
 			select {
 			case c := <-h.RegisterController:
-				h.Controllers[c] = true
+				h.controllers[c] = true
 
 			case c := <-h.UnregisterController:
-				delete(h.Controllers, c)
+				delete(h.controllers, c)
 
 			case s := <-h.RegisterScreen:
-				h.Screens[s] = true
+				h.screens[s] = true
 
 			case s := <-h.UnregisterScreen:
-				delete(h.Screens, s)
+				delete(h.screens, s)
 
 			case c := <-h.Controls:
-				for s := range h.Screens {
+				if c.MsgType == "gameDone" {
+					smtp, err := h.db.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
+					if err != nil {
+						log.Fatalln(errors.Wrap(err, "error preparing DB statement"))
+					}
+					_, err = smtp.Exec(c.Player.ID, c.Player.Name, c.FinalScore, c.Color)
+					if err != nil {
+						log.Fatalln(errors.Wrap(err, "error executing DB statement"))
+					}
+				}
+
+				for s := range h.screens {
 					err := s.WriteJSON(c)
 					if err != nil {
 						err = s.Close()
@@ -63,7 +76,7 @@ func (h *Hub) Run() {
 				}
 
 			case e := <-h.Events:
-				for c := range h.Controllers {
+				for c := range h.controllers {
 					err := c.WriteJSON(e)
 					if err != nil {
 						err = c.Close()
