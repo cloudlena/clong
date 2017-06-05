@@ -1,11 +1,11 @@
 // Convert vertical screen coordinates from relative to absolute
 function absH(rel) {
-    return h * (rel/100);
+    return Math.round(h * (rel/100));
 }
 
 // Convert horizontal screen coordinates from relative to absolute
 function absW(rel) {
-    return w * (rel/100);
+    return Math.round(w * (rel/100));
 }
 
 // Convert vertical screen coordinates from absolute to relative

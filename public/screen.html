@@ -15,6 +15,12 @@
     <script src="/assets/scripts/helpers.js"></script>
     <script>
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
+    var canvas = document.getElementById("clong-canvas");
+    var ctx = canvas.getContext("2d");
+    var requestAnimationFrame = window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
 
     // Set game preferences
     var ballRadius = 1;
@@ -83,7 +89,7 @@
 
         // Trigger forever loops
         spawnTarget(randInt(targetSpawnIntervalMin, targetSpawnIntervalMax));
-        window.requestAnimationFrame(draw);
+        requestAnimationFrame(draw);
     }
 
     function ballDone(player, points) {
@@ -120,9 +126,6 @@
 
     // Draw current status onto canvas
     function draw() {
-        var canvas = document.getElementById("clong-canvas");
-        var ctx = canvas.getContext("2d");
-
         ctx.canvas.width = w;
         ctx.canvas.height = h;
 
@@ -172,7 +175,7 @@
             }
         }
 
-        window.requestAnimationFrame(draw);
+        requestAnimationFrame(draw);
     }
 
     init();
