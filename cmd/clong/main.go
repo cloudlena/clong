@@ -7,14 +7,15 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
-	. "github.com/mastertinner/clong"
 	"github.com/pkg/errors"
+
+	. "github.com/mastertinner/clong"
 )
 
 func main() {
 	var (
 		port     = flag.String("port", "8080", "the port the app should listen on")
-		dbString = flag.String("db-string", "root:pwd@/clong", "the connection string to the DB")
+		dbString = flag.String("db-string", "root@/clong", "the connection string to the DB")
 	)
 	flag.Parse()
 
