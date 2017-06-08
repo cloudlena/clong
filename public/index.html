@@ -11,11 +11,14 @@
     <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body>
+    <div id="start-button">
+        <button class="btn" onclick="startGame()">Start Game</button>
+    </div>
     <div id="main"></div>
     <div id="spinner"></div>
     <div class="hud">
-        <div id="score">Score: <span id="score-num">0</span></div>
         <div id="timer"><span id="sec-num">60</span> sec</div>
+        <div id="score"><span id="score-num">0</span> points</div>
     </div>
     <script
       src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -34,7 +37,7 @@
     // Initialize global variables
     var w = 0;
     var h = 0;
-    var myColor = '#fff';
+    var myColor = 'white';
     var gameRunning = false;
     var locked = false;
     var myPoints = 0;
@@ -50,7 +53,7 @@
         myColor = randomColor();
         main.style.backgroundColor = myColor;
         spinner.style.borderColor = myColor;
-        spinner.style.borderTopColor = '#fff';
+        spinner.style.borderTopColor = '#131313';
 
         // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
@@ -78,22 +81,22 @@
                 unlock();
             }
         });
-
-        // Start the game
-        startGame();
     }
 
     function startGame() {
-        gameRunning = true;
+        $('#start-button').hide();
         myTime = 60;
         $('#sec-num').text(myTime);
-        myScore = 0;
+        myPoints = 0;
         $('#score-num').text(myPoints);
+        gameRunning = true;
         var gameLoop = setInterval(function() {
             myTime--;
             $('#sec-num').text(myTime);
             if (myTime <= 0) {
                 gameRunning = false;
+                unlock();
+                $('#start-button').show();
                 clearInterval(gameLoop);
                 msg = {
                     msgType: 'gameDone',

@@ -1,5 +1,7 @@
 html,
 body {
+    background-color: #1c1c1c;
+    color: white;
     margin: 0;
     padding: 0;
     touch-action: none;
@@ -13,6 +15,17 @@ body {
     bottom: 0;
     width: 100%;
     z-index: 999;
+}
+
+.btn {
+    background-color: white;
+    border: none;
+    color: black;
+    padding: 1em 2em;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 3em;
 }
 
 #score,
@@ -30,8 +43,8 @@ body {
     display: block;
 }
 
-#spinner {
-    z-index: 0;
+#spinner,
+#start-button {
     position: absolute;
     margin-top: auto;
     margin-right: auto;
@@ -41,6 +54,10 @@ body {
     right: 0;
     bottom: 0;
     left: 0;
+}
+
+#spinner {
+    z-index: 0;
     border: 0.6em solid transparent;
     border-top: 0.6em solid transparent;
     border-radius: 50%;
@@ -52,6 +69,10 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg);  }
     100% { transform: rotate(360deg);  }
+}
+
+#start-button {
+    z-index: 999;
 }
 
 #scoreboard {

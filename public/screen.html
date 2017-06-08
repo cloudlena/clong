@@ -29,6 +29,10 @@
     var targetSpawnIntervalMax = 500;
     var targetTypes = [
         {
+            imgUrl: '/assets/img/swisscom-logo-lifeform.svg',
+            sizeRatio: 1,
+        },
+        {
             imgUrl: 'https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg',
             sizeRatio: 1,
         },
@@ -78,7 +82,7 @@
             if (msg.msgType === 'ballInit') {
                 if (msg.velocityY > 0) {
                     msg.radius = ballRadius;
-                    msg.velocityY = Math.max(msg.velocityY, 0.05) * 1.5;
+                    msg.velocityY = Math.max(msg.velocityY, 0.05) * 2;
 
                     balls.push(msg);
                 } else {
