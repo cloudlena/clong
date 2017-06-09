@@ -15,9 +15,11 @@
     <link rel="stylesheet" href="/assets/styles/styles.css">
 </head>
 <body id="scoreboard">
-    <table>
+   <table>
         <tr><td style="text-align:center;">No scores yet...</td></tr>
     </table>
+
+    <p class="url">Visit <span id="game-url"></span> to play</p>
 
     <script src="/assets/scripts/helpers.js"></script>
     <script>
@@ -37,6 +39,9 @@
                 drawScores();
             }
         });
+
+        // Show game URL on screen
+        $('#game-url').text(window.location.protocol + '//' + window.location.host);
 
         // Listen for new scores coming in
         ws.addEventListener('message', function(e) {

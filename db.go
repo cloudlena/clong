@@ -25,7 +25,7 @@ func NewDB(connString string) (DB, error) {
 	}
 
 	// Create scores table if it doesn't exist yet
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scores (id int NOT NULL AUTO_INCREMENT, playerID varchar(36), playerName varchar(15), finalScore int, created date, color varchar(7), PRIMARY KEY (id))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scores (id int NOT NULL AUTO_INCREMENT, playerID varchar(36), playerName varchar(30), finalScore int, created date, color varchar(7), PRIMARY KEY (id))")
 	if err != nil {
 		return DB{}, errors.Wrap(err, "error creating scores table")
 	}

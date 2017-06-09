@@ -140,9 +140,9 @@
     }
 
     function getUserName() {
-        var userName = prompt('What\'s your name, stranger? (2-15 characters)', '');
+        var userName = prompt('Please enter your first and last name (2-30 characters)', '');
 
-        if (userName.length < 2 || userName.length > 15) {
+        if (userName === null || userName.length < 2 || userName.length > 30) {
             userName = getUserName()
         }
 
