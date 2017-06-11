@@ -14,6 +14,7 @@
     <div id="start-button">
         <button class="btn" onclick="startGame()">Start Game</button>
     </div>
+    <p id="intro" style="display:none;text-align:center;">Swipe up to play</p>
     <div id="main"></div>
     <div id="spinner"></div>
     <div class="hud">
@@ -62,6 +63,8 @@
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
         mc.on('swipe', function(e) {
             if (gameRunning && !locked) {
+                $('#intro').hide();
+
                 var msg = {
                     msgType: 'ballInit',
                     color: myColor,
@@ -92,6 +95,7 @@
         $('#sec-num').text(myTime);
         myPoints = 0;
         $('#score-num').text(myPoints);
+        $('#intro').show();
         gameRunning = true;
         var gameLoop = setInterval(function() {
             myTime--;
