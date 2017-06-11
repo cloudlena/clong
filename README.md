@@ -14,7 +14,7 @@ A simple game where players have to throw balls at targets from their smart phon
 ### Run locally
 
 1. Run `make`
-1. Run a local database (e.g. with `docker run -d -p "3306:3306" -e "MYSQL_ALLOW_EMPTY_PASSWORD=yes" mysql`)
+1. Run a local database (e.g. with `docker run -d -p "3306:3306" -e "MYSQL_ALLOW_EMPTY_PASSWORD=yes" -e "MYSQL_DATABASE=clong" mysql`)
 1. Execute the created binary and visit <http://localhost:8080>
 
 ### Run on Cloud Foundry
