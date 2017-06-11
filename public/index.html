@@ -21,14 +21,14 @@
         <div id="score"><span id="score-num">0</span> points</div>
     </div>
     <script
-      src="https://code.jquery.com/jquery-3.2.1.min.js"
-      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-      crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"
+        integrity="sha256-eVNjHw5UeU0jUqPPpZHAkU1z4U+QFBBY488WvueTm88="
+        crossorigin="anonymous"></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var myID = setUserID();
-    setUserName();
     var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/controller');
     var main = document.getElementById('main');
     var spinner = document.getElementById('spinner');
@@ -37,6 +37,7 @@
     // Initialize global variables
     var w = 0;
     var h = 0;
+    var myID = '';
     var myColor = 'white';
     var gameRunning = false;
     var locked = false;
@@ -50,6 +51,8 @@
         });
 
         // Init player
+        myID = setUserID();
+        setUserName();
         myColor = randomColor();
         main.style.backgroundColor = myColor;
         spinner.style.borderColor = myColor;
@@ -170,6 +173,12 @@
         main.style.display = 'block';
     }
 
-    init();
+    if (window.WebSocket) {
+        init();
+    } else {
+        $('#start-button .btn').hide();
+        $('.hud').hide();
+        $('#start-button').append('<p style="text-align:center;margin-top:2em;">Sorry, your browser isn\'t supported...</p>');
+    }
     </script>
 </body>
