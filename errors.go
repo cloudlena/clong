@@ -9,7 +9,6 @@ import (
 const (
 	errUpgradingConnection = "error upgrading connection"
 	errClosingConnection   = "error closing WebSocket connection"
-	errReadingMessage      = "error reading message"
 )
 
 // UnauthorizedError occurs when a user tries to do something they are not authorized to do.

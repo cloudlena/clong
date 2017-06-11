@@ -46,7 +46,7 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 
 			err := ws.ReadJSON(&c)
 			if err != nil {
-				handleHTTPError(w, errors.Wrap(err, errReadingMessage))
+				handleHTTPError(w, errors.Wrap(err, "error reading control message"))
 				h.UnregisterController <- ws
 				break
 			}
