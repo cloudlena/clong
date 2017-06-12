@@ -12,18 +12,22 @@
 <body>
     <canvas id="clong-canvas"></canvas>
 
+    <p class="url">Visit <span id="game-url"></span> to play</p>
+
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
     <script src="/assets/scripts/helpers.js"></script>
     <script>
     var ws = null;
     var canvas = document.getElementById("clong-canvas");
     var ctx = canvas.getContext("2d");
-    var requestAnimationFrame = window.requestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.msRequestAnimationFrame;
 
     // Set game preferences
-    var ballRadius = 1;
+    var ballRadius = 0.7;
+    var ballVelocityFactor = 2.5;
     var maxTargets = 5;
     var targetSpawnIntervalMin = 100;
     var targetSpawnIntervalMax = 500;
@@ -70,6 +74,9 @@
             calcScreenSize();
         });
 
+        // Show game URL on screen
+        $('#game-url').text(window.location.protocol + '//' + window.location.host);
+
         // Initialize target images
         for (i = 0; i < targetTypes.length; i++) {
             targetTypes[i].img = new Image();
@@ -85,7 +92,7 @@
             if (msg.msgType === 'ballInit') {
                 if (msg.velocityY > 0) {
                     msg.radius = ballRadius;
-                    msg.velocityY = Math.max(msg.velocityY, 0.05) * 2;
+                    msg.velocityY = Math.max(msg.velocityY, 0.05) * ballVelocityFactor;
 
                     balls.push(msg);
                 } else {
@@ -101,7 +108,7 @@
 
         // Trigger forever loops
         spawnTarget(randInt(targetSpawnIntervalMin, targetSpawnIntervalMax));
-        requestAnimationFrame(draw);
+        window.requestAnimationFrame(draw);
     }
 
     function ballDone(player, points) {
@@ -187,7 +194,7 @@
             }
         }
 
-        requestAnimationFrame(draw);
+        window.requestAnimationFrame(draw);
     }
 
     init();

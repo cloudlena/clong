@@ -37,10 +37,12 @@ body {
 
 
 .url {
-    margin-top: 2em;
-    font-size: 0.7em;
+    position: fixed;
+    top: 30vh;
+    width: 100vw;
+    font-size: 3em;
     text-align: center;
-    color: gray;
+    color: black;
 }
 
 #score,

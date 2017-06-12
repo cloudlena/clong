@@ -30,7 +30,7 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 
 			err = ws.ReadJSON(&e)
 			if err != nil {
-				handleHTTPError(w, errors.Wrap(err, "error reading event message"))
+				handleHTTPError(w, errors.Wrap(err, "error reading event JSON"))
 				h.UnregisterScreen <- ws
 				break
 			}
