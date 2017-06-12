@@ -42,15 +42,19 @@ func (h *Hub) Run() {
 			select {
 			case c := <-h.RegisterController:
 				h.controllers[c] = true
+				log.Printf("controller registered (%v connected)", len(h.controllers))
 
 			case c := <-h.UnregisterController:
 				delete(h.controllers, c)
+				log.Printf("controller unregistered (%v connected)", len(h.controllers))
 
 			case s := <-h.RegisterScreen:
 				h.screens[s] = true
+				log.Printf("screen registered (%v connected)", len(h.screens))
 
 			case s := <-h.UnregisterScreen:
 				delete(h.screens, s)
+				log.Printf("screen unregistered (%v connected)", len(h.screens))
 
 			case c := <-h.Controls:
 				if c.MsgType == "gameDone" {

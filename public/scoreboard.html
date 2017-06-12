@@ -23,7 +23,7 @@
 
     <script src="/assets/scripts/helpers.js"></script>
     <script>
-    var ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
+    var ws = null;
 
     // Set game preferences
     var maxScores = 10;
@@ -43,6 +43,9 @@
         // Show game URL on screen
         $('#game-url').text(window.location.protocol + '//' + window.location.host);
 
+        // Initialize WebSocket connection
+        ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
+
         // Listen for new scores coming in
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
@@ -51,6 +54,11 @@
                 drawScores();
             }
         });
+
+        // Try to reconnect on close
+        ws.onclose = function() {
+            setTimeout(init, 5000);
+        };
     }
 
     function drawScores() {
