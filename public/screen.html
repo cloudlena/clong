@@ -24,6 +24,7 @@
     var ws = null;
     var canvas = document.getElementById("clong-canvas");
     var ctx = canvas.getContext("2d");
+    var lastDrawnTime = Date.now();
 
     // Set game preferences
     var ballRadius = 0.7;
@@ -145,6 +146,11 @@
 
     // Draw current status onto canvas
     function draw() {
+        var now = Date.now();
+        var dt = (now - lastDrawnTime) / 17;
+        console.log(dt);
+        lastDrawnTime = now;
+
         ctx.canvas.width = w;
         ctx.canvas.height = h;
 
@@ -160,8 +166,8 @@
             ctx.arc(absW(b.posX), absH(100 - b.posY), absW(b.radius), 0, 2 * Math.PI);
             ctx.fill();
 
-            balls[i].posX += b.velocityX;
-            balls[i].posY += b.velocityY;
+            balls[i].posX += b.velocityX * dt;
+            balls[i].posY += b.velocityY * dt;
 
             if (b.posY >= 100 || b.posX <= 0 || b.posX >= 100) {
                 ballDone(b.player, 0);
@@ -176,12 +182,12 @@
             ctx.drawImage(t.img, absW(t.posX), absH(100 - t.posY), absW(t.width), absH(t.height));
 
             // Invert velocity if target reaches end of screen
-            if (t.posX <= 0 || t.posX >= (100 - (t.width))) {
+            if ((t.posX <= 0 && t.velocityX < 0) || (t.posX >= (100 - (t.width)) && t.velocityX > 0)) {
                 targets[i].velocityX = -t.velocityX;
             }
 
-            targets[i].posX += t.velocityX;
-            targets[i].posY += t.velocityY;
+            targets[i].posX += t.velocityX * dt;
+            targets[i].posY += t.velocityY * dt;
 
             for (j = 0; j < balls.length; j++) {
                 var b = balls[j];
