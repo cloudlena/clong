@@ -7,6 +7,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
+	"github.com/mastertinner/adapters"
+	"github.com/mastertinner/adapters/secure"
 	"github.com/pkg/errors"
 
 	. "github.com/mastertinner/clong"
@@ -14,8 +16,9 @@ import (
 
 func main() {
 	var (
-		port     = flag.String("port", "8080", "the port the app should listen on")
-		dbString = flag.String("db-string", "root@/clong", "the connection string to the DB")
+		port       = flag.String("port", "8080", "the port the app should listen on")
+		dbString   = flag.String("db-string", "root@/clong", "the connection string to the DB")
+		forceHTTPS = flag.Bool("force-https", false, "set to redirect any HTTP requests to HTTPS")
 	)
 	flag.Parse()
 
@@ -36,10 +39,22 @@ func main() {
 	hub := NewHub(db)
 	hub.Run()
 
-	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.Handle("/scores", FindScoresHandler(db))
-	http.Handle("/screen", ScreenViewHandler())
-	http.Handle("/scoreboard", ScoreboardViewHandler())
+	http.Handle("/", adapters.Adapt(
+		http.FileServer(http.Dir("public")),
+		secure.Handler(*forceHTTPS),
+	))
+	http.Handle("/scores", adapters.Adapt(
+		FindScoresHandler(db),
+		secure.Handler(*forceHTTPS),
+	))
+	http.Handle("/screen", adapters.Adapt(
+		ScreenViewHandler(),
+		secure.Handler(*forceHTTPS),
+	))
+	http.Handle("/scoreboard", adapters.Adapt(
+		ScoreboardViewHandler(),
+		secure.Handler(*forceHTTPS),
+	))
 	http.Handle("/ws/controller", ControllerConnHandler(hub, up))
 	http.Handle("/ws/screen", ScreenConnHandler(hub, up))
 

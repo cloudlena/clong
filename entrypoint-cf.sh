@@ -23,4 +23,5 @@ db_string="${db_username}:${db_password}@(${db_host}:${db_port})/${db_database}"
 # Run binary
 ./clong \
     -port "${PORT}" \
-    -db-string "${db_string}"
+    -db-string "${db_string}" \
+    -force-https
