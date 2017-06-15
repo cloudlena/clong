@@ -57,7 +57,7 @@ func (h *Hub) Run() {
 				log.Printf("screen unregistered (%v connected)", len(h.screens))
 
 			case c := <-h.Controls:
-				if c.MsgType == "gameDone" {
+				if c.Type == "gameDone" {
 					smtp, err := h.db.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
 					if err != nil {
 						log.Fatalln(errors.Wrap(err, "error preparing DB statement"))

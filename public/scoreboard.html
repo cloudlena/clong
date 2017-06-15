@@ -44,7 +44,7 @@
         // Listen for new scores coming in
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            if (msg.msgType === 'gameDone') {
+            if (msg.type === 'gameDone') {
                 highScores.push(msg);
                 drawScores();
             }
