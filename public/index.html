@@ -66,7 +66,7 @@
                 $('#intro').hide();
 
                 var msg = {
-                    msgType: 'ballInit',
+                    type: 'ballInit',
                     color: myColor,
                     posX: relW(e.center.x),
                     velocityX: relW(e.velocityX),
@@ -81,7 +81,7 @@
         // Listen for when ball is done to unlock screen
         ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            if (gameRunning && msg.msgType === 'ballDone' && msg.player.id === myID) {
+            if (gameRunning && msg.type === 'ballDone' && msg.player.id === myID) {
                 myPoints += msg.points;
                 $('#score-num').text(myPoints);
                 unlock();
@@ -106,7 +106,7 @@
                 $('#start-button').show();
                 clearInterval(gameLoop);
                 msg = {
-                    msgType: 'gameDone',
+                    type: 'gameDone',
                     finalScore: myPoints,
                     color: myColor,
                 };
