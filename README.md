@@ -1,5 +1,7 @@
 # Clong
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong)](https://goreportcard.com/report/github.com/mastertinner/clong)
+
 A simple game where players have to throw balls at targets from their smart phones.
 
 1. Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets
