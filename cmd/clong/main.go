@@ -9,9 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters"
 	"github.com/mastertinner/adapters/secure"
+	"github.com/mastertinner/clong"
 	"github.com/pkg/errors"
-
-	. "github.com/mastertinner/clong"
 )
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	// Set up DB
-	db, err := NewDB(*dbString)
+	db, err := clong.NewDB(*dbString)
 	if err != nil {
 		log.Fatalln(errors.Wrap(err, "error creating DB"))
 	}
@@ -36,7 +35,7 @@ func main() {
 	}
 
 	// Set up messaging hub
-	hub := NewHub(db)
+	hub := clong.NewHub(db)
 	hub.Run()
 
 	http.Handle("/", adapters.Adapt(
@@ -44,19 +43,19 @@ func main() {
 		secure.Handler(*forceHTTPS),
 	))
 	http.Handle("/scores", adapters.Adapt(
-		FindScoresHandler(db),
+		clong.FindScoresHandler(db),
 		secure.Handler(*forceHTTPS),
 	))
 	http.Handle("/screen", adapters.Adapt(
-		ScreenViewHandler(),
+		clong.ScreenViewHandler(),
 		secure.Handler(*forceHTTPS),
 	))
 	http.Handle("/scoreboard", adapters.Adapt(
-		ScoreboardViewHandler(),
+		clong.ScoreboardViewHandler(),
 		secure.Handler(*forceHTTPS),
 	))
-	http.Handle("/ws/controller", ControllerConnHandler(hub, up))
-	http.Handle("/ws/screen", ScreenConnHandler(hub, up))
+	http.Handle("/ws/controller", clong.ControllerConnHandler(hub, up))
+	http.Handle("/ws/screen", clong.ScreenConnHandler(hub, up))
 
 	log.Fatalln(http.ListenAndServe(":"+*port, nil))
 }
