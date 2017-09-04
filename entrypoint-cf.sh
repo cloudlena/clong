@@ -8,7 +8,7 @@ if [ -z "${PORT}" ]; then
 fi
 
 # Database
-db_credentials="$(echo "${VCAP_SERVICES}" | jq -r '.["mariadb"][0].credentials // ""')"
+db_credentials="$(echo "${VCAP_SERVICES}" | jq -r '.["mariadbent"][0].credentials // ""')"
 if [ -z "${db_credentials}" ]; then
   echo "Error: Please bind a MariaDB service" >&2
   exit 1
