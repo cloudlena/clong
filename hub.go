@@ -60,11 +60,11 @@ func (h *Hub) Run() {
 				if c.Type == "gameDone" {
 					smtp, err := h.db.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error preparing DB statement"))
+						log.Fatalln(errors.Wrap(err, "error preparing create score DB statement"))
 					}
 					_, err = smtp.Exec(c.Player.ID, c.Player.Name, c.FinalScore, c.Color)
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error executing DB statement"))
+						log.Fatalln(errors.Wrap(err, "error executing create score DB statement"))
 					}
 				}
 
