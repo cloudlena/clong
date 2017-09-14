@@ -18,6 +18,7 @@ function relW(abs) {
     return (abs / w) * 100;
 }
 
+// Calculate the points a certain target is worth
 function calcPoints(posY, width, height, velocityX) {
     if (velocityX < 0) {
         velocityX = -velocityX;
@@ -25,7 +26,7 @@ function calcPoints(posY, width, height, velocityX) {
     var bias = 5;
     var posYVal = 10 * (posY/100);
     var widthVal = 10 * ((13-width)/11);
-    var heightVal = 10 * ((13-width)/11);
+    var heightVal = 3 * ((13-width)/11);
     var velXVal = 25 * (2*velocityX);
     var finalVal = Math.round(bias + posYVal + widthVal + heightVal + velXVal);
     return finalVal;
