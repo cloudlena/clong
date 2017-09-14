@@ -14,9 +14,9 @@
     <div id="start-button">
         <button class="btn" onclick="startGame()">Start Game</button>
     </div>
-    <p id="intro" style="display:none;text-align:center;">Swipe up to shoot balls at targets on big screen</p>
+    <p id="intro" style="text-align:center;">Swipe up to shoot balls at targets on big screen</p>
     <div id="main"></div>
-    <div id="spinner"></div>
+    <div id="spinner">X</div>
     <div class="hud">
         <div id="timer"><span id="sec-num">60</span> sec</div>
         <div id="score"><span id="score-num">0</span> points</div>
@@ -56,8 +56,7 @@
         setUserName();
         myColor = randomColor();
         main.style.backgroundColor = myColor;
-        spinner.style.borderColor = myColor;
-        spinner.style.borderTopColor = '#131313';
+        spinner.style.color = myColor;
 
         // Listen for new swipes
         mc.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
@@ -95,7 +94,6 @@
         $('#sec-num').text(myTime);
         myPoints = 0;
         $('#score-num').text(myPoints);
-        $('#intro').show();
         gameRunning = true;
         var gameLoop = setInterval(function() {
             myTime--;

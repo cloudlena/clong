@@ -38,24 +38,20 @@ func main() {
 	hub := clong.NewHub(db)
 	hub.Run()
 
-	http.Handle("/", adapters.Adapt(
-		http.FileServer(http.Dir("public")),
-		secure.Handler(*forceHTTPS),
-	))
-	http.Handle("/scores", adapters.Adapt(
-		clong.FindScoresHandler(db),
-		secure.Handler(*forceHTTPS),
-	))
-	http.Handle("/screen", adapters.Adapt(
-		clong.ScreenViewHandler(),
-		secure.Handler(*forceHTTPS),
-	))
-	http.Handle("/scoreboard", adapters.Adapt(
-		clong.ScoreboardViewHandler(),
-		secure.Handler(*forceHTTPS),
-	))
-	http.Handle("/ws/controller", clong.ControllerConnHandler(hub, up))
-	http.Handle("/ws/screen", clong.ScreenConnHandler(hub, up))
+	// Set up mux
+	mux := http.NewServeMux()
 
-	log.Fatalln(http.ListenAndServe(":"+*port, nil))
+	mux.Handle("/scores", clong.FindScoresHandler(db))
+	mux.Handle("/screen", clong.ScreenViewHandler())
+	mux.Handle("/scoreboard", clong.ScoreboardViewHandler())
+
+	mux.Handle("/ws/controller", clong.ControllerConnHandler(hub, up))
+	mux.Handle("/ws/screen", clong.ScreenConnHandler(hub, up))
+
+	mux.Handle("/", http.FileServer(http.Dir("public")))
+
+	log.Fatalln(http.ListenAndServe(":"+*port, adapters.Adapt(
+		mux,
+		secure.Handler(*forceHTTPS),
+	)))
 }
