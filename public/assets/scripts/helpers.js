@@ -1,3 +1,8 @@
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+    window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
 // Convert vertical screen coordinates from relative to absolute
 function absH(rel) {
     return Math.round(h * (rel/100));

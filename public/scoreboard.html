@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Clong Scoreboard</title>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-    <title>Clong Scoreboard</title>
 
     <script
         src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -20,63 +20,5 @@
     </table>
 
     <script src="/assets/scripts/helpers.js"></script>
-    <script>
-    var ws = null;
-
-    // Set game preferences
-    var maxScores = 10;
-
-    // Initialize global variables
-    var highScores = [];
-
-    function init() {
-        // Get existing scores
-        $.get('/scores', function(data) {
-            if (data !== null) {
-                highScores = data;
-                drawScores();
-            }
-        });
-
-        // Initialize WebSocket connection
-        ws = new WebSocket(wsProtocol() + '//' + window.location.host + '/ws/screen');
-
-        // Listen for new scores coming in
-        ws.addEventListener('message', function(e) {
-            var msg = JSON.parse(e.data);
-            if (msg.type === 'gameDone') {
-                highScores.push(msg);
-                drawScores();
-            }
-        });
-
-        // Try to reconnect on close
-        ws.onclose = function() {
-            setTimeout(init, 5000);
-        };
-    }
-
-    function drawScores() {
-        // Sort by final score
-        highScores.sort(function(a, b) {
-            return b.finalScore - a.finalScore;
-        });
-
-        // Extract top 10
-        highScores = highScores.slice(0, maxScores);
-
-        var htmlString = '';
-        for (i = 0; i < highScores.length; i++) {
-            htmlString += '<tr>' +
-                '<td class="rank">' + (i + 1) + '.</td>' +
-                '<td>' + highScores[i].player.name + '<span style="color: ' + highScores[i].color + ';"> &#9679;</span></td>' +
-                '<td>' + highScores[i].finalScore + '</td>' +
-                '</tr>';
-        }
-
-        $('#scoreboard table').html(htmlString);
-    }
-
-    init();
-    </script>
+    <script src="/assets/scripts/scoreboard.js"></script>
 </body>
