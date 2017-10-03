@@ -22,5 +22,5 @@ A simple game where players have to throw balls at targets from their smart phon
 ### Run on Cloud Foundry
 
 1. Change `host` in `manifest.yml` to something that isn't taken yet
-1. Run `cf create-service mariadb small clong-db` to create a DB service if it doesn't exist yet
+1. Run `cf create-service mariadbent usage clong-db` to create a DB service if it doesn't exist yet
 1. Run `make deploy-cf`
