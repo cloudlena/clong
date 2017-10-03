@@ -73,8 +73,10 @@ body {
 }
 
 #spinner {
+    position: fixed;
     z-index: 0;
     font-size: 50vh;
+    width: 100vw;
     text-align: center;
     margin-top: 15vh;
 }
