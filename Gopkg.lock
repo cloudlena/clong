@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/mastertinner/adapters"
   packages = [".","secure"]
-  revision = "beb02d908bae3a5473ed98e538480ff92b68517e"
+  revision = "5b03a2ea9f89295fba5ab18b2c4af55b843e3a2d"
 
 [[projects]]
   name = "github.com/pkg/errors"
