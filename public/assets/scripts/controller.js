@@ -127,7 +127,7 @@ function setUserID() {
 }
 
 function getUserName() {
-    var userName = prompt("Please enter your first and last name (2-30 characters)", "");
+    var userName = prompt("Please provide your Twitter handle or email address so we can contact you if you win:", "");
 
     if (userName === null || userName.length < 2 || userName.length > 30) {
         userName = getUserName()
