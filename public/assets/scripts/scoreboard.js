@@ -13,7 +13,7 @@ function init() {
 
     ws.onopen = function() {
 	// Get existing scores
-	$.get("/scores", function(data) {
+	$.get("/api/scores", function(data) {
 	    if (data !== null) {
 		highScores = data;
 		drawScores();
