@@ -8,3 +8,7 @@ applications:
 
   services:
     - clong-db
+
+  env:
+    USERNAME: tobi
+    PASSWORD: comswisscom

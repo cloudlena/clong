@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters"
 	"github.com/mastertinner/adapters/secure"
@@ -18,6 +19,8 @@ func main() {
 		port       = flag.String("port", "8080", "the port the app should listen on")
 		dbString   = flag.String("db-string", "root@/clong", "the connection string to the DB")
 		forceHTTPS = flag.Bool("force-https", false, "set to redirect any HTTP requests to HTTPS")
+		username   = flag.String("username", "", "the username for accessing admin features")
+		password   = flag.String("password", "", "the password for accessing admin features")
 	)
 	flag.Parse()
 
@@ -39,19 +42,43 @@ func main() {
 	hub.Run()
 
 	// Set up mux
-	mux := http.NewServeMux()
+	r := mux.NewRouter().StrictSlash(true)
 
-	mux.Handle("/scores", clong.FindScoresHandler(db))
-	mux.Handle("/screen", clong.ScreenViewHandler())
-	mux.Handle("/scoreboard", clong.ScoreboardViewHandler())
+	r.
+		Path("/screen").
+		Handler(adapters.Adapt(
+			clong.ScreenViewHandler(),
+			secure.BasicAuth(*username, *password, "Clong screen"),
+		))
+	r.
+		Path("/scoreboard").
+		Handler(clong.ScoreboardViewHandler())
 
-	mux.Handle("/ws/controller", clong.ControllerConnHandler(hub, up))
-	mux.Handle("/ws/screen", clong.ScreenConnHandler(hub, up))
+	r.
+		Path("/ws/controller").
+		Handler(clong.ControllerConnHandler(hub, up))
+	r.
+		Path("/ws/screen").
+		Handler(clong.ScreenConnHandler(hub, up))
 
-	mux.Handle("/", http.FileServer(http.Dir("public")))
+	r.
+		Methods(http.MethodGet).
+		Path("/api/scores").
+		Handler(clong.FindScoresHandler(db))
+	r.
+		Methods(http.MethodDelete).
+		Path("/api/scores").
+		Handler(adapters.Adapt(
+			clong.RemoveScoresHandler(db),
+			secure.BasicAuth(*username, *password, "Clong scores"),
+		))
+
+	r.
+		PathPrefix("/").
+		Handler(http.FileServer(http.Dir("public")))
 
 	log.Fatalln(http.ListenAndServe(":"+*port, adapters.Adapt(
-		mux,
-		secure.Handler(*forceHTTPS),
+		r,
+		secure.ForceHTTPS(*forceHTTPS),
 	)))
 }

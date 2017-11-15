@@ -24,4 +24,6 @@ db_string="${db_username}:${db_password}@(${db_host}:${db_port})/${db_database}"
 ./clong \
     -port "${PORT}" \
     -db-string "${db_string}" \
-    -force-https
+    -force-https \
+    -username "${USERNAME}" \
+    -password "${PASSWORD}"
