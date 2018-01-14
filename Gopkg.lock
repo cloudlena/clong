@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
-  version = "v1.6.0"
+  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
+  version = "v1.6.1"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -28,8 +28,8 @@
 [[projects]]
   branch = "master"
   name = "github.com/mastertinner/adapters"
-  packages = [".","secure"]
-  revision = "72d914e5dd4b9ca253266ff443814dab654f0b47"
+  packages = ["basicauth","enforcehttps"]
+  revision = "13192f10bc2b687f23f1aef2d06a7a7c35dd81e9"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -40,6 +40,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "775d3d095e74a97789e78e01f9ba29c189e4a60e7ac2dd1ad0be10c83d5fffd3"
+  inputs-digest = "c1b017f7066f4535d960fab64ba422a2e258f3bad0b9e6b123d8f46db180a3ef"
   solver-name = "gps-cdcl"
   solver-version = 1

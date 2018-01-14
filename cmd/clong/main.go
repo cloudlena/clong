@@ -8,8 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/mastertinner/adapters"
-	"github.com/mastertinner/adapters/secure"
+	"github.com/mastertinner/adapters/basicauth"
+	"github.com/mastertinner/adapters/enforcehttps"
 	"github.com/mastertinner/clong"
 	"github.com/pkg/errors"
 )
@@ -46,9 +46,8 @@ func main() {
 
 	r.
 		Path("/screen").
-		Handler(adapters.Adapt(
+		Handler(basicauth.Handler("Clong screen", []basicauth.User{{Username: *username, Password: *password}})(
 			clong.ScreenViewHandler(),
-			secure.BasicAuth(*username, *password, "Clong screen"),
 		))
 	r.
 		Path("/scoreboard").
@@ -68,17 +67,13 @@ func main() {
 	r.
 		Methods(http.MethodDelete).
 		Path("/api/scores").
-		Handler(adapters.Adapt(
+		Handler(basicauth.Handler("Clong scores", []basicauth.User{{Username: *username, Password: *password}})(
 			clong.RemoveScoresHandler(db),
-			secure.BasicAuth(*username, *password, "Clong scores"),
 		))
 
 	r.
 		PathPrefix("/").
 		Handler(http.FileServer(http.Dir("public")))
 
-	log.Fatalln(http.ListenAndServe(":"+*port, adapters.Adapt(
-		r,
-		secure.ForceHTTPS(*forceHTTPS),
-	)))
+	log.Fatalln(http.ListenAndServe(":"+*port, enforcehttps.Handler(*forceHTTPS)(r)))
 }
