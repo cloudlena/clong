@@ -2,6 +2,7 @@ package clong
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -34,7 +35,12 @@ func findScores(db DB) ([]Score, error) {
 	if err != nil {
 		return []Score{}, errors.Wrap(err, "error getting scores from DB")
 	}
-	defer rows.Close()
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			log.Fatal(errors.Wrap(err, "error closing DB rows"))
+		}
+	}()
 	for rows.Next() {
 		var s Score
 		err := rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)

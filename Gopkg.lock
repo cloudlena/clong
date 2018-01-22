@@ -28,8 +28,11 @@
 [[projects]]
   branch = "master"
   name = "github.com/mastertinner/adapters"
-  packages = ["basicauth","enforcehttps"]
-  revision = "13192f10bc2b687f23f1aef2d06a7a7c35dd81e9"
+  packages = [
+    "basicauth",
+    "enforcehttps"
+  ]
+  revision = "368acae73d1569f0495b00991aaa85ec27d6ee8e"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -40,6 +43,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c1b017f7066f4535d960fab64ba422a2e258f3bad0b9e6b123d8f46db180a3ef"
+  inputs-digest = "4b043603e741addae160d797125236af5d264977dc81dd3dc96fac2d48c6da83"
   solver-name = "gps-cdcl"
   solver-version = 1

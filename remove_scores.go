@@ -1,6 +1,7 @@
 package clong
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -26,7 +27,12 @@ func removeScores(db DB) error {
 	if err != nil {
 		return errors.Wrap(err, "error removing scores from DB")
 	}
-	defer rows.Close()
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			log.Fatal(errors.Wrap(err, "error closing DB rows"))
+		}
+	}()
 
 	return nil
 }

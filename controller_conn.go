@@ -1,6 +1,7 @@
 package clong
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -15,7 +16,12 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			handleHTTPError(w, errors.Wrap(err, errUpgradingConnection))
 			return
 		}
-		defer ws.Close()
+		defer func() {
+			err := ws.Close()
+			if err != nil {
+				log.Fatal(errors.Wrap(err, "error closing websocket"))
+			}
+		}()
 
 		h.RegisterController <- ws
 
