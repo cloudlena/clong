@@ -8,11 +8,10 @@ import (
 // Error codes commonly used throughout the application.
 const (
 	errUpgradingConnection = "error upgrading connection"
-	errClosingConnection   = "error closing WebSocket connection"
 	errReadingJSON         = "error reading JSON"
 )
 
-// UnauthorizedError occurs when a user tries to do something they are not authorized to do.
+// UnauthorizedError occurs when a user does something they are not authorized to do.
 type UnauthorizedError struct {
 	msg string
 }

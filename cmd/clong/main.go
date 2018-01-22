@@ -29,7 +29,12 @@ func main() {
 	if err != nil {
 		log.Fatalln(errors.Wrap(err, "error creating DB"))
 	}
-	defer db.Close()
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			log.Fatal(errors.Wrap(err, "error closing DB"))
+		}
+	}()
 
 	// Set up WebSocket upgrader
 	up := websocket.Upgrader{
@@ -43,6 +48,7 @@ func main() {
 
 	// Set up mux
 	r := mux.NewRouter().StrictSlash(true)
+	r.Use(enforcehttps.Handler(*forceHTTPS))
 
 	r.
 		Path("/screen").
@@ -75,5 +81,5 @@ func main() {
 		PathPrefix("/").
 		Handler(http.FileServer(http.Dir("public")))
 
-	log.Fatalln(http.ListenAndServe(":"+*port, enforcehttps.Handler(*forceHTTPS)(r)))
+	log.Fatalln(http.ListenAndServe(":"+*port, r))
 }
