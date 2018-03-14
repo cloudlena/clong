@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
-	"github.com/mastertinner/clong"
+	"github.com/mastertinner/clong/internal/app/clong"
 	"github.com/pkg/errors"
 )
 
@@ -79,7 +79,7 @@ func main() {
 
 	r.
 		PathPrefix("/").
-		Handler(http.FileServer(http.Dir("public")))
+		Handler(http.FileServer(http.Dir("web/static")))
 
 	log.Fatalln(http.ListenAndServe(":"+*port, r))
 }

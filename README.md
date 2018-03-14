@@ -1,26 +1,34 @@
 # Clong
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong)](https://goreportcard.com/report/github.com/mastertinner/clong)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong?style=flat-square)](https://goreportcard.com/report/github.com/mastertinner/clong)
+[![Build Status](https://travis-ci.org/mastertinner/clong.svg?branch=master&style=flat-square)](https://travis-ci.org/mastertinner/clong)
+[![Release](https://img.shields.io/github/release/mastertinner/clong.svg?style=flat-square)](https://github.com/mastertinner/clong/releases/latest)
 
 A simple game where players have to throw balls at targets from their smart phones.
 
-1. Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets
-1. Open `/` on any touch device and swipe forward to launch balls at the targets. Many players can play at the same time.
-1. Open `/scoreboard` to get a list of high scores (which updates live)
+1.  Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets
+1.  Open `/` on any touch device and swipe forward to launch balls at the targets. Many players can play at the same time.
+1.  Open `/scoreboard` to get a list of high scores (which updates live)
 
-## Run the app
+## Install Dependencies
 
 1. Install [Dep](https://github.com/golang/dep)
 1. Run `dep ensure`
 
-### Run locally
+## Build and Run Locally
 
-1. Run `make`
-1. Run a local database (e.g. with `docker run -d -p "3306:3306" -e "MYSQL_ALLOW_EMPTY_PASSWORD=yes" -e "MYSQL_DATABASE=clong" mysql`)
-1. Execute the created binary and visit <http://localhost:8080>
+1.  Run `make`
+1.  Execute the created binary and visit <http://localhost:8080>
 
-### Run on Cloud Foundry
+## Run Tests
 
-1. Change `host` in `manifest.yml` to something that isn't taken yet
-1. Run `cf create-service mariadbent usage clong-db` to create a DB service if it doesn't exist yet
-1. Run `make deploy-cf`
+1.  Run `make test`
+
+## Build Docker Image
+
+1.  Run `make build-docker`
+
+## Run on Cloud Foundry
+
+1.  Modify `deployments/cf/*` to your liking
+1.  Run `make deploy-cf`
