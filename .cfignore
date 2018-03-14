@@ -1,5 +1,5 @@
 /*
 
-!/public/
 !/clong
-!/entrypoint-cf.sh
+!/web/
+!/deployments/cf/

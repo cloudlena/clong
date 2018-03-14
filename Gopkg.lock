@@ -32,7 +32,7 @@
     "basicauth",
     "enforcehttps"
   ]
-  revision = "368acae73d1569f0495b00991aaa85ec27d6ee8e"
+  revision = "9dd1b86beda61f4746be3a5ee267f1566ab032ce"
 
 [[projects]]
   name = "github.com/pkg/errors"
