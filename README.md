@@ -6,14 +6,14 @@
 
 A simple game where players have to throw balls at targets from their smart phones.
 
-1.  Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets
+1.  Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets.
 1.  Open `/` on any touch device and swipe forward to launch balls at the targets. Many players can play at the same time.
-1.  Open `/scoreboard` to get a list of high scores (which updates live)
+1.  Open `/scoreboard` to get a list of high scores (which updates live).
 
 ## Install Dependencies
 
-1. Install [Dep](https://github.com/golang/dep)
-1. Run `dep ensure`
+1.  Install [Dep](https://github.com/golang/dep)
+1.  Run `dep ensure`
 
 ## Build and Run Locally
 
@@ -30,5 +30,6 @@ A simple game where players have to throw balls at targets from their smart phon
 
 ## Run on Cloud Foundry
 
+1.  Create an SQL database service
 1.  Modify `deployments/cf/*` to your liking
 1.  Run `make deploy-cf`
