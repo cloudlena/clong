@@ -2,7 +2,7 @@ all:
 	go build ./cmd/clong
 
 test:
-	go test ./...
+	go test ./... -race -cover
 
 build-docker:
 	docker build . -f build/docker/Dockerfile -t clong
