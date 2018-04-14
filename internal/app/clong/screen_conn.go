@@ -9,7 +9,7 @@ import (
 )
 
 // ScreenConnHandler handles a WebSocket connection coming from a screen.
-func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
+func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
@@ -23,7 +23,7 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			}
 		}()
 
-		h.RegisterScreen <- ws
+		hub.RegisterScreen <- ws
 
 		for {
 			var e Event
@@ -31,11 +31,11 @@ func ScreenConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			err = ws.ReadJSON(&e)
 			if err != nil {
 				handleHTTPError(w, errors.Wrap(err, errReadingJSON))
-				h.UnregisterScreen <- ws
+				hub.UnregisterScreen <- ws
 				break
 			}
 
-			h.Events <- e
+			hub.Events <- e
 		}
 	})
 }
