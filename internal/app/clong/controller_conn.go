@@ -9,7 +9,7 @@ import (
 )
 
 // ControllerConnHandler handles a WebSocket connection coming from a controller.
-func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
+func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
@@ -23,35 +23,35 @@ func ControllerConnHandler(h *Hub, up websocket.Upgrader) http.Handler {
 			}
 		}()
 
-		h.RegisterController <- ws
+		hub.RegisterController <- ws
 
 		for {
-			var c Control
+			var ctrl Control
 			id, ok := cookieVal(r.Cookies(), "userid")
 			if !ok {
 				handleHTTPError(w, ErrUserIDMissing)
-				h.UnregisterController <- ws
+				hub.UnregisterController <- ws
 				break
 			}
 			name, ok := cookieVal(r.Cookies(), "username")
 			if !ok {
 				handleHTTPError(w, ErrUserNameMissing)
-				h.UnregisterController <- ws
+				hub.UnregisterController <- ws
 				break
 			}
-			c.Player = User{
+			ctrl.Player = User{
 				ID:   id,
 				Name: name,
 			}
 
-			err = ws.ReadJSON(&c)
+			err = ws.ReadJSON(&ctrl)
 			if err != nil {
 				handleHTTPError(w, errors.Wrap(err, errReadingJSON))
-				h.UnregisterController <- ws
+				hub.UnregisterController <- ws
 				break
 			}
 
-			h.Controls <- c
+			hub.Controls <- ctrl
 		}
 	})
 }
