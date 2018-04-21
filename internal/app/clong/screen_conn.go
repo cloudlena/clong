@@ -17,7 +17,7 @@ func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 			return
 		}
 		defer func() {
-			err := ws.Close()
+			err = ws.Close()
 			if err != nil {
 				log.Fatal(errors.Wrap(err, "error closing websocket"))
 			}

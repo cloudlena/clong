@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ControllerConnHandler handles a WebSocket connection coming from a controller.
+// ControllerConnHandler handles a WebSocket connection from a controller.
 func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
@@ -17,7 +17,7 @@ func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 			return
 		}
 		defer func() {
-			err := ws.Close()
+			err = ws.Close()
 			if err != nil {
 				log.Fatal(errors.Wrap(err, "error closing websocket"))
 			}
