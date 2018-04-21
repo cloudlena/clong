@@ -36,14 +36,14 @@ func findScores(db DB) ([]Score, error) {
 		return []Score{}, errors.Wrap(err, "error getting scores from DB")
 	}
 	defer func() {
-		err := rows.Close()
+		err = rows.Close()
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error closing DB rows"))
 		}
 	}()
 	for rows.Next() {
 		var s Score
-		err := rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)
+		err = rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)
 		if err != nil {
 			return []Score{}, errors.Wrap(err, "error scanning DB rows")
 		}

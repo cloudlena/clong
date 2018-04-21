@@ -11,7 +11,7 @@ const (
 	errReadingJSON         = "error reading JSON"
 )
 
-// UnauthorizedError occurs when a user does something they are not authorized to do.
+// UnauthorizedError occurs when a user does something they are not authorized for.
 type UnauthorizedError struct {
 	msg string
 }

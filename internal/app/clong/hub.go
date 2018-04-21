@@ -36,7 +36,7 @@ func NewHub(db DB) *Hub {
 }
 
 // Run runs the messaging hub in a forever loop as a goruotine.
-func (h *Hub) Run() {
+func (h *Hub) Run() { // nolint: gocyclo
 	go func() {
 		for {
 			select {

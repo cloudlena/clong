@@ -17,10 +17,10 @@ import (
 func main() {
 	var (
 		port       = flag.String("port", "8080", "the port the app should listen on")
-		dbString   = flag.String("db-string", "root@/clong", "the connection string to the DB")
-		forceHTTPS = flag.Bool("force-https", false, "set to redirect any HTTP requests to HTTPS")
-		username   = flag.String("username", "", "the username for accessing admin features")
-		password   = flag.String("password", "", "the password for accessing admin features")
+		dbString   = flag.String("db-string", "root@/clong", "DB connection string")
+		forceHTTPS = flag.Bool("force-https", false, "redirect all requests to HTTPS")
+		username   = flag.String("username", "", "username for admin features")
+		password   = flag.String("password", "", "password for admin features")
 	)
 	flag.Parse()
 
@@ -46,13 +46,16 @@ func main() {
 	hub := clong.NewHub(db)
 	hub.Run()
 
+	// Set up basic auth user
+	users := []basicauth.User{{Username: *username, Password: *password}}
+
 	// Set up mux
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(enforcehttps.Handler(*forceHTTPS))
 
 	r.
 		Path("/screen").
-		Handler(basicauth.Handler("Clong screen", []basicauth.User{{Username: *username, Password: *password}})(
+		Handler(basicauth.Handler("Clong screen", users)(
 			clong.ScreenViewHandler(),
 		))
 	r.
@@ -73,7 +76,7 @@ func main() {
 	r.
 		Methods(http.MethodDelete).
 		Path("/api/scores").
-		Handler(basicauth.Handler("Clong scores", []basicauth.User{{Username: *username, Password: *password}})(
+		Handler(basicauth.Handler("Clong scores", users)(
 			clong.RemoveScoresHandler(db),
 		))
 
