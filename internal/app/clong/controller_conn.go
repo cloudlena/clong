@@ -13,7 +13,7 @@ func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, errUpgradingConnection))
+			handleHTTPError(w, errors.Wrap(err, "error upgrading connection"))
 			return
 		}
 		defer func() {
@@ -23,35 +23,35 @@ func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 			}
 		}()
 
-		hub.RegisterController <- ws
+		hub.registerController <- ws
 
 		for {
-			var ctrl Control
+			var ctrl control
 			id, ok := cookieVal(r.Cookies(), "userid")
 			if !ok {
-				handleHTTPError(w, ErrUserIDMissing)
-				hub.UnregisterController <- ws
+				handleHTTPError(w, errUserIDMissing)
+				hub.unregisterController <- ws
 				break
 			}
 			name, ok := cookieVal(r.Cookies(), "username")
 			if !ok {
-				handleHTTPError(w, ErrUserNameMissing)
-				hub.UnregisterController <- ws
+				handleHTTPError(w, errUserNameMissing)
+				hub.unregisterController <- ws
 				break
 			}
-			ctrl.Player = User{
+			ctrl.Player = user{
 				ID:   id,
 				Name: name,
 			}
 
 			err = ws.ReadJSON(&ctrl)
 			if err != nil {
-				handleHTTPError(w, errors.Wrap(err, errReadingJSON))
-				hub.UnregisterController <- ws
+				handleHTTPError(w, errors.Wrap(err, "error reading JSON"))
+				hub.unregisterController <- ws
 				break
 			}
 
-			hub.Controls <- ctrl
+			hub.controls <- ctrl
 		}
 	})
 }
@@ -63,6 +63,5 @@ func cookieVal(cookies []*http.Cookie, name string) (string, bool) {
 			return c.Value, true
 		}
 	}
-
 	return "", false
 }

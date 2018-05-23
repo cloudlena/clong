@@ -11,6 +11,7 @@ import (
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
 	"github.com/mastertinner/clong/internal/app/clong"
+	"github.com/mastertinner/clong/internal/app/clong/mysql"
 	"github.com/pkg/errors"
 )
 
@@ -25,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	// Set up DB
-	db, err := clong.NewDB(*dbString)
+	db, err := mysql.New(*dbString)
 	if err != nil {
 		log.Fatalln(errors.Wrap(err, "error creating DB"))
 	}
@@ -52,7 +53,6 @@ func main() {
 	// Set up mux
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(enforcehttps.Handler(*forceHTTPS))
-
 	r.
 		Path("/screen").
 		Handler(basicauth.Handler("Clong screen", users)(
@@ -61,14 +61,12 @@ func main() {
 	r.
 		Path("/scoreboard").
 		Handler(clong.ScoreboardViewHandler())
-
 	r.
 		Path("/ws/controller").
 		Handler(clong.ControllerConnHandler(hub, up))
 	r.
 		Path("/ws/screen").
 		Handler(clong.ScreenConnHandler(hub, up))
-
 	r.
 		Methods(http.MethodGet).
 		Path("/api/scores").
@@ -79,7 +77,6 @@ func main() {
 		Handler(basicauth.Handler("Clong scores", users)(
 			clong.RemoveScoresHandler(db),
 		))
-
 	r.
 		PathPrefix("/").
 		Handler(http.FileServer(http.Dir("web/static")))

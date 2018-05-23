@@ -1,9 +1,9 @@
 package clong
 
-// Control is a WebSocket message sent from a controller to control a screen.
-type Control struct {
+// control is a WebSocket message sent from a controller to control a screen.
+type control struct {
 	Type       string  `json:"type"`
-	Player     User    `json:"player"`
+	Player     user    `json:"player"`
 	Color      string  `json:"color"`
 	PosX       float64 `json:"posX"`
 	PosY       float64 `json:"posY"`

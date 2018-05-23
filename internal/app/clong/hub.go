@@ -9,26 +9,26 @@ import (
 
 // Hub is a WebSocket messaging hub.
 type Hub struct {
-	RegisterController   chan *websocket.Conn
-	UnregisterController chan *websocket.Conn
-	RegisterScreen       chan *websocket.Conn
-	UnregisterScreen     chan *websocket.Conn
-	Controls             chan Control
-	Events               chan Event
+	registerController   chan *websocket.Conn
+	unregisterController chan *websocket.Conn
+	registerScreen       chan *websocket.Conn
+	unregisterScreen     chan *websocket.Conn
+	controls             chan control
+	events               chan event
 	controllers          map[*websocket.Conn]bool
 	screens              map[*websocket.Conn]bool
-	db                   DB
+	db                   ScoreStore
 }
 
 // NewHub creates a new messaging hub.
-func NewHub(db DB) *Hub {
+func NewHub(db ScoreStore) *Hub {
 	return &Hub{
-		RegisterController:   make(chan *websocket.Conn),
-		UnregisterController: make(chan *websocket.Conn),
-		RegisterScreen:       make(chan *websocket.Conn),
-		UnregisterScreen:     make(chan *websocket.Conn),
-		Controls:             make(chan Control),
-		Events:               make(chan Event),
+		registerController:   make(chan *websocket.Conn),
+		unregisterController: make(chan *websocket.Conn),
+		registerScreen:       make(chan *websocket.Conn),
+		unregisterScreen:     make(chan *websocket.Conn),
+		controls:             make(chan control),
+		events:               make(chan event),
 		controllers:          make(map[*websocket.Conn]bool),
 		screens:              make(map[*websocket.Conn]bool),
 		db:                   db,
@@ -40,31 +40,32 @@ func (h *Hub) Run() { // nolint: gocyclo
 	go func() {
 		for {
 			select {
-			case c := <-h.RegisterController:
+			case c := <-h.registerController:
 				h.controllers[c] = true
 				log.Printf("controller registered (%v connected)", len(h.controllers))
 
-			case c := <-h.UnregisterController:
+			case c := <-h.unregisterController:
 				delete(h.controllers, c)
 				log.Printf("controller unregistered (%v connected)", len(h.controllers))
 
-			case s := <-h.RegisterScreen:
+			case s := <-h.registerScreen:
 				h.screens[s] = true
 				log.Printf("screen registered (%v connected)", len(h.screens))
 
-			case s := <-h.UnregisterScreen:
+			case s := <-h.unregisterScreen:
 				delete(h.screens, s)
 				log.Printf("screen unregistered (%v connected)", len(h.screens))
 
-			case c := <-h.Controls:
+			case c := <-h.controls:
 				if c.Type == "gameDone" {
-					smtp, err := h.db.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
-					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error preparing create score DB statement"))
+					newScore := Score{
+						Player:     c.Player,
+						FinalScore: c.FinalScore,
+						Color:      c.Color,
 					}
-					_, err = smtp.Exec(c.Player.ID, c.Player.Name, c.FinalScore, c.Color)
+					err := h.db.CreateScore(newScore)
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error executing create score DB statement"))
+						log.Fatalln(errors.Wrap(err, "error creating score in DB"))
 					}
 				}
 
@@ -75,11 +76,11 @@ func (h *Hub) Run() { // nolint: gocyclo
 						if err != nil {
 							log.Fatalln(errors.Wrap(err, "error closing screen connection"))
 						}
-						h.UnregisterScreen <- s
+						h.unregisterScreen <- s
 					}
 				}
 
-			case e := <-h.Events:
+			case e := <-h.events:
 				for c := range h.controllers {
 					err := c.WriteJSON(e)
 					if err != nil {
@@ -87,7 +88,7 @@ func (h *Hub) Run() { // nolint: gocyclo
 						if err != nil {
 							log.Fatalln(errors.Wrap(err, "error closing controller connection"))
 						}
-						h.UnregisterController <- c
+						h.unregisterController <- c
 					}
 				}
 			}
