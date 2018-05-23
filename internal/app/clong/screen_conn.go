@@ -13,7 +13,7 @@ func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, errUpgradingConnection))
+			handleHTTPError(w, errors.Wrap(err, "error upgrading connection"))
 			return
 		}
 		defer func() {
@@ -23,19 +23,19 @@ func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 			}
 		}()
 
-		hub.RegisterScreen <- ws
+		hub.registerScreen <- ws
 
 		for {
-			var e Event
+			var e event
 
 			err = ws.ReadJSON(&e)
 			if err != nil {
-				handleHTTPError(w, errors.Wrap(err, errReadingJSON))
-				hub.UnregisterScreen <- ws
+				handleHTTPError(w, errors.Wrap(err, "error reading JSON"))
+				hub.unregisterScreen <- ws
 				break
 			}
 
-			hub.Events <- e
+			hub.events <- e
 		}
 	})
 }

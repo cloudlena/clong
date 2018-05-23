@@ -5,19 +5,19 @@
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   revision = "a0583e0143b1624142adab07e0e97fe106d99561"
-  version = "v1.3"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
-  version = "v1.6.1"
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -32,7 +32,7 @@
     "basicauth",
     "enforcehttps"
   ]
-  revision = "9dd1b86beda61f4746be3a5ee267f1566ab032ce"
+  revision = "368acae73d1569f0495b00991aaa85ec27d6ee8e"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -43,6 +43,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4b043603e741addae160d797125236af5d264977dc81dd3dc96fac2d48c6da83"
+  inputs-digest = "104e5dc3cb91d60832a4a0bc32440bce5b16fe76ad12ad3fc88b1e83c6d98c90"
   solver-name = "gps-cdcl"
   solver-version = 1

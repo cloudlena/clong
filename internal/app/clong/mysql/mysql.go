@@ -1,4 +1,4 @@
-package clong
+package mysql
 
 import (
 	"database/sql"
@@ -11,8 +11,8 @@ type DB struct {
 	*sql.DB
 }
 
-// NewDB creates a new database session.
-func NewDB(connString string) (DB, error) {
+// New creates a new database session.
+func New(connString string) (DB, error) {
 	db, err := sql.Open("mysql", connString)
 	if err != nil {
 		return DB{}, errors.Wrap(err, "error opening DB session")

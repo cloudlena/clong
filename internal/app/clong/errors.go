@@ -5,33 +5,27 @@ import (
 	"net/http"
 )
 
-// Error codes commonly used throughout the application.
-const (
-	errUpgradingConnection = "error upgrading connection"
-	errReadingJSON         = "error reading JSON"
-)
-
-// UnauthorizedError occurs when a user does something they are not authorized for.
-type UnauthorizedError struct {
+// unauthorizedError occurs when a user does something they are not authorized for.
+type unauthorizedError struct {
 	msg string
 }
 
 // Error returns the error string.
-func (e UnauthorizedError) Error() string {
+func (e *unauthorizedError) Error() string {
 	return e.msg
 }
 
 // Errors commonly used throughout the application.
 var (
-	ErrUserIDMissing   = &UnauthorizedError{"user ID missing"}
-	ErrUserNameMissing = &UnauthorizedError{"user name missing"}
+	errUserIDMissing   = &unauthorizedError{"user ID missing"}
+	errUserNameMissing = &unauthorizedError{"user name missing"}
 )
 
 // handleHTTPError handles HTTP errors.
 func handleHTTPError(w http.ResponseWriter, err error) {
 	var code int
 	switch err.(type) {
-	case *UnauthorizedError:
+	case *unauthorizedError:
 		code = http.StatusUnauthorized
 	default:
 		code = http.StatusInternalServerError
