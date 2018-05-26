@@ -4,12 +4,12 @@ go:
   - stable
 
 before_install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - go get -u golang.org/x/vgo
   - go get -u github.com/alecthomas/gometalinter
   - gometalinter --install
 
 install:
-  - dep ensure
+  - vgo vendor
 
 script:
   - make lint

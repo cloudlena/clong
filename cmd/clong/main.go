@@ -1,4 +1,4 @@
-package main
+package main // import "github.com/mastertinner/clong/cmd/clong"
 
 import (
 	"flag"
