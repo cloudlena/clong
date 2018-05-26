@@ -1,4 +1,5 @@
-package mysql
+// Package mysql allows to interact with a MySQL storage backend.
+package mysql // import "github.com/mastertinner/clong/internal/app/clong/mysql"
 
 import (
 	"database/sql"
