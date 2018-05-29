@@ -5,8 +5,7 @@ go:
 
 before_install:
   - go get -u golang.org/x/vgo
-  - go get -u github.com/alecthomas/gometalinter
-  - gometalinter --install
+  - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 install:
   - vgo vendor

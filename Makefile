@@ -4,7 +4,7 @@ all:
 	go build ./cmd/clong
 
 lint:
-	gometalinter --vendor ./...
+	golangci-lint run --tests --enable-all
 
 test:
 	go test -race -cover ./...
