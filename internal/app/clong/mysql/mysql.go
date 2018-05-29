@@ -1,4 +1,4 @@
-// Package mysql allows to interact with a MySQL storage backend.
+// Package mysql allows to interact with a MySQL database.
 package mysql // import "github.com/mastertinner/clong/internal/app/clong/mysql"
 
 import (
@@ -26,7 +26,8 @@ func New(connString string) (DB, error) {
 	}
 
 	// Create scores table if it doesn't exist yet
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS scores (id int NOT NULL AUTO_INCREMENT, playerID varchar(36), playerName varchar(30), finalScore int, created date, color varchar(7), PRIMARY KEY (id))")
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS scores
+		(id int NOT NULL AUTO_INCREMENT, playerID varchar(36), playerName varchar(30), finalScore int, created date, color varchar(7), PRIMARY KEY (id))`)
 	if err != nil {
 		return DB{}, errors.Wrap(err, "error creating table in DB")
 	}
