@@ -12,5 +12,5 @@ type Score struct {
 type ScoreStore interface {
 	Scores() ([]Score, error)
 	CreateScore(Score) error
-	RemoveScores() error
+	DeleteScores() error
 }

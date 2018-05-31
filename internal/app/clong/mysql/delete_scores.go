@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RemoveScores removes all scores from the DB.
-func (db DB) RemoveScores() error {
+// DeleteScores deletes all scores from the DB.
+func (db DB) DeleteScores() error {
 	rows, err := db.Query("DELETE FROM scores")
 	if err != nil {
 		return errors.Wrap(err, "error removing scores from DB")

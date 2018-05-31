@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
 	"github.com/mastertinner/clong/internal/app/clong"
 	"github.com/mastertinner/clong/internal/app/clong/mysql"
+	"github.com/matryer/way"
 	"github.com/pkg/errors"
 )
 
@@ -50,36 +50,16 @@ func main() {
 	// Set up basic auth user
 	users := []basicauth.User{{Username: *username, Password: *password}}
 
-	// Set up mux
-	r := mux.NewRouter().StrictSlash(true)
-	r.Use(enforcehttps.Handler(*forceHTTPS))
-	r.
-		Path("/screen").
-		Handler(basicauth.Handler("Clong screen", users)(
-			clong.ScreenViewHandler(),
-		))
-	r.
-		Path("/scoreboard").
-		Handler(clong.ScoreboardViewHandler())
-	r.
-		Path("/ws/controller").
-		Handler(clong.ControllerConnHandler(hub, up))
-	r.
-		Path("/ws/screen").
-		Handler(clong.ScreenConnHandler(hub, up))
-	r.
-		Methods(http.MethodGet).
-		Path("/api/scores").
-		Handler(clong.FindScoresHandler(db))
-	r.
-		Methods(http.MethodDelete).
-		Path("/api/scores").
-		Handler(basicauth.Handler("Clong scores", users)(
-			clong.RemoveScoresHandler(db),
-		))
-	r.
-		PathPrefix("/").
-		Handler(http.FileServer(http.Dir("web/static")))
+	// Set up router
+	r := way.NewRouter()
+	r.Handle(http.MethodGet, "/screen", basicauth.Handler("Clong screen", users)(clong.HandleScreenView()))
+	r.Handle(http.MethodGet, "/scoreboard", clong.HandleScoreboardView())
+	r.Handle(http.MethodGet, "/ws/controller", clong.HandleControllerConn(hub, up))
+	r.Handle(http.MethodGet, "/ws/screen", clong.HandleScreenConn(hub, up))
+	r.Handle(http.MethodGet, "/api/scores", clong.HandleFindScores(db))
+	r.Handle(http.MethodDelete, "/api/scores", basicauth.Handler("Clong scores", users)(clong.HandleDeleteScores(db)))
+	r.Handle(http.MethodGet, "/...", http.FileServer(http.Dir("web/static")))
 
-	log.Fatalln(http.ListenAndServe(":"+*port, r))
+	sr := enforcehttps.Handler(*forceHTTPS)(r)
+	log.Fatalln(http.ListenAndServe(":"+*port, sr))
 }

@@ -5,9 +5,9 @@ import (
 	"path"
 )
 
-// ScoreboardViewHandler returns the screen HTML page.
-func ScoreboardViewHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// HandleScoreboardView returns the screen HTML page.
+func HandleScoreboardView() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, path.Join("web", "static", "scoreboard.html"))
-	})
+	}
 }
