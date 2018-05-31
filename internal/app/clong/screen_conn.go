@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ScreenConnHandler handles a WebSocket connection coming from a screen.
-func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// HandleScreenConn handles a WebSocket connection coming from a screen.
+func HandleScreenConn(hub *Hub, up websocket.Upgrader) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error upgrading connection"))
@@ -37,5 +37,5 @@ func ScreenConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 
 			hub.events <- e
 		}
-	})
+	}
 }

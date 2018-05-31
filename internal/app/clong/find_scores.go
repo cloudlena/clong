@@ -7,9 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FindScoresHandler returns all scores as JSON.
-func FindScoresHandler(db ScoreStore) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// HandleFindScores returns all scores as JSON.
+func HandleFindScores(db ScoreStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve scores from DB
 		scrs, err := db.Scores()
 		if err != nil {
@@ -23,5 +23,5 @@ func FindScoresHandler(db ScoreStore) http.Handler {
 			handleHTTPError(w, errors.Wrap(err, "error encoding JSON"))
 			return
 		}
-	})
+	}
 }

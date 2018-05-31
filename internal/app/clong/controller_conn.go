@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ControllerConnHandler handles a WebSocket connection from a controller.
-func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// HandleControllerConn handles a WebSocket connection from a controller.
+func HandleControllerConn(hub *Hub, up websocket.Upgrader) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error upgrading connection"))
@@ -53,7 +53,7 @@ func ControllerConnHandler(hub *Hub, up websocket.Upgrader) http.Handler {
 
 			hub.controls <- ctrl
 		}
-	})
+	}
 }
 
 // cookieVal returns the value of a cookie.
