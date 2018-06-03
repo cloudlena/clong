@@ -12,8 +12,8 @@ A simple game where players have to throw balls at targets from their smart phon
 
 ## Install Dependencies
 
-1.  Install [Dep](https://github.com/golang/dep)
-1.  Run `dep ensure`
+1.  Install [vgo](https://github.com/golang/vgo)
+1.  Run `vgo vendor`
 
 ## Build and Run Locally
 

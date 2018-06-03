@@ -4,7 +4,7 @@ all:
 	go build ./cmd/clong
 
 lint:
-	golangci-lint run --tests --enable-all
+	golangci-lint run --enable-all
 
 test:
 	go test -race -cover ./...
