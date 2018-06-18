@@ -17,8 +17,8 @@ func (e *unauthorizedError) Error() string {
 
 // Errors commonly used throughout the application.
 var (
-	errUserIDMissing   = &unauthorizedError{"user ID missing"}
-	errUserNameMissing = &unauthorizedError{"user name missing"}
+	errUserIDMissing   = &unauthorizedError{msg: "user ID missing"}
+	errUserNameMissing = &unauthorizedError{msg: "user name missing"}
 )
 
 // handleHTTPError handles HTTP errors.
