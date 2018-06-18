@@ -7,7 +7,7 @@ import (
 
 // CreateScore creates a new score.
 func (db DB) CreateScore(in clong.Score) error {
-	smtp, err := db.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
+	smtp, err := db.session.Prepare("INSERT INTO scores(playerID, playerName, finalScore, color) VALUES(?,?,?,?)")
 	if err != nil {
 		return errors.Wrap(err, "error preparing create score DB statement")
 	}
