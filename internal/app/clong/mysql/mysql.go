@@ -1,5 +1,5 @@
 // Package mysql allows to interact with a MySQL database.
-package mysql // import "github.com/mastertinner/clong/internal/app/clong/mysql"
+package mysql
 
 import (
 	"database/sql"
