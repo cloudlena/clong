@@ -1,16 +1,15 @@
----
 applications:
-- name: clong
-  memory: 64M
-  buildpack: https://github.com/cloudfoundry/binary-buildpack.git
-  command: ./deployments/cf/entrypoint.sh
+  - name: clong
+    memory: 64M
+    buildpack: https://github.com/cloudfoundry/binary-buildpack.git
+    command: ./deployments/cf/entrypoint.sh
 
-  routes:
-  - route: clong.scapp.io
+    routes:
+      - route: clong.scapp.io
 
-  services:
-  - clong-db
+    services:
+      - clong-db
 
-  env:
-    USERNAME: xxx
-    PASSWORD: xxx
+    env:
+      USERNAME: xxx
+      PASSWORD: xxx
