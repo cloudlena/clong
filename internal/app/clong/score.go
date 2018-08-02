@@ -11,6 +11,6 @@ type Score struct {
 // ScoreStore is a store of scores.
 type ScoreStore interface {
 	Scores() ([]Score, error)
-	CreateScore(Score) error
+	CreateScore(data Score) error
 	DeleteScores() error
 }
