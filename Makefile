@@ -5,6 +5,7 @@ all:
 
 lint:
 	golangci-lint run --enable-all
+	gocritic check-project .
 
 test:
 	go test -race -cover ./...
