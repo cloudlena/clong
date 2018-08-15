@@ -4,7 +4,7 @@ package clong
 type Score struct {
 	ID         string `json:"id"`
 	Player     user   `json:"player"`
-	FinalScore int    `json:"finalScore"`
+	FinalScore int64  `json:"finalScore"`
 	Color      string `json:"color"`
 }
 

@@ -25,15 +25,14 @@ func New(connString string) (DB, error) {
 		return DB{}, errors.Wrap(err, "error pinging DB")
 	}
 
-	// Create scores table if it doesn't exist yet
-	_, err = sess.Exec(`CREATE TABLE IF NOT EXISTS scores (
-		id int NOT NULL AUTO_INCREMENT,
-		playerID varchar(36),
-		playerName varchar(30),
-		finalScore int,
-		created date,
-		color varchar(7),
-		PRIMARY KEY (id)
+	// Create score table if it doesn't exist yet
+	_, err = sess.Exec(`CREATE TABLE IF NOT EXISTS score (
+		score_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		player_id VARCHAR(36) NOT NULL,
+		player_name VARCHAR(30) NOT NULL,
+		final_score INT(11) UNSIGNED NOT NULL,
+		color VARCHAR(7) NOT NULL,
+		PRIMARY KEY (score_id)
 	)`)
 	if err != nil {
 		return DB{}, errors.Wrap(err, "error creating table in DB")
