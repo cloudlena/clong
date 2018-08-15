@@ -1,103 +1,122 @@
-var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-    window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+var requestAnimationFrame =
+  window.requestAnimationFrame ||
+  window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  window.msRequestAnimationFrame;
 
-var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+var cancelAnimationFrame =
+  window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 // Convert vertical screen coordinates from relative to absolute
 function absH(rel) {
-    return Math.round(h * (rel/100));
+  return Math.round(h * (rel / 100));
 }
 
 // Convert horizontal screen coordinates from relative to absolute
 function absW(rel) {
-    return Math.round(w * (rel/100));
+  return Math.round(w * (rel / 100));
 }
 
 // Convert vertical screen coordinates from absolute to relative
 function relH(abs) {
-    return (abs / h) * -100;
+  return (abs / h) * -100;
 }
 
 // Convert horizontal screen coordinates from absolute to relative
 function relW(abs) {
-    return (abs / w) * 100;
+  return (abs / w) * 100;
 }
 
 // Calculate the points a certain target is worth
 function calcPoints(posY, width, height, velocityX) {
-    if (velocityX < 0) {
-        velocityX = -velocityX;
-    }
-    var bias = 5;
-    var posYVal = 10 * (posY/100);
-    var widthVal = 10 * ((13-width)/11);
-    var heightVal = 3 * ((13-width)/11);
-    var velXVal = 25 * (2*velocityX);
-    var finalVal = Math.round(bias + posYVal + widthVal + heightVal + velXVal);
-    return finalVal;
+  if (velocityX < 0) {
+    velocityX = -velocityX;
+  }
+  var bias = 5;
+  var posYVal = 10 * (posY / 100);
+  var widthVal = 10 * ((13 - width) / 11);
+  var heightVal = 3 * ((13 - width) / 11);
+  var velXVal = 25 * (2 * velocityX);
+  var finalVal = Math.round(bias + posYVal + widthVal + heightVal + velXVal);
+  return finalVal;
 }
 
 // Calculate the current screen size
 function calcScreenSize() {
-    w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+  w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 }
 
 // Check if a ball and a target collide
 function doCollide(t, b) {
-    var xMatch = false;
-    var yMatch = false;
-    var verticalRadius = b.radius * (w/h);
+  var xMatch = false;
+  var yMatch = false;
+  var verticalRadius = b.radius * (w / h);
 
-    if (b.posX+b.radius >= t.posX && b.posX-b.radius <= t.posX+t.width) {
-        xMatch = true;
-    }
-    if (b.posY+verticalRadius >= t.posY-t.height && b.posY-verticalRadius <= t.posY) {
-        yMatch = true;
-    }
+  if (b.posX + b.radius >= t.posX && b.posX - b.radius <= t.posX + t.width) {
+    xMatch = true;
+  }
+  if (
+    b.posY + verticalRadius >= t.posY - t.height &&
+    b.posY - verticalRadius <= t.posY
+  ) {
+    yMatch = true;
+  }
 
-    if (xMatch && yMatch) {
-        return true;
-    }
+  if (xMatch && yMatch) {
+    return true;
+  }
 
-    return false
+  return false;
 }
 
 // Generate random integer
 function randInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 // Generate random hex color value
 function randomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
+  var letters = "0123456789ABCDEF";
+  var color = "#";
 
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
 
-    return color;
+  return color;
 }
 
 // Generate a UUID
 function uuid() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return (
+    s4() +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    "-" +
+    s4() +
+    s4() +
+    s4()
+  );
 }
 
 // Return correct WebSocket protocol
 function wsProtocol() {
-    var p = 'ws';
+  var p = "ws";
 
-    if (window.location.protocol === "https:") {
-        p = 'wss';
-    }
+  if (window.location.protocol === "https:") {
+    p = "wss";
+  }
 
-    return p + ':';
+  return p + ":";
 }

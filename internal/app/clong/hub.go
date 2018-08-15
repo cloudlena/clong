@@ -57,13 +57,13 @@ func (h *Hub) Run() { // nolint: gocyclo
 				log.Printf("screen unregistered (%v connected)", len(h.screens))
 
 			case c := <-h.controls:
-				if c.Type == "gameDone" {
-					newScore := Score{
+				if c.Type == "GAME_FINISHED" {
+					s := Score{
 						Player:     c.Player,
 						FinalScore: c.FinalScore,
 						Color:      c.Color,
 					}
-					err := h.db.CreateScore(newScore)
+					err := h.db.CreateScore(s)
 					if err != nil {
 						log.Fatalln(errors.Wrap(err, "error creating score in DB"))
 					}
