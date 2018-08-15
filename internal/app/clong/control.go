@@ -9,5 +9,5 @@ type control struct {
 	PosY       float64 `json:"posY"`
 	VelocityX  float64 `json:"velocityX"`
 	VelocityY  float64 `json:"velocityY"`
-	FinalScore int     `json:"finalScore"`
+	FinalScore int64   `json:"finalScore"`
 }

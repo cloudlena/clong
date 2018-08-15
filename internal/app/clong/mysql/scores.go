@@ -8,9 +8,8 @@ import (
 )
 
 // Scores retrieves all scores from the DB.
-func (db DB) Scores() ([]clong.Score, error) {
-	var scrs []clong.Score
-	rows, err := db.session.Query("SELECT id, playerID, playerName, finalScore, color FROM scores")
+func (db DB) Scores() (scores []clong.Score, err error) {
+	rows, err := db.session.Query("SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting scores from DB")
 	}
@@ -26,11 +25,11 @@ func (db DB) Scores() ([]clong.Score, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "error scanning DB rows")
 		}
-		scrs = append(scrs, s)
+		scores = append(scores, s)
 	}
 	err = rows.Err()
 	if err != nil {
 		return nil, errors.Wrap(err, "error in DB rows")
 	}
-	return scrs, nil
+	return scores, nil
 }

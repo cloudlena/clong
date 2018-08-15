@@ -8,7 +8,7 @@ import (
 
 // DeleteScores deletes all scores from the DB.
 func (db DB) DeleteScores() error {
-	rows, err := db.session.Query("DELETE FROM scores")
+	rows, err := db.session.Query("DELETE FROM score")
 	if err != nil {
 		return errors.Wrap(err, "error removing scores from DB")
 	}
