@@ -1,99 +1,98 @@
 html,
 body {
-    font-family: sans-serif;
-    background-color: #1c1c1c;
-    color: white;
-    margin: 0;
-    padding: 0;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-family: sans-serif;
+  background-color: #1c1c1c;
+  color: white;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .hud {
-    font-size: 1.3em;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 999;
+  font-size: 1.3em;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 .btn {
-    background-color: white;
-    border: none;
-    color: black;
-    padding: 1em 2em;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 3em;
+  background-color: white;
+  border: none;
+  color: black;
+  padding: 1em 2em;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 3em;
 }
 
 .rank {
-    text-align: right;
-    padding-right: 1em;
+  text-align: right;
+  padding-right: 1em;
 }
 
-
 .url {
-    position: fixed;
-    top: 30vh;
-    width: 100vw;
-    font-size: 3em;
-    text-align: center;
-    color: #666;
+  position: fixed;
+  top: 30vh;
+  width: 100vw;
+  font-size: 3em;
+  text-align: center;
+  color: #666;
 }
 
 #score,
 #timer {
-    display: inline-block;
-    padding: 1.3em;
+  display: inline-block;
+  padding: 1.3em;
 }
 
 #main,
 #clong-canvas {
-    z-index: 1;
-    position: relative;
-    height: 100vh;
-    width: 100vw;
-    display: block;
+  z-index: 1;
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: block;
 }
 
 #start-button {
-    position: absolute;
-    margin-top: auto;
-    margin-right: auto;
-    margin-bottom: auto;
-    margin-left: auto;
-    top: 50px;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  position: absolute;
+  margin-top: auto;
+  margin-right: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+  top: 50px;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 #spinner {
-    position: fixed;
-    z-index: 0;
-    font-size: 50vh;
-    width: 100vw;
-    text-align: center;
-    margin-top: 15vh;
+  position: fixed;
+  z-index: 0;
+  font-size: 50vh;
+  width: 100vw;
+  text-align: center;
+  margin-top: 15vh;
 }
 
 #start-button {
-    z-index: 999;
+  z-index: 999;
 }
 
 #scoreboard {
-    font-size: 2em;
-    padding-top: 1em;
+  font-size: 2em;
+  padding-top: 1em;
 }
 
 #scoreboard table {
-    width: 100%;
+  width: 100%;
 }
 
 #scoreboard td {
-    padding-bottom: 0.5em;
+  padding-bottom: 0.5em;
 }
