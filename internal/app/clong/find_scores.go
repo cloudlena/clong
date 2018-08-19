@@ -11,7 +11,8 @@ import (
 func HandleFindScores(db ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve scores from DB
-		scrs, err := db.Scores()
+		ctx := r.Context()
+		scrs, err := db.Scores(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error finding scores"))
 			return

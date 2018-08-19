@@ -4,6 +4,8 @@ package mysql
 import (
 	"database/sql"
 
+	// This is the MySQL DB driver.
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 )
 
@@ -43,5 +45,9 @@ func New(connString string) (DB, error) {
 
 // Close closes the underlying database session.
 func (db DB) Close() error {
-	return db.session.Close()
+	err := db.session.Close()
+	if err != nil {
+		return errors.Wrap(err, "error closing DB connection")
+	}
+	return nil
 }

@@ -1,5 +1,7 @@
 package clong
 
+import "context"
+
 // Score is the score of a player.
 type Score struct {
 	ID         string `json:"id"`
@@ -10,7 +12,7 @@ type Score struct {
 
 // ScoreStore is a store of scores.
 type ScoreStore interface {
-	Scores() ([]Score, error)
-	CreateScore(data Score) error
-	DeleteScores() error
+	Scores(ctx context.Context) ([]Score, error)
+	CreateScore(ctx context.Context, data Score) error
+	DeleteScores(ctx context.Context) error
 }
