@@ -10,7 +10,8 @@ import (
 func HandleDeleteScores(db ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Delete scores from DB
-		err := db.DeleteScores()
+		ctx := r.Context()
+		err := db.DeleteScores(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error removing scores"))
 			return

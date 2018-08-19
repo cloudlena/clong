@@ -1,6 +1,7 @@
 package clong
 
 import (
+	"context"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -63,9 +64,10 @@ func (h *Hub) Run() { // nolint: gocyclo
 						FinalScore: c.FinalScore,
 						Color:      c.Color,
 					}
-					err := h.db.CreateScore(s)
+					ctx := context.Background()
+					err := h.db.CreateScore(ctx, s)
 					if err != nil {
-						log.Fatalln(errors.Wrap(err, "error creating score in DB"))
+						log.Fatal(errors.Wrap(err, "error creating score in DB"))
 					}
 				}
 
@@ -74,7 +76,7 @@ func (h *Hub) Run() { // nolint: gocyclo
 					if err != nil {
 						err = s.Close()
 						if err != nil {
-							log.Fatalln(errors.Wrap(err, "error closing screen connection"))
+							log.Fatal(errors.Wrap(err, "error closing screen connection"))
 						}
 						h.unregisterScreen <- s
 					}
@@ -86,7 +88,7 @@ func (h *Hub) Run() { // nolint: gocyclo
 					if err != nil {
 						err = c.Close()
 						if err != nil {
-							log.Fatalln(errors.Wrap(err, "error closing controller connection"))
+							log.Fatal(errors.Wrap(err, "error closing controller connection"))
 						}
 						h.unregisterController <- c
 					}

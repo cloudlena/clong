@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"log"
 
 	"github.com/mastertinner/clong/internal/app/clong"
@@ -8,13 +9,13 @@ import (
 )
 
 // Scores retrieves all scores from the DB.
-func (db DB) Scores() (scores []clong.Score, err error) {
-	rows, err := db.session.Query("SELECT score_id, player_id, player_name, final_score, color FROM score")
+func (db DB) Scores(ctx context.Context) (scores []clong.Score, err error) {
+	rows, err := db.session.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting scores from DB")
 	}
 	defer func() {
-		err = rows.Close()
+		err := rows.Close()
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error closing DB rows"))
 		}

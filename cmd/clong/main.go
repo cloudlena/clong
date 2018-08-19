@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
@@ -32,7 +31,7 @@ func main() {
 	// Set up DB
 	db, err := mysql.New(*dbString)
 	if err != nil {
-		log.Fatalln(errors.Wrap(err, "error creating DB"))
+		log.Fatal(errors.Wrap(err, "error creating DB"))
 	}
 	defer func() {
 		err := db.Close()
@@ -65,5 +64,5 @@ func main() {
 	r.Handle(http.MethodGet, "/...", http.FileServer(http.Dir("web/static")))
 
 	sr := enforcehttps.Handler(*forceHTTPS)(r)
-	log.Fatalln(http.ListenAndServe(":"+*port, sr))
+	log.Fatal(http.ListenAndServe(":"+*port, sr))
 }

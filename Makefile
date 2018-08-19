@@ -4,7 +4,7 @@ all:
 	go build ./cmd/clong
 
 lint:
-	golangci-lint run --enable-all
+	golangci-lint run --enable-all --disable lll
 	gocritic check-project .
 
 test:
