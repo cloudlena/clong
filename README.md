@@ -10,11 +10,6 @@ A simple game where players have to throw balls at targets from their smart phon
 1.  Open `/` on any touch device and swipe forward to launch balls at the targets. Many players can play at the same time.
 1.  Open `/scoreboard` to get a list of high scores (which updates live).
 
-## Install Dependencies
-
-1.  Install [vgo](https://github.com/golang/vgo)
-1.  Run `vgo mod vendor`
-
 ## Build and Run Locally
 
 1.  Run `make`
