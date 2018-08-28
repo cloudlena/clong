@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/mastertinner/clong/internal/app/clong"
+	"github.com/mastertinner/clong/internal/app/clong/scores"
 	"github.com/pkg/errors"
 )
 
-// Scores retrieves all scores from the DB.
-func (db DB) Scores(ctx context.Context) (scores []clong.Score, err error) {
+// FindAll retrieves all scores from the DB.
+func (db DB) FindAll(ctx context.Context) (scrs []scores.Score, err error) {
 	rows, err := db.session.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting scores from DB")
@@ -21,16 +21,16 @@ func (db DB) Scores(ctx context.Context) (scores []clong.Score, err error) {
 		}
 	}()
 	for rows.Next() {
-		var s clong.Score
+		var s scores.Score
 		err = rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)
 		if err != nil {
 			return nil, errors.Wrap(err, "error scanning DB rows")
 		}
-		scores = append(scores, s)
+		scrs = append(scrs, s)
 	}
 	err = rows.Err()
 	if err != nil {
 		return nil, errors.Wrap(err, "error in DB rows")
 	}
-	return scores, nil
+	return scrs, nil
 }

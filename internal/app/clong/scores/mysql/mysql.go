@@ -4,8 +4,6 @@ package mysql
 import (
 	"database/sql"
 
-	// This is the MySQL DB driver.
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 )
 
@@ -15,20 +13,15 @@ type DB struct {
 }
 
 // New creates a new database session.
-func New(connString string) (DB, error) {
-	sess, err := sql.Open("mysql", connString)
-	if err != nil {
-		return DB{}, errors.Wrap(err, "error opening DB session")
-	}
-
+func New(session *sql.DB) (DB, error) {
 	// Check if DB connection is healthy
-	err = sess.Ping()
+	err := session.Ping()
 	if err != nil {
 		return DB{}, errors.Wrap(err, "error pinging DB")
 	}
 
 	// Create score table if it doesn't exist yet
-	_, err = sess.Exec(`CREATE TABLE IF NOT EXISTS score (
+	_, err = session.Exec(`CREATE TABLE IF NOT EXISTS score (
 		score_id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
 		player_id VARCHAR(36) NOT NULL,
 		player_name VARCHAR(30) NOT NULL,
@@ -40,7 +33,7 @@ func New(connString string) (DB, error) {
 		return DB{}, errors.Wrap(err, "error creating table in DB")
 	}
 
-	return DB{session: sess}, nil
+	return DB{session: session}, nil
 }
 
 // Close closes the underlying database session.

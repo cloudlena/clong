@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/mastertinner/clong/internal/app/clong/scores"
 	"github.com/pkg/errors"
 )
 
 // HandleFindScores returns all scores as JSON.
-func HandleFindScores(db ScoreStore) http.HandlerFunc {
+func HandleFindScores(repo scores.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve scores from DB
 		ctx := r.Context()
-		scrs, err := db.Scores(ctx)
+		scrs, err := repo.FindAll(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error finding scores"))
 			return
