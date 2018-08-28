@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gorilla/websocket"
+	"github.com/mastertinner/clong/internal/app/clong/scores"
 	"github.com/pkg/errors"
 )
 
@@ -18,11 +19,11 @@ type Hub struct {
 	events               chan event
 	controllers          map[*websocket.Conn]bool
 	screens              map[*websocket.Conn]bool
-	db                   ScoreStore
+	repo                 scores.Repository
 }
 
 // NewHub creates a new messaging hub.
-func NewHub(db ScoreStore) *Hub {
+func NewHub(repo scores.Repository) *Hub {
 	return &Hub{
 		registerController:   make(chan *websocket.Conn),
 		unregisterController: make(chan *websocket.Conn),
@@ -32,7 +33,7 @@ func NewHub(db ScoreStore) *Hub {
 		events:               make(chan event),
 		controllers:          make(map[*websocket.Conn]bool),
 		screens:              make(map[*websocket.Conn]bool),
-		db:                   db,
+		repo:                 repo,
 	}
 }
 
@@ -59,13 +60,13 @@ func (h *Hub) Run() { // nolint: gocyclo
 
 			case c := <-h.controls:
 				if c.Type == "GAME_FINISHED" {
-					s := Score{
+					s := scores.Score{
 						Player:     c.Player,
 						FinalScore: c.FinalScore,
 						Color:      c.Color,
 					}
 					ctx := context.Background()
-					err := h.db.CreateScore(ctx, s)
+					err := h.repo.Add(ctx, s)
 					if err != nil {
 						log.Fatal(errors.Wrap(err, "error creating score in DB"))
 					}

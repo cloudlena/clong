@@ -5,15 +5,17 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/mastertinner/clong/internal/app/clong/mysql"
+	"github.com/mastertinner/clong/internal/app/clong/scores/mysql"
 	"github.com/matryer/way"
 	"github.com/pkg/errors"
 )
@@ -29,7 +31,11 @@ func main() {
 	flag.Parse()
 
 	// Set up DB
-	db, err := mysql.New(*dbString)
+	sess, err := sql.Open("mysql", *dbString)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "error opening DB session"))
+	}
+	db, err := mysql.New(sess)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error creating DB"))
 	}
