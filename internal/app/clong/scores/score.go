@@ -14,9 +14,9 @@ type Score struct {
 	Color      string     `json:"color"`
 }
 
-// Repository is a store of scores.
-type Repository interface {
-	FindAll(ctx context.Context) ([]Score, error)
+// ScoreStore is a store of scores.
+type ScoreStore interface {
+	Scores(ctx context.Context) ([]Score, error)
 	Add(ctx context.Context, data Score) error
 	RemoveAll(ctx context.Context) error
 }

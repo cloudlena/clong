@@ -9,11 +9,11 @@ import (
 )
 
 // HandleFindScores returns all scores as JSON.
-func HandleFindScores(repo scores.Repository) http.HandlerFunc {
+func HandleFindScores(store scores.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve scores from DB
 		ctx := r.Context()
-		scrs, err := repo.FindAll(ctx)
+		scrs, err := store.Scores(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error finding scores"))
 			return

@@ -10,7 +10,11 @@ import (
 
 // Add adds a new score.
 func (db DB) Add(ctx context.Context, in scores.Score) error {
-	stmt, err := db.session.PrepareContext(ctx, "INSERT INTO score (player_id, player_name, final_score, color) VALUES(?,?,?,?)")
+	stmt, err := db.session.PrepareContext(ctx, `
+		INSERT INTO score
+		(player_id, player_name, final_score, color)
+		VALUES(?,?,?,?)
+	`)
 	if err != nil {
 		return errors.Wrap(err, "error preparing create score DB statement")
 	}
