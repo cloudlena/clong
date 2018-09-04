@@ -12,8 +12,8 @@ type DB struct {
 	session *sql.DB
 }
 
-// New creates a new database session.
-func New(session *sql.DB) (DB, error) {
+// Make creates a new database session.
+func Make(session *sql.DB) (DB, error) {
 	// Check if DB connection is healthy
 	err := session.Ping()
 	if err != nil {

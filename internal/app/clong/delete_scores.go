@@ -8,11 +8,11 @@ import (
 )
 
 // HandleDeleteScores deletes all scores and resets the scoreboard.
-func HandleDeleteScores(repo scores.Repository) http.HandlerFunc {
+func HandleDeleteScores(store scores.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Delete scores from DB
 		ctx := r.Context()
-		err := repo.RemoveAll(ctx)
+		err := store.RemoveAll(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error removing scores"))
 			return

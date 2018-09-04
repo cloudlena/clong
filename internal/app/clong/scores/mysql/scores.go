@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FindAll retrieves all scores from the DB.
-func (db DB) FindAll(ctx context.Context) (scrs []scores.Score, err error) {
+// Scores retrieves all scores from the DB.
+func (db DB) Scores(ctx context.Context) (scrs []scores.Score, err error) {
 	rows, err := db.session.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting scores from DB")
