@@ -19,11 +19,11 @@ type Hub struct {
 	events               chan event
 	controllers          map[*websocket.Conn]bool
 	screens              map[*websocket.Conn]bool
-	repo                 scores.Repository
+	store                scores.ScoreStore
 }
 
 // NewHub creates a new messaging hub.
-func NewHub(repo scores.Repository) *Hub {
+func NewHub(store scores.ScoreStore) *Hub {
 	return &Hub{
 		registerController:   make(chan *websocket.Conn),
 		unregisterController: make(chan *websocket.Conn),
@@ -33,7 +33,7 @@ func NewHub(repo scores.Repository) *Hub {
 		events:               make(chan event),
 		controllers:          make(map[*websocket.Conn]bool),
 		screens:              make(map[*websocket.Conn]bool),
-		repo:                 repo,
+		store:                store,
 	}
 }
 
@@ -66,7 +66,7 @@ func (h *Hub) Run() { // nolint: gocyclo
 						Color:      c.Color,
 					}
 					ctx := context.Background()
-					err := h.repo.Add(ctx, s)
+					err := h.store.Add(ctx, s)
 					if err != nil {
 						log.Fatal(errors.Wrap(err, "error creating score in DB"))
 					}

@@ -1,8 +1,8 @@
 # Clong
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong?style=flat-square)](https://goreportcard.com/report/github.com/mastertinner/clong)
-[![Build Status](https://travis-ci.org/mastertinner/clong.svg?branch=master&style=flat-square)](https://travis-ci.org/mastertinner/clong)
-[![Release](https://img.shields.io/github/release/mastertinner/clong.svg?style=flat-square)](https://github.com/mastertinner/clong/releases/latest)
+[![Release](https://img.shields.io/github/release/mastertinner/clong.svg)](https://github.com/mastertinner/clong/releases/latest)
+[![Build Status](https://travis-ci.org/mastertinner/clong.svg?branch=master)](https://travis-ci.org/mastertinner/clong)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong)](https://goreportcard.com/report/github.com/mastertinner/clong)
 
 A simple game where players have to throw balls at targets from their smart phones.
 
