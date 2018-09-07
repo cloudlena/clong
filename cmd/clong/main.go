@@ -54,7 +54,7 @@ func main() {
 
 	// Set up messaging hub
 	hub := clong.NewHub(db)
-	hub.Run()
+	go hub.Run()
 
 	// Set up basic auth user
 	users := []basicauth.User{{Username: *username, Password: *password}}

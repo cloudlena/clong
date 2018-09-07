@@ -39,62 +39,60 @@ func NewHub(store scores.ScoreStore) *Hub {
 
 // Run runs the messaging hub in a forever loop as a goruotine.
 func (h *Hub) Run() { // nolint: gocyclo
-	go func() {
-		for {
-			select {
-			case c := <-h.registerController:
-				h.controllers[c] = true
-				log.Printf("controller registered (%v connected)", len(h.controllers))
+	for {
+		select {
+		case c := <-h.registerController:
+			h.controllers[c] = true
+			log.Printf("controller registered (%v connected)", len(h.controllers))
 
-			case c := <-h.unregisterController:
-				delete(h.controllers, c)
-				log.Printf("controller unregistered (%v connected)", len(h.controllers))
+		case c := <-h.unregisterController:
+			delete(h.controllers, c)
+			log.Printf("controller unregistered (%v connected)", len(h.controllers))
 
-			case s := <-h.registerScreen:
-				h.screens[s] = true
-				log.Printf("screen registered (%v connected)", len(h.screens))
+		case s := <-h.registerScreen:
+			h.screens[s] = true
+			log.Printf("screen registered (%v connected)", len(h.screens))
 
-			case s := <-h.unregisterScreen:
-				delete(h.screens, s)
-				log.Printf("screen unregistered (%v connected)", len(h.screens))
+		case s := <-h.unregisterScreen:
+			delete(h.screens, s)
+			log.Printf("screen unregistered (%v connected)", len(h.screens))
 
-			case c := <-h.controls:
-				if c.Type == "GAME_FINISHED" {
-					s := scores.Score{
-						Player:     c.Player,
-						FinalScore: c.FinalScore,
-						Color:      c.Color,
-					}
-					ctx := context.Background()
-					err := h.store.Add(ctx, s)
-					if err != nil {
-						log.Fatal(errors.Wrap(err, "error creating score in DB"))
-					}
+		case c := <-h.controls:
+			if c.Type == "GAME_FINISHED" {
+				s := scores.Score{
+					Player:     c.Player,
+					FinalScore: c.FinalScore,
+					Color:      c.Color,
 				}
-
-				for s := range h.screens {
-					err := s.WriteJSON(c)
-					if err != nil {
-						err = s.Close()
-						if err != nil {
-							log.Fatal(errors.Wrap(err, "error closing screen connection"))
-						}
-						h.unregisterScreen <- s
-					}
+				ctx := context.Background()
+				err := h.store.Add(ctx, s)
+				if err != nil {
+					log.Fatal(errors.Wrap(err, "error creating score in DB"))
 				}
+			}
 
-			case e := <-h.events:
-				for c := range h.controllers {
-					err := c.WriteJSON(e)
+			for s := range h.screens {
+				err := s.WriteJSON(c)
+				if err != nil {
+					err = s.Close()
 					if err != nil {
-						err = c.Close()
-						if err != nil {
-							log.Fatal(errors.Wrap(err, "error closing controller connection"))
-						}
-						h.unregisterController <- c
+						log.Fatal(errors.Wrap(err, "error closing screen connection"))
 					}
+					h.unregisterScreen <- s
+				}
+			}
+
+		case e := <-h.events:
+			for c := range h.controllers {
+				err := c.WriteJSON(e)
+				if err != nil {
+					err = c.Close()
+					if err != nil {
+						log.Fatal(errors.Wrap(err, "error closing controller connection"))
+					}
+					h.unregisterController <- c
 				}
 			}
 		}
-	}()
+	}
 }
