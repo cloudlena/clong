@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error opening DB session"))
 	}
-	db, err := mysql.New(sess)
+	db, err := mysql.Make(sess)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error creating DB"))
 	}
@@ -54,7 +54,7 @@ func main() {
 
 	// Set up messaging hub
 	hub := clong.NewHub(db)
-	hub.Run()
+	go hub.Run()
 
 	// Set up basic auth user
 	users := []basicauth.User{{Username: *username, Password: *password}}
