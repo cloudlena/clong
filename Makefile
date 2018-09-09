@@ -1,18 +1,23 @@
-.PHONY: all lint test build-docker deploy-cf
+.PHONY: all lint test build-docker deploy-cf clean
+
+.EXPORT_ALL_VARIABLES:
+GO111MODULE = on
 
 all:
-	go build ./cmd/clong
+	go build -o bin/clong ./cmd/clong
 
 lint:
-	golangci-lint run --enable-all
-	gocritic check-project .
+	golangci-lint run
 
 test:
 	go test -race -cover ./...
 
 build-docker:
-	docker build -f build/docker/Dockerfile -t clong .
+	docker build -t clong .
 
 deploy-cf:
-	GOOS=linux go build -ldflags="-s -w" ./cmd/clong
+	GOOS=linux go build -ldflags="-s -w" -o bin/clong ./cmd/clong
 	cf push -f deployments/cf/manifest.yml
+
+clean:
+	rm -rf bin

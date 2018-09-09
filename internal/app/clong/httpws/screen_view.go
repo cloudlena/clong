@@ -1,4 +1,4 @@
-package clong
+package httpws
 
 import (
 	"net/http"
