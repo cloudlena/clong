@@ -1,4 +1,4 @@
-package clong
+package httpws
 
 import (
 	"encoding/json"
@@ -9,11 +9,10 @@ import (
 )
 
 // HandleFindScores returns all scores as JSON.
-func HandleFindScores(store clong.ScoreStore) http.HandlerFunc {
+func HandleFindScores(scores clong.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Retrieve scores from DB
 		ctx := r.Context()
-		scrs, err := store.Scores(ctx)
+		scrs, err := scores.ListAll(ctx)
 		if err != nil {
 			handleHTTPError(w, errors.Wrap(err, "error finding scores"))
 			return

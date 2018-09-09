@@ -1,8 +1,8 @@
 # Clong
 
-[![Release](https://img.shields.io/github/release/mastertinner/clong.svg)](https://github.com/mastertinner/clong/releases/latest)
-[![Build Status](https://travis-ci.org/mastertinner/clong.svg?branch=master)](https://travis-ci.org/mastertinner/clong)
-[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong)](https://goreportcard.com/report/github.com/mastertinner/clong)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong?style=flat-square)](https://goreportcard.com/report/github.com/mastertinner/clong)
+[![Build Status](https://img.shields.io/travis/mastertinner/clong.svg?style=flat-square)](https://travis-ci.org/mastertinner/clong)
+[![Docker Build](https://img.shields.io/docker/build/mastertinner/clong.svg?style=flat-square)](https://hub.docker.com/r/mastertinner/clong)
 
 A simple game where players have to throw balls at targets from their smart phones.
 
@@ -20,6 +20,8 @@ A simple game where players have to throw balls at targets from their smart phon
 1.  Run `make test`
 
 ## Build Docker Image
+
+The image is available on [Docker Hub](https://hub.docker.com/r/mastertinner/clong/)
 
 1.  Run `make build-docker`
 

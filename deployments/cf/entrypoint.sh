@@ -21,7 +21,7 @@ db_database="$(echo "${db_credentials}" | jq -r '.database // ""')"
 db_string="${db_username}:${db_password}@(${db_host}:${db_port})/${db_database}"
 
 # Run binary
-./clong \
+./bin/clong \
     -port "${PORT}" \
     -db-string "${db_string}" \
     -force-https \

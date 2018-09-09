@@ -1,4 +1,4 @@
-package clong
+package httpws
 
 import (
 	"net/http"
@@ -8,13 +8,12 @@ import (
 )
 
 // HandleDeleteScores deletes all scores and resets the scoreboard.
-func HandleDeleteScores(store clong.ScoreStore) http.HandlerFunc {
+func HandleDeleteScores(scores clong.ScoreStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Delete scores from DB
 		ctx := r.Context()
-		err := store.RemoveAll(ctx)
+		err := scores.RemoveAll(ctx)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, "error removing scores"))
+			handleHTTPError(w, errors.Wrap(err, "error removing all scores from store"))
 			return
 		}
 

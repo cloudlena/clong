@@ -1,4 +1,4 @@
-// Binary clong is a simple game that allows controller-
+// Command clong is a simple game that allows controller-
 // and screen devices to connect to each other.
 // The goal of the game is to hit targets on the screen
 // by flicking balls at them from the controller.
@@ -15,7 +15,8 @@ import (
 	"github.com/mastertinner/adapters/basicauth"
 	"github.com/mastertinner/adapters/enforcehttps"
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/mastertinner/clong/internal/app/clong/scores/mysql"
+	"github.com/mastertinner/clong/internal/app/clong/httpws"
+	"github.com/mastertinner/clong/internal/app/clong/mysql"
 	"github.com/matryer/way"
 	"github.com/pkg/errors"
 )
@@ -31,16 +32,12 @@ func main() {
 	flag.Parse()
 
 	// Set up DB
-	sess, err := sql.Open("mysql", *dbString)
+	db, err := sql.Open("mysql", *dbString)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error opening DB session"))
-	}
-	db, err := mysql.Make(sess)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "error creating DB"))
+		log.Fatal(errors.Wrap(err, "error opening DB"))
 	}
 	defer func() {
-		err := db.Close()
+		err = db.Close()
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error closing DB"))
 		}
@@ -52,21 +49,28 @@ func main() {
 		WriteBufferSize: 1024,
 	}
 
-	// Set up messaging hub
-	hub := clong.NewHub(db)
-	go hub.Run()
+	// Set up service
+	scores, err := mysql.NewScoreStore(db)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "error creating score store"))
+	}
+	svc := clong.NewService(scores)
 
 	// Set up basic auth user
 	users := []basicauth.User{{Username: *username, Password: *password}}
 
 	// Set up router
 	r := way.NewRouter()
-	r.Handle(http.MethodGet, "/screen", basicauth.Handler("Clong screen", users)(clong.HandleScreenView()))
-	r.Handle(http.MethodGet, "/scoreboard", clong.HandleScoreboardView())
-	r.Handle(http.MethodGet, "/ws/controller", clong.HandleControllerConn(hub, up))
-	r.Handle(http.MethodGet, "/ws/screen", clong.HandleScreenConn(hub, up))
-	r.Handle(http.MethodGet, "/api/scores", clong.HandleFindScores(db))
-	r.Handle(http.MethodDelete, "/api/scores", basicauth.Handler("Clong scores", users)(clong.HandleDeleteScores(db)))
+	r.Handle(http.MethodGet, "/screen", basicauth.Handler("Clong screen", users)(httpws.HandleScreenView()))
+	r.Handle(http.MethodGet, "/scoreboard", httpws.HandleScoreboardView())
+	r.Handle(http.MethodGet, "/ws/controller", httpws.HandleControllerConn(svc, up))
+	r.Handle(http.MethodGet, "/ws/screen", httpws.HandleScreenConn(svc, up))
+	r.Handle(http.MethodGet, "/api/scores", httpws.HandleFindScores(scores))
+	r.Handle(
+		http.MethodDelete,
+		"/api/scores",
+		basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)),
+	)
 	r.Handle(http.MethodGet, "/...", http.FileServer(http.Dir("web/static")))
 
 	sr := enforcehttps.Handler(*forceHTTPS)(r)
