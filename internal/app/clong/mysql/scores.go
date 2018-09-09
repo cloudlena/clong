@@ -9,7 +9,7 @@ import (
 )
 
 // Scores retrieves all scores from the DB.
-func (db DB) Scores(ctx context.Context) (scrs []scores.Score, err error) {
+func (db DB) Scores(ctx context.Context) (scrs []*scores.Score, err error) {
 	rows, err := db.session.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting scores from DB")
@@ -26,7 +26,7 @@ func (db DB) Scores(ctx context.Context) (scrs []scores.Score, err error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "error scanning DB rows")
 		}
-		scrs = append(scrs, s)
+		scrs = append(scrs, &s)
 	}
 	err = rows.Err()
 	if err != nil {

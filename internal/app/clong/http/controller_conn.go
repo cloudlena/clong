@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/mastertinner/clong/internal/app/clong/users"
+	"github.com/mastertinner/clong/internal/app/clong"
 	"github.com/pkg/errors"
 )
 
@@ -40,7 +40,7 @@ func HandleControllerConn(hub *Hub, up websocket.Upgrader) http.HandlerFunc {
 				hub.unregisterController <- ws
 				break
 			}
-			ctrl.Player = users.User{
+			ctrl.Player = clong.User{
 				ID:   id,
 				Name: name,
 			}
