@@ -1,0 +1,15 @@
+name: Lint and Test
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-go@master
+        with:
+          go-version: "1"
+      - uses: actions-contrib/golangci-lint@master
+        with:
+          args: run
+      - run: make test
+      - run: make
