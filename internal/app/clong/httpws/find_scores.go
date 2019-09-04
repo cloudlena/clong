@@ -2,10 +2,10 @@ package httpws
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/pkg/errors"
 )
 
 // HandleFindScores returns all scores as JSON.
@@ -14,14 +14,14 @@ func HandleFindScores(scores clong.ScoreStore) http.HandlerFunc {
 		ctx := r.Context()
 		scrs, err := scores.ListAll(ctx)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, "error finding scores"))
+			handleHTTPError(w, fmt.Errorf("error finding scores: %w", err))
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(w).Encode(scrs)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, "error encoding JSON"))
+			handleHTTPError(w, fmt.Errorf("error encoding JSON: %w", err))
 			return
 		}
 	}

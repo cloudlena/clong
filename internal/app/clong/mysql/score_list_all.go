@@ -2,35 +2,35 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/pkg/errors"
 )
 
 // ListAll retrieves all scores from the DB.
 func (s *scoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
-		return nil, errors.Wrap(err, "error querying DB")
+		return nil, fmt.Errorf("error querying DB: %w", err)
 	}
 	defer func() {
 		err = rows.Close()
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "error closing DB rows"))
+			log.Fatal(fmt.Errorf("error closing DB rows: %w", err))
 		}
 	}()
 	for rows.Next() {
 		var s clong.Score
 		err = rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)
 		if err != nil {
-			return nil, errors.Wrap(err, "error scanning DB rows")
+			return nil, fmt.Errorf("error scanning DB rows: %w", err)
 		}
 		scrs = append(scrs, &s)
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, errors.Wrap(err, "error in DB rows")
+		return nil, fmt.Errorf("error in DB rows: %w", err)
 	}
 	return scrs, nil
 }

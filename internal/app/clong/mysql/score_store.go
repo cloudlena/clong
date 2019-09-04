@@ -3,9 +3,9 @@ package mysql
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/pkg/errors"
 )
 
 // scoreStore is a score store.
@@ -18,7 +18,7 @@ func NewScoreStore(db *sql.DB) (clong.ScoreStore, error) {
 	// Check if DB connection is healthy
 	err := db.Ping()
 	if err != nil {
-		return nil, errors.Wrap(err, "error pinging DB")
+		return nil, fmt.Errorf("error pinging DB: %w", err)
 	}
 
 	// Create score table if it doesn't exist yet
@@ -31,7 +31,7 @@ func NewScoreStore(db *sql.DB) (clong.ScoreStore, error) {
 		PRIMARY KEY (score_id)
 	)`)
 	if err != nil {
-		return nil, errors.Wrap(err, "error executing DB statement")
+		return nil, fmt.Errorf("error executing DB statement: %w", err)
 	}
 
 	return &scoreStore{db: db}, nil

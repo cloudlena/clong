@@ -1,6 +1,7 @@
 package httpws
 
 import (
+	"errors"
 	"log"
 	"net/http"
 )
@@ -22,18 +23,18 @@ func (e *UnauthorizedError) Error() string {
 
 // handleHTTPError handles HTTP errors.
 func handleHTTPError(w http.ResponseWriter, err error) {
-	var code int
-	switch err.(type) {
-	case *UnauthorizedError:
+	code := http.StatusInternalServerError
+
+	var ue *UnauthorizedError
+	ok := errors.As(err, &ue)
+	if ok {
 		code = http.StatusUnauthorized
-	default:
-		code = http.StatusInternalServerError
 	}
 
 	http.Error(w, http.StatusText(code), code)
 
 	// Log if server error
-	if code >= 500 {
+	if code >= http.StatusInternalServerError {
 		log.Println(err)
 	}
 }

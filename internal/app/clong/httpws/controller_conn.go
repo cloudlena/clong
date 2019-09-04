@@ -1,12 +1,12 @@
 package httpws
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/pkg/errors"
 )
 
 // HandleControllerConn handles a WebSocket connection from a controller.
@@ -15,13 +15,13 @@ func HandleControllerConn(svc clong.Service, up websocket.Upgrader) http.Handler
 		ctx := r.Context()
 		ws, err := up.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, "error upgrading connection"))
+			handleHTTPError(w, fmt.Errorf("error upgrading connection: %w", err))
 			return
 		}
 		defer func() {
 			err = ws.Close()
 			if err != nil {
-				log.Fatal(errors.Wrap(err, "error closing websocket"))
+				log.Fatal(fmt.Errorf("error closing websocket: %w", err))
 			}
 		}()
 		svc.RegisterController(ws)
@@ -45,7 +45,7 @@ func HandleControllerConn(svc clong.Service, up websocket.Upgrader) http.Handler
 			var ctrl clong.Control
 			err = ws.ReadJSON(&ctrl)
 			if err != nil {
-				handleHTTPError(w, errors.Wrap(err, "error reading JSON"))
+				handleHTTPError(w, fmt.Errorf("error reading JSON: %w", err))
 				svc.UnregisterController(ws)
 				break
 			}
