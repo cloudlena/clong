@@ -2,9 +2,8 @@ package clong
 
 import (
 	"context"
+	"fmt"
 	"log"
-
-	"github.com/pkg/errors"
 )
 
 // ClientConnection is a connection with a client.
@@ -64,7 +63,7 @@ func (s *service) PublishEvent(_ context.Context, event Event) {
 		if err != nil {
 			err = c.Close()
 			if err != nil {
-				log.Fatal(errors.Wrap(err, "error closing controller connection"))
+				log.Fatal(fmt.Errorf("error closing controller connection: %w", err))
 			}
 			s.UnregisterController(c)
 		}
@@ -82,7 +81,7 @@ func (s *service) PublishControl(ctx context.Context, ctrl Control) {
 		}
 		err := s.scores.Add(ctx, &scr)
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "error adding score to store"))
+			log.Fatal(fmt.Errorf("error adding score to store: %w", err))
 		}
 	default:
 		for scrn := range s.screens {
@@ -90,7 +89,7 @@ func (s *service) PublishControl(ctx context.Context, ctrl Control) {
 			if err != nil {
 				err = scrn.Close()
 				if err != nil {
-					log.Fatal(errors.Wrap(err, "error closing screen connection"))
+					log.Fatal(fmt.Errorf("error closing screen connection: %w", err))
 				}
 				s.UnregisterScreen(scrn)
 			}

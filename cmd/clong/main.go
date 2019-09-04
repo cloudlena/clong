@@ -7,6 +7,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -18,8 +19,9 @@ import (
 	"github.com/mastertinner/clong/internal/app/clong/httpws"
 	"github.com/mastertinner/clong/internal/app/clong/mysql"
 	"github.com/matryer/way"
-	"github.com/pkg/errors"
 )
+
+const oneKiloByte = 1024
 
 func main() {
 	var (
@@ -34,25 +36,25 @@ func main() {
 	// Set up DB
 	db, err := sql.Open("mysql", *dbString)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error opening DB"))
+		log.Fatal(fmt.Errorf("error opening DB: %w", err))
 	}
 	defer func() {
 		err = db.Close()
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "error closing DB"))
+			log.Fatal(fmt.Errorf("error cloding DB: %w", err))
 		}
 	}()
 
 	// Set up WebSocket upgrader
 	up := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  oneKiloByte,
+		WriteBufferSize: oneKiloByte,
 	}
 
 	// Set up service
 	scores, err := mysql.NewScoreStore(db)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error creating score store"))
+		log.Fatal(fmt.Errorf("error creating score store: %w", err))
 	}
 	svc := clong.NewService(scores)
 

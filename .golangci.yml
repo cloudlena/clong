@@ -1,5 +1,7 @@
 linters:
   enable-all: true
+  disable:
+    - wsl
 
 linters-settings:
   govet:

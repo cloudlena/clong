@@ -1,23 +1,28 @@
-.PHONY: all lint test build-docker deploy-cf clean
-
-.EXPORT_ALL_VARIABLES:
-GO111MODULE = on
-
-all:
+.PHONY: build
+build:
 	go build -o bin/clong ./cmd/clong
 
+.PHONY: run
+run:
+	go run cmd/clong/main.go
+
+.PHONY: lint
 lint:
 	golangci-lint run
 
+.PHONY: test
 test:
 	go test -race -cover ./...
 
+.PHONY: build-docker
 build-docker:
 	docker build -t clong .
 
+.PHONY: deploy-cf
 deploy-cf:
 	GOOS=linux go build -ldflags="-s -w" -o bin/clong ./cmd/clong
 	cf push -f deployments/cf/manifest.yml
 
+.PHONY: clean
 clean:
 	rm -rf bin

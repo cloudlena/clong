@@ -1,7 +1,7 @@
 # Clong
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong?style=flat-square)](https://goreportcard.com/report/github.com/mastertinner/clong)
-[![Docker Build](https://img.shields.io/docker/build/mastertinner/clong.svg?style=flat-square)](https://hub.docker.com/r/mastertinner/clong)
+[![Docker Build](https://img.shields.io/docker/cloud/build/mastertinner/clong.svg?style=flat-square)](https://hub.docker.com/r/mastertinner/clong)
 
 A simple game where players have to throw balls at targets from their smart phones.
 

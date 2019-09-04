@@ -1,10 +1,10 @@
 package httpws
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/pkg/errors"
 )
 
 // HandleDeleteScores deletes all scores and resets the scoreboard.
@@ -13,7 +13,7 @@ func HandleDeleteScores(scores clong.ScoreStore) http.HandlerFunc {
 		ctx := r.Context()
 		err := scores.RemoveAll(ctx)
 		if err != nil {
-			handleHTTPError(w, errors.Wrap(err, "error removing all scores from store"))
+			handleHTTPError(w, fmt.Errorf("error removing all scores from store: %w", err))
 			return
 		}
 
