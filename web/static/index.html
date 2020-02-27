@@ -1,39 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>Clong</title>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="msapplication-tap-highlight" content="no" />
 
-    <link rel="stylesheet" href="/assets/styles/styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/assets/styles/styles.css" />
+  </head>
+  <body>
     <div id="start-button">
-        <button class="btn" onclick="startGame()">Start Game</button>
+      <button class="btn" onclick="startGame()">Start Game</button>
     </div>
 
-    <p id="intro" style="text-align:center;">Swipe up to shoot balls at targets on big screen</p>
-    <p id="reconnecting-msg" style="text-align:center;display:none;z-index:9999;height:100vh;width:100vw;">Reconnecting...</p>
+    <p id="intro" style="text-align: center;">
+      Swipe up to shoot balls at targets on big screen
+    </p>
+    <p
+      id="reconnecting-msg"
+      style="
+        text-align: center;
+        display: none;
+        z-index: 9999;
+        height: 100vh;
+        width: 100vw;
+      "
+    >
+      Reconnecting...
+    </p>
 
     <div id="main"></div>
 
     <div id="spinner">X</div>
 
     <div class="hud">
-        <div id="timer"><span id="sec-num">60</span> sec</div>
-        <div id="score"><span id="score-num">0</span> points</div>
+      <div id="timer"><span id="sec-num">60</span> sec</div>
+      <div id="score"><span id="score-num">0</span> points</div>
     </div>
 
     <script
-        src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"
-        integrity="sha256-eVNjHw5UeU0jUqPPpZHAkU1z4U+QFBBY488WvueTm88="
-        crossorigin="anonymous"></script>
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"
+      integrity="sha256-eVNjHw5UeU0jUqPPpZHAkU1z4U+QFBBY488WvueTm88="
+      crossorigin="anonymous"
+    ></script>
     <script src="/assets/scripts/helpers.js"></script>
     <script src="/assets/scripts/controller.js"></script>
-</body>
+  </body>
+</html>
