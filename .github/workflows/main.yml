@@ -1,20 +1,18 @@
-on: [push, pull_request]
 name: Lint and Test
+on: [push, pull_request]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Go
-        uses: actions/setup-go@master
-        with:
-          go-version: "1"
       - name: Checkout code
-        uses: actions/checkout@master
-      - name: Lint
-        uses: reviewdog/action-golangci-lint@master
+        uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v2
         with:
-          args: run
+          go-version: "1.14"
+      - name: Lint
+        uses: reviewdog/action-golangci-lint@v1
       - name: Test
         run: make test
       - name: Build
-        run: make
+        run: make build

@@ -9,85 +9,85 @@ var targetSpawnIntervalMax = 500;
 var targetTypes = [
   {
     imgUrl: "/assets/img/swisscom-logo-lifeform.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
 
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/docker-image.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/dotnetcore.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/go.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/java.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/node.js.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/php.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/python.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/ruby.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
 
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/elk.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mariadb.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mongodb.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/rabbitmq.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/redis.svg",
-    sizeRatio: 1
+    sizeRatio: 1,
   },
   {
     imgUrl:
       "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/smartmsg.svg",
-    sizeRatio: 1
-  }
+    sizeRatio: 1,
+  },
 ];
 
 // Initialize target images
@@ -115,7 +115,7 @@ function init() {
   // Initialize WebSocket connection
   ws = new WebSocket(wsProtocol() + "//" + window.location.host + "/ws/screen");
 
-  ws.onopen = function() {
+  ws.onopen = function () {
     // Show game URL on screen
     $("#game-msg").text(
       "Visit " +
@@ -131,7 +131,7 @@ function init() {
   };
 
   // Listen for new balls coming in
-  ws.onmessage = function(e) {
+  ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
     if (msg.type === "ballInit") {
       if (msg.velocityY > 0) {
@@ -146,7 +146,7 @@ function init() {
   };
 
   // Try to reconnect on close
-  ws.onclose = function() {
+  ws.onclose = function () {
     $("#game-msg").text("Reconnecting...");
     clearTimeout(spawnTargetTimeout);
     targets = [];
@@ -160,14 +160,14 @@ function ballDone(player, points) {
   var msg = {
     type: "ballDone",
     player: player,
-    points: points
+    points: points,
   };
   ws.send(JSON.stringify(msg));
 }
 
 // Regularly spawn new targets
 function spawnTarget(ms) {
-  spawnTargetTimeout = setTimeout(function() {
+  spawnTargetTimeout = setTimeout(function () {
     if (targets.length < maxTargets) {
       var type = targetTypes[randInt(0, targetTypes.length)];
       var width = randInt(2, 13);
@@ -180,7 +180,7 @@ function spawnTarget(ms) {
         velocityX: Math.random() - 0.5,
         velocityY: 0,
         width: width,
-        height: height
+        height: height,
       });
     }
 

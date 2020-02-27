@@ -30,13 +30,13 @@ function init() {
     wsProtocol() + "//" + window.location.host + "/ws/controller"
   );
 
-  ws.onopen = function() {
+  ws.onopen = function () {
     unlock();
     $("#reconnecting-msg").hide();
 
     // Listen for new swipes
     mc.get("swipe").set({ direction: Hammer.DIRECTION_ALL });
-    mc.on("swipe", function(e) {
+    mc.on("swipe", function (e) {
       if (gameRunning && !locked) {
         $("#intro").hide();
 
@@ -45,7 +45,7 @@ function init() {
           color: myColor,
           posX: relW(e.center.x),
           velocityX: relW(e.velocityX),
-          velocityY: relH(e.velocityY)
+          velocityY: relH(e.velocityY),
         };
         ws.send(JSON.stringify(msg));
 
@@ -55,7 +55,7 @@ function init() {
   };
 
   // Listen for when ball is done to unlock screen
-  ws.onmessage = function(e) {
+  ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
     if (gameRunning && msg.type === "ballDone" && msg.player.id === myID) {
       myPoints += msg.points;
@@ -65,7 +65,7 @@ function init() {
   };
 
   // Try to reconnect on close
-  ws.onclose = function() {
+  ws.onclose = function () {
     lock();
     $("#reconnecting-msg").show();
     setTimeout(init, 3000);
@@ -79,7 +79,7 @@ function startGame() {
   myPoints = 0;
   $("#score-num").text(myPoints);
   gameRunning = true;
-  var gameLoop = setInterval(function() {
+  var gameLoop = setInterval(function () {
     myTime--;
     $("#sec-num").text(myTime);
     if (myTime <= 0) {
@@ -90,7 +90,7 @@ function startGame() {
       var msg = {
         type: "GAME_FINISHED",
         finalScore: myPoints,
-        color: myColor
+        color: myColor,
       };
       ws.send(JSON.stringify(msg));
     }

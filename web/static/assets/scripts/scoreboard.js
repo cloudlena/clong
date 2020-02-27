@@ -11,9 +11,9 @@ function init() {
   // Initialize WebSocket connection
   ws = new WebSocket(wsProtocol() + "//" + window.location.host + "/ws/screen");
 
-  ws.onopen = function() {
+  ws.onopen = function () {
     // Get existing scores
-    $.get("/api/scores", function(data) {
+    $.get("/api/scores", function (data) {
       if (data !== null) {
         highScores = data;
         drawScores();
@@ -22,7 +22,7 @@ function init() {
   };
 
   // Listen for new scores coming in
-  ws.onmessage = function(e) {
+  ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
     if (msg.type === "GAME_FINISHED") {
       highScores.push(msg);
@@ -31,7 +31,7 @@ function init() {
   };
 
   // Try to reconnect on close
-  ws.onclose = function() {
+  ws.onclose = function () {
     $("#scoreboard table").html(
       '<tr><td style="text-align:center;">Reconnecting...</td></tr>'
     );
@@ -41,7 +41,7 @@ function init() {
 
 function drawScores() {
   // Sort by final score
-  highScores.sort(function(a, b) {
+  highScores.sort(function (a, b) {
     return b.finalScore - a.finalScore;
   });
 
