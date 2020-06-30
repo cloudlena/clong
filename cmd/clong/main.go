@@ -36,14 +36,9 @@ func main() {
 	// Set up DB
 	db, err := sql.Open("mysql", *dbString)
 	if err != nil {
-		log.Fatal(fmt.Errorf("error opening DB: %w", err))
+		log.Fatal(fmt.Errorf("error opening DB connection: %w", err))
 	}
-	defer func() {
-		err = db.Close()
-		if err != nil {
-			log.Fatal(fmt.Errorf("error cloding DB: %w", err))
-		}
-	}()
+	defer db.Close()
 
 	// Set up WebSocket upgrader
 	up := websocket.Upgrader{

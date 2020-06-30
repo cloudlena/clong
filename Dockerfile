@@ -1,13 +1,14 @@
-FROM golang:1 AS builder
-RUN groupadd -r app && useradd --no-log-init -r -g app app
-WORKDIR /app
+FROM docker.io/library/golang:1 AS builder
+WORKDIR /usr/src/app
 COPY . ./
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o bin/clong ./cmd/clong
 
-FROM scratch
-WORKDIR /app
-COPY --from=builder /app/bin/clong /app/web ./
-COPY --from=builder /etc/passwd /etc/passwd
-USER app
+FROM docker.io/library/alpine:latest
+WORKDIR /usr/src/app
+RUN addgroup -S clong && adduser -S clong -G clong
+RUN apk add --no-cache dumb-init
+COPY --from=builder --chown=clong:clong /usr/src/app/bin/clong /usr/src/app/web ./
+USER clong
 EXPOSE 8080
-ENTRYPOINT ["./clong"]
+ENTRYPOINT [ "/usr/bin/dumb-init", "--" ]
+CMD [ "/usr/src/app/clong" ]
