@@ -2,6 +2,8 @@ linters:
   enable-all: true
   disable:
     - exhaustivestruct
+    - gocritic
+    - ifshort
     - nlreturn
     - wsl
 
