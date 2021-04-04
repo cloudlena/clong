@@ -1,7 +1,7 @@
 FROM docker.io/library/golang:1 AS builder
 WORKDIR /usr/src/app
 COPY . ./
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o bin/clong ./cmd/clong
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o bin/clong
 
 FROM docker.io/library/alpine:latest
 WORKDIR /usr/src/app
