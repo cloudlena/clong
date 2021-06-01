@@ -6,8 +6,10 @@ package main
 
 import (
 	"database/sql"
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 
@@ -22,6 +24,10 @@ import (
 )
 
 const oneKiloByte = 1024
+
+// Set up static assets
+//go:embed web/static
+var staticFS embed.FS
 
 func main() {
 	var (
@@ -56,6 +62,12 @@ func main() {
 	// Set up basic auth user
 	users := []basicauth.User{{Username: *username, Password: *password}}
 
+	// Set up static files
+	static, err := fs.Sub(staticFS, "web/static")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Set up router
 	r := way.NewRouter()
 	r.Handle(http.MethodGet, "/screen", basicauth.Handler("Clong screen", users)(httpws.HandleScreenView()))
@@ -68,7 +80,7 @@ func main() {
 		"/api/scores",
 		basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)),
 	)
-	r.Handle(http.MethodGet, "/...", http.FileServer(http.Dir("web/static")))
+	r.Handle(http.MethodGet, "/...", http.FileServer(http.FS(static)))
 
 	sr := enforcehttps.Handler(*forceHTTPS)(r)
 	log.Fatal(http.ListenAndServe(":"+*port, sr))
