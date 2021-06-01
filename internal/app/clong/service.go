@@ -31,9 +31,12 @@ type service struct {
 
 // NewService creates a new service.
 func NewService(scores ScoreStore) Service {
-	svc := new(service)
-	svc.scores = scores
-	return svc
+	svc := service{
+		controllers: make(map[ClientConnection]bool),
+		screens:     make(map[ClientConnection]bool),
+		scores:      scores,
+	}
+	return &svc
 }
 
 // RegisterController registers a new controller.

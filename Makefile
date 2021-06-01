@@ -1,10 +1,10 @@
 .PHONY: build
 build:
-	go build -o bin/clong ./cmd/clong
+	go build -o bin/clong
 
 .PHONY: run
 run:
-	go run cmd/clong/main.go
+	go run main.go
 
 .PHONY: lint
 lint:
