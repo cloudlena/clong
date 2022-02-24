@@ -22,16 +22,16 @@ type Service interface {
 	PublishControl(ctx context.Context, ctrl Control)
 }
 
-// service is a messaging hub.
-type service struct {
+// BaseService is a messaging hub.
+type BaseService struct {
 	controllers map[ClientConnection]bool
 	screens     map[ClientConnection]bool
 	scores      ScoreStore
 }
 
 // NewService creates a new service.
-func NewService(scores ScoreStore) Service {
-	svc := service{
+func NewService(scores ScoreStore) *BaseService {
+	svc := BaseService{
 		controllers: make(map[ClientConnection]bool),
 		screens:     make(map[ClientConnection]bool),
 		scores:      scores,
@@ -40,27 +40,27 @@ func NewService(scores ScoreStore) Service {
 }
 
 // RegisterController registers a new controller.
-func (s *service) RegisterController(c ClientConnection) {
+func (s *BaseService) RegisterController(c ClientConnection) {
 	s.controllers[c] = true
 }
 
 // UnregisterController removes a controller.
-func (s *service) UnregisterController(c ClientConnection) {
+func (s *BaseService) UnregisterController(c ClientConnection) {
 	delete(s.controllers, c)
 }
 
 // RegisterScreen registers a new screen.
-func (s *service) RegisterScreen(c ClientConnection) {
+func (s *BaseService) RegisterScreen(c ClientConnection) {
 	s.screens[c] = true
 }
 
 // UnregisterScreen removes a screen.
-func (s *service) UnregisterScreen(c ClientConnection) {
+func (s *BaseService) UnregisterScreen(c ClientConnection) {
 	delete(s.screens, c)
 }
 
 // EventsChannel returns the hub's events channel.
-func (s *service) PublishEvent(_ context.Context, event Event) {
+func (s *BaseService) PublishEvent(_ context.Context, event Event) {
 	for c := range s.controllers {
 		err := c.WriteJSON(event)
 		if err != nil {
@@ -74,7 +74,7 @@ func (s *service) PublishEvent(_ context.Context, event Event) {
 }
 
 // PublishControl returns the hub's events channel.
-func (s *service) PublishControl(ctx context.Context, ctrl Control) {
+func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
 	switch ctrl.Type {
 	case "GAME_FINISHED":
 		scr := Score{

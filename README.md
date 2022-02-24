@@ -1,8 +1,7 @@
 # Clong
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/mastertinner/clong?style=flat-square)](https://goreportcard.com/report/github.com/mastertinner/clong)
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fmastertinner%2Fclong%2Fbadge&style=flat-square)](https://github.com/mastertinner/clong/actions)
-[![Docker Build](https://img.shields.io/docker/cloud/build/mastertinner/clong.svg?style=flat-square)](https://hub.docker.com/r/mastertinner/clong)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cloudlena/clong)](https://goreportcard.com/report/github.com/cloudlena/clong)
+[![Build Status](https://github.com/cloudlena/clong/actions/workflows/main.yml/badge.svg)](https://github.com/cloudlena/clong/actions)
 
 A simple game where players have to throw balls at targets from their smart phones.
 
@@ -19,9 +18,9 @@ A simple game where players have to throw balls at targets from their smart phon
 
 1.  Run `make test`
 
-## Build Docker Image
+## Build Container Image
 
-The image is available on [Docker Hub](https://hub.docker.com/r/mastertinner/clong/)
+The image is also available on [Docker Hub](https://hub.docker.com/r/cloudlena/clong/).
 
 1.  Run `make build-docker`
 

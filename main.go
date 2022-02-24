@@ -13,13 +13,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/cloudlena/adapters/basicauth"
+	"github.com/cloudlena/adapters/enforcehttps"
+	"github.com/cloudlena/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/app/clong/httpws"
+	"github.com/cloudlena/clong/internal/app/clong/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
-	"github.com/mastertinner/adapters/basicauth"
-	"github.com/mastertinner/adapters/enforcehttps"
-	"github.com/mastertinner/clong/internal/app/clong"
-	"github.com/mastertinner/clong/internal/app/clong/httpws"
-	"github.com/mastertinner/clong/internal/app/clong/mysql"
 	"github.com/matryer/way"
 )
 

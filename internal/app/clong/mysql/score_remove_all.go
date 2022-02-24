@@ -6,7 +6,7 @@ import (
 )
 
 // RemoveAll removes all scores from the DB.
-func (s *scoreStore) RemoveAll(_ context.Context) error {
+func (s *ScoreStore) RemoveAll(_ context.Context) error {
 	_, err := s.db.Exec("DELETE FROM score")
 	if err != nil {
 		return fmt.Errorf("error executing DB statement: %w", err)

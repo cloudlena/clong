@@ -4,17 +4,15 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/mastertinner/clong/internal/app/clong"
 )
 
-// scoreStore is a score store.
-type scoreStore struct {
+// ScoreStore is a score store.
+type ScoreStore struct {
 	db *sql.DB
 }
 
 // NewScoreStore creates a new score store.
-func NewScoreStore(db *sql.DB) (clong.ScoreStore, error) {
+func NewScoreStore(db *sql.DB) (*ScoreStore, error) {
 	// Check if DB connection is healthy
 	err := db.Ping()
 	if err != nil {
@@ -34,5 +32,5 @@ func NewScoreStore(db *sql.DB) (clong.ScoreStore, error) {
 		return nil, fmt.Errorf("error executing DB statement: %w", err)
 	}
 
-	return &scoreStore{db: db}, nil
+	return &ScoreStore{db: db}, nil
 }

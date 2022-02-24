@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mastertinner/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/app/clong"
 )
 
 // HandleDeleteScores deletes all scores and resets the scoreboard.
