@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mastertinner/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/app/clong"
 )
 
 // Add adds a new score to the DB.
-func (s *scoreStore) Add(ctx context.Context, scr *clong.Score) error {
+func (s *ScoreStore) Add(ctx context.Context, scr *clong.Score) error {
 	stmt, err := s.db.PrepareContext(ctx, `
 		INSERT INTO score
 		(player_id, player_name, final_score, color)

@@ -4,8 +4,13 @@ linters:
     - exhaustivestruct
     - gochecknoglobals
     - gocritic
+    - golint
     - ifshort
+    - interfacer
+    - maligned
     - nlreturn
+    - scopelint
+    - varnamelen
     - wsl
 
 linters-settings:

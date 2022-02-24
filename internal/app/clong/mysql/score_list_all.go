@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mastertinner/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/app/clong"
 )
 
 // ListAll retrieves all scores from the DB.
-func (s *scoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err error) {
+func (s *ScoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, fmt.Errorf("error querying DB: %w", err)

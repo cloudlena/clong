@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/cloudlena/clong/internal/app/clong"
 	"github.com/gorilla/websocket"
-	"github.com/mastertinner/clong/internal/app/clong"
 )
 
 // HandleControllerConn handles a WebSocket connection from a controller.
