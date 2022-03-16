@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/cloudlena/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/clong"
 	"github.com/gorilla/websocket"
 )
 

@@ -8,7 +8,7 @@ import (
 
 // ClientConnection is a connection with a client.
 type ClientConnection interface {
-	WriteJSON(v interface{}) error
+	WriteJSON(v any) error
 	Close() error
 }
 

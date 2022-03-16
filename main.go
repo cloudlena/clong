@@ -15,9 +15,9 @@ import (
 
 	"github.com/cloudlena/adapters/basicauth"
 	"github.com/cloudlena/adapters/enforcehttps"
-	"github.com/cloudlena/clong/internal/app/clong"
-	"github.com/cloudlena/clong/internal/app/clong/httpws"
-	"github.com/cloudlena/clong/internal/app/clong/mysql"
+	"github.com/cloudlena/clong/internal/clong"
+	"github.com/cloudlena/clong/internal/clong/httpws"
+	"github.com/cloudlena/clong/internal/clong/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/matryer/way"
