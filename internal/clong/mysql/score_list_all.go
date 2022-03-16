@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cloudlena/clong/internal/app/clong"
+	"github.com/cloudlena/clong/internal/clong"
 )
 
 // ListAll retrieves all scores from the DB.
