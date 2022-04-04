@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/cloudlena/clong)](https://goreportcard.com/report/github.com/cloudlena/clong)
 [![Build Status](https://github.com/cloudlena/clong/actions/workflows/main.yml/badge.svg)](https://github.com/cloudlena/clong/actions)
 
-A simple game where players have to throw balls at targets from their smart phones.
+A simple game where players have to throw balls at targets from their smartphones.
 
 1.  Open `/screen` on any big screen. This is where the game runs. The game should begin to spawn targets.
 1.  Open `/` on any touch device and swipe forward to launch balls at the targets. Many players can play at the same time.

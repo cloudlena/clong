@@ -9,7 +9,7 @@ import (
 )
 
 // ListAll retrieves all scores from the DB.
-func (s *ScoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err error) {
+func (s *ScoreStore) ListAll(ctx context.Context) ([]*clong.Score, error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT score_id, player_id, player_name, final_score, color FROM score")
 	if err != nil {
 		return nil, fmt.Errorf("error querying DB: %w", err)
@@ -20,6 +20,8 @@ func (s *ScoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err erro
 			log.Fatal(fmt.Errorf("error closing DB rows: %w", err))
 		}
 	}()
+
+	scrs := make([]*clong.Score, 0)
 	for rows.Next() {
 		var s clong.Score
 		err = rows.Scan(&s.ID, &s.Player.ID, &s.Player.Name, &s.FinalScore, &s.Color)
@@ -32,5 +34,6 @@ func (s *ScoreStore) ListAll(ctx context.Context) (scrs []*clong.Score, err erro
 	if err != nil {
 		return nil, fmt.Errorf("error in DB rows: %w", err)
 	}
+
 	return scrs, nil
 }
