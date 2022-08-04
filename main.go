@@ -26,6 +26,7 @@ import (
 const oneKiloByte = 1024
 
 // Set up static assets
+//
 //go:embed web/static
 var staticFS embed.FS
 
