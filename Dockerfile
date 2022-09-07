@@ -1,9 +1,9 @@
-FROM docker.io/library/golang:1 AS builder
+FROM docker.io/golang:1 AS builder
 WORKDIR /usr/src/app
 COPY . ./
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o bin/clong
 
-FROM docker.io/library/alpine:latest
+FROM docker.io/alpine:latest
 WORKDIR /usr/src/app
 RUN addgroup -S clong && adduser -S clong -G clong
 RUN apk add --no-cache dumb-init

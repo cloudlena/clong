@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/cloudlena/adapters/basicauth"
 	"github.com/cloudlena/adapters/enforcehttps"
@@ -23,7 +24,9 @@ import (
 	"github.com/matryer/way"
 )
 
-const oneKiloByte = 1024
+const kiloByte = 1024
+
+const serverTimeout = 5 * time.Second
 
 // Set up static assets
 //
@@ -49,8 +52,8 @@ func main() {
 
 	// Set up WebSocket upgrader
 	up := websocket.Upgrader{
-		ReadBufferSize:  oneKiloByte,
-		WriteBufferSize: oneKiloByte,
+		ReadBufferSize:  kiloByte,
+		WriteBufferSize: kiloByte,
 	}
 
 	// Set up service
@@ -83,6 +86,11 @@ func main() {
 	)
 	r.Handle(http.MethodGet, "/...", http.FileServer(http.FS(static)))
 
-	sr := enforcehttps.Handler(*forceHTTPS)(r)
-	log.Fatal(http.ListenAndServe(":"+*port, sr))
+	srv := &http.Server{
+		Addr:         ":" + *port,
+		Handler:      enforcehttps.Handler(*forceHTTPS)(r),
+		ReadTimeout:  serverTimeout,
+		WriteTimeout: serverTimeout,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
