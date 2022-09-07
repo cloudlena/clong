@@ -1,5 +1,5 @@
-github.com/cloudlena/adapters v0.0.0-20220805095045-f5a3e0da0506 h1:7lM1kaBcTJsG4LIhjGS+zaRSHwQVunqFrrRGoVl7z7w=
-github.com/cloudlena/adapters v0.0.0-20220805095045-f5a3e0da0506/go.mod h1:RkedzzBkpuEq4g7LIw7bjcxTBGWCu2JawSebQNTIhWM=
+github.com/cloudlena/adapters v0.0.0-20220828204810-d5b81e754114 h1:f3Lkk1+9i/+EgcALUKk/VJ27Kvjd+ShR1qt1R7dECfk=
+github.com/cloudlena/adapters v0.0.0-20220828204810-d5b81e754114/go.mod h1:wg69klGiDKM7/v/cTv+unA8VMG4sPZ97AmkWWNSXVNc=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
