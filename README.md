@@ -29,3 +29,21 @@ The image is also available on [Docker Hub](https://hub.docker.com/r/cloudlena/c
 1.  Create an SQL database service
 1.  Modify `deployments/cf/*` to your liking
 1.  Run `make deploy-cf`
+
+## Run on Kubernetes
+
+1. Create a namespace and target it.
+2. Define a USERNAME and a PASSWORD for logging in.
+3. Define a DB_USERNAME and a DB_PASSWORD for clong to access the DB with.
+4. Create a secret called `clong-credentials` as follows:
+
+```shell
+kubectl create secret generic clong-credentials --from-literal=clongUsername="${USERNAME}" --from-literal=clongPassword="${PASSWORD}" --from-literal=dbUsername="${DB_USERNAME}" --from-literal=dbPassword="${DB_PASSWORD}"
+```
+
+5. Insert your host instead of `xxx` in `deployments/k8s/ing-clong.yml`
+6. Apply the deployment as follows:
+
+```shell
+kubectl apply -f deployments/k8s
+```
