@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    kubernetes.io/ingress.class: nginx
+  name: clong
+spec:
+  rules:
+    - host: xxx
+      http:
+        paths:
+          - backend:
+              service:
+                name: clong
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

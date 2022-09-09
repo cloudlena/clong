@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clong
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clong
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clong
+    spec:
+      containers:
+        - name: clong
+          image: cloudlena/clong
+          imagePullPolicy: Always
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              db_string="${DB_USERNAME}:${DB_PASSWORD}@(clongdb:3306)/clong"
+              /usr/src/app/clong -port 8080 -db-string "${db_string}" -force-https -username "${USERNAME}" -password "${PASSWORD}"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: clong-credentials
+                  key: clongUsername
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clong-credentials
+                  key: clongPassword
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: clong-credentials
+                  key: dbUsername
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clong-credentials
+                  key: dbPassword
