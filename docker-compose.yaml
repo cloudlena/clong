@@ -1,7 +1,7 @@
 services:
   clong:
     build: .
-    command: ["-db-string", "root:clong@db/clong"]
+    command: ["/usr/src/app/clong", "-db-string", "clong:clong@(db)/clong"]
     ports:
       - 8080:8080
     depends_on:
@@ -11,7 +11,10 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: clong
+      MARIADB_RANDOM_ROOT_PASSWORD: yes
+      MARIADB_DATABASE: clong
+      MARIADB_USER: clong
+      MARIADB_PASSWORD: clong
 
 volumes:
   db-data:

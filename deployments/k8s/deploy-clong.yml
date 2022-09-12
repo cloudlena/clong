@@ -13,14 +13,14 @@ spec:
     spec:
       containers:
         - name: clong
-          image: cloudlena/clong
+          image: cloudlena/clong:latest
           imagePullPolicy: Always
           command: ["/bin/sh"]
           args:
             - -c
             - |
-              db_string="${DB_USERNAME}:${DB_PASSWORD}@(clongdb:3306)/clong"
-              /usr/src/app/clong -port 8080 -db-string "${db_string}" -force-https -username "${USERNAME}" -password "${PASSWORD}"
+              db_string="${DB_USERNAME}:${DB_PASSWORD}@(clong-db)/clong"
+              /usr/src/app/clong -db-string "${db_string}" -username "${USERNAME}" -password "${PASSWORD}"
           ports:
             - containerPort: 8080
           env:

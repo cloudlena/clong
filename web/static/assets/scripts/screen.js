@@ -8,84 +8,47 @@ var targetSpawnIntervalMin = 100;
 var targetSpawnIntervalMax = 500;
 var targetTypes = [
   {
-    imgUrl: "/assets/img/swisscom-logo-lifeform.svg",
-    sizeRatio: 1,
-  },
-
-  {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/docker-image.svg",
+    imgUrl: "/assets/img/docker.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/dotnetcore.svg",
+    imgUrl: "/assets/img/go.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/go.svg",
+    imgUrl: "/assets/img/java.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/java.svg",
+    imgUrl: "/assets/img/nodejs.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/node.js.svg",
+    imgUrl: "/assets/img/python.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/php.svg",
+    imgUrl: "/assets/img/ruby.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/python.svg",
+    imgUrl: "/assets/img/mariadb.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/buildpack/ruby.svg",
-    sizeRatio: 1,
-  },
-
-  {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/atmos.svg",
+    imgUrl: "/assets/img/mongodb.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/elk.svg",
+    imgUrl: "/assets/img/rabbitmq.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mariadb.svg",
+    imgUrl: "/assets/img/redis.svg",
     sizeRatio: 1,
   },
   {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/mongodb.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/rabbitmq.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/redis.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl:
-      "https://api.lyra-836.appcloud.swisscom.com/static-media/images/service/smartmsg.svg",
+    imgUrl: "/assets/img/kubernetes.svg",
     sizeRatio: 1,
   },
 ];
@@ -133,7 +96,7 @@ function init() {
   // Listen for new balls coming in
   ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
-    if (msg.type === "ballInit") {
+    if (msg.type === "BALL_INIT") {
       if (msg.velocityY > 0) {
         msg.radius = ballRadius;
         msg.velocityY = Math.max(msg.velocityY, 0.05) * ballVelocityFactor;
@@ -158,7 +121,7 @@ function init() {
 
 function ballDone(player, points) {
   var msg = {
-    type: "ballDone",
+    type: "BALL_DONE",
     player: player,
     points: points,
   };

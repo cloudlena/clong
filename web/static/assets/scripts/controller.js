@@ -41,7 +41,7 @@ function init() {
         $("#intro").hide();
 
         var msg = {
-          type: "ballInit",
+          type: "BALL_INIT",
           color: myColor,
           posX: relW(e.center.x),
           velocityX: relW(e.velocityX),
@@ -57,7 +57,7 @@ function init() {
   // Listen for when ball is done to unlock screen
   ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
-    if (gameRunning && msg.type === "ballDone" && msg.player.id === myID) {
+    if (gameRunning && msg.type === "BALL_DONE" && msg.player.id === myID) {
       myPoints += msg.points;
       $("#score-num").text(myPoints);
       unlock();
@@ -133,10 +133,7 @@ function setUserID() {
 }
 
 function getUserName() {
-  var userName = prompt(
-    "Please provide your Twitter handle or email address so we can contact you if you win:",
-    ""
-  );
+  var userName = prompt("Please provide your username:", "");
 
   if (userName === null || userName.length < 2 || userName.length > 30) {
     userName = getUserName();

@@ -59,7 +59,7 @@ func (s *BaseService) UnregisterScreen(c ClientConnection) {
 	delete(s.screens, c)
 }
 
-// EventsChannel returns the hub's events channel.
+// PublishEvent publishes an event to the messaging bus.
 func (s *BaseService) PublishEvent(_ context.Context, event Event) {
 	for c := range s.controllers {
 		err := c.WriteJSON(event)
@@ -73,10 +73,9 @@ func (s *BaseService) PublishEvent(_ context.Context, event Event) {
 	}
 }
 
-// PublishControl returns the hub's events channel.
+// PublishControl publishes a control to the messaging bus.
 func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
-	switch ctrl.Type {
-	case "GAME_FINISHED":
+	if ctrl.Type == "GAME_FINISHED" {
 		scr := Score{
 			Player:     ctrl.Player,
 			FinalScore: ctrl.FinalScore,
@@ -86,16 +85,16 @@ func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
 		if err != nil {
 			log.Fatal(fmt.Errorf("error adding score to store: %w", err))
 		}
-	default:
-		for scrn := range s.screens {
-			err := scrn.WriteJSON(ctrl)
+	}
+
+	for scrn := range s.screens {
+		err := scrn.WriteJSON(ctrl)
+		if err != nil {
+			err = scrn.Close()
 			if err != nil {
-				err = scrn.Close()
-				if err != nil {
-					log.Fatal(fmt.Errorf("error closing screen connection: %w", err))
-				}
-				s.UnregisterScreen(scrn)
+				log.Fatal(fmt.Errorf("error closing screen connection: %w", err))
 			}
+			s.UnregisterScreen(scrn)
 		}
 	}
 }

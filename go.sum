@@ -1,7 +1,7 @@
-github.com/cloudlena/adapters v0.0.0-20220828204810-d5b81e754114 h1:f3Lkk1+9i/+EgcALUKk/VJ27Kvjd+ShR1qt1R7dECfk=
-github.com/cloudlena/adapters v0.0.0-20220828204810-d5b81e754114/go.mod h1:wg69klGiDKM7/v/cTv+unA8VMG4sPZ97AmkWWNSXVNc=
-github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
-github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
+github.com/cloudlena/adapters v0.0.0-20230410212441-d7669b7e557b h1:bp+Wk0u1SRz51EEX5qUAGA4m1vvCbPqoF6ple6RGPZk=
+github.com/cloudlena/adapters v0.0.0-20230410212441-d7669b7e557b/go.mod h1:kBXOj13xk5gCwpdcDN+cbf4eXznROQYUa2VDq8LG5uc=
+github.com/go-sql-driver/mysql v1.7.1 h1:lUIinVbN1DY0xBg0eMOzmmtGoHwWBbvnWubQUrtU8EI=
+github.com/go-sql-driver/mysql v1.7.1/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/matryer/way v0.0.0-20180416093233-9632d0c407b0 h1:KWiqy3hl8yCUPAq1frD0DKXKyn7d9h2nVhj2r5ISq2o=

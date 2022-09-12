@@ -13,40 +13,41 @@ import (
 func HandleControllerConn(svc clong.Service, up websocket.Upgrader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		ws, err := up.Upgrade(w, r, nil)
+
+		conn, err := up.Upgrade(w, r, nil)
 		if err != nil {
 			handleHTTPError(w, fmt.Errorf("error upgrading connection: %w", err))
 			return
 		}
 		defer func() {
-			err = ws.Close()
+			err = conn.Close()
 			if err != nil {
 				log.Fatal(fmt.Errorf("error closing websocket: %w", err))
 			}
 		}()
-		svc.RegisterController(ws)
+		svc.RegisterController(conn)
 
 		for {
 			userID, ok := cookieVal(r.Cookies(), "userid")
 			if !ok {
 				err := NewUnauthorizedError("user ID missing")
 				handleHTTPError(w, err)
-				svc.UnregisterController(ws)
+				svc.UnregisterController(conn)
 				break
 			}
 			userName, ok := cookieVal(r.Cookies(), "username")
 			if !ok {
-				err := NewUnauthorizedError("user name missing")
+				err := NewUnauthorizedError("username missing")
 				handleHTTPError(w, err)
-				svc.UnregisterController(ws)
+				svc.UnregisterController(conn)
 				break
 			}
 
 			var ctrl clong.Control
-			err = ws.ReadJSON(&ctrl)
+			err = conn.ReadJSON(&ctrl)
 			if err != nil {
 				handleHTTPError(w, fmt.Errorf("error reading JSON: %w", err))
-				svc.UnregisterController(ws)
+				svc.UnregisterController(conn)
 				break
 			}
 			ctrl.Player = clong.User{
