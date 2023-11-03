@@ -21,7 +21,6 @@ import (
 	"github.com/cloudlena/clong/internal/clong/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
-	"github.com/matryer/way"
 )
 
 const kiloByte = 1024
@@ -73,22 +72,18 @@ func main() {
 	}
 
 	// Set up router
-	r := way.NewRouter()
-	r.Handle(http.MethodGet, "/screen", basicauth.Handler("Clong screen", users)(httpws.HandleScreenView()))
-	r.Handle(http.MethodGet, "/scoreboard", httpws.HandleScoreboardView())
-	r.Handle(http.MethodGet, "/ws/controller", httpws.HandleControllerConn(svc, up))
-	r.Handle(http.MethodGet, "/ws/screen", httpws.HandleScreenConn(svc, up))
-	r.Handle(http.MethodGet, "/api/scores", httpws.HandleFindScores(scores))
-	r.Handle(
-		http.MethodDelete,
-		"/api/scores",
-		basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)),
-	)
-	r.Handle(http.MethodGet, "/...", http.FileServer(http.FS(static)))
+	mux := http.NewServeMux()
+	mux.Handle("GET /screen", basicauth.Handler("Clong screen", users)(httpws.HandleScreenView()))
+	mux.Handle("GET /scoreboard", httpws.HandleScoreboardView())
+	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc, up))
+	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc, up))
+	mux.Handle("GET /api/scores", httpws.HandleFindScores(scores))
+	mux.Handle("DELETE /api/scores", basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)))
+	mux.Handle("GET /...", http.FileServer(http.FS(static)))
 
 	srv := &http.Server{
 		Addr:         ":" + *port,
-		Handler:      enforcehttps.Handler(*forceHTTPS)(r),
+		Handler:      enforcehttps.Handler(*forceHTTPS)(mux),
 		ReadTimeout:  serverTimeout,
 		WriteTimeout: serverTimeout,
 	}
