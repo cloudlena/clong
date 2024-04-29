@@ -1,20 +1,19 @@
 services:
   clong:
     build: .
-    command: ["/usr/src/app/clong", "-db-string", "clong:clong@(db)/clong"]
     ports:
       - 8080:8080
     depends_on:
       - db
-  db:
-    image: docker.io/mariadb
-    volumes:
-      - db-data:/var/lib/mysql
     environment:
-      MARIADB_RANDOM_ROOT_PASSWORD: yes
-      MARIADB_DATABASE: clong
-      MARIADB_USER: clong
-      MARIADB_PASSWORD: clong
+      DATABASE_URL: postgresql://postgres:clong@db?sslmode=disable
+  db:
+    image: docker.io/library/postgres
+    volumes:
+      - db-data:/data/postgres
+    environment:
+      POSTGRES_PASSWORD: clong
+      PG_DATA: /data/postgres
 
 volumes:
   db-data:
