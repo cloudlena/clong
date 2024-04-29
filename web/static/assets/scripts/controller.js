@@ -27,7 +27,7 @@ function init() {
 
   // Initialize WebSocket connection
   ws = new WebSocket(
-    wsProtocol() + "//" + window.location.host + "/ws/controller"
+    wsProtocol() + "//" + window.location.host + "/ws/controller",
   );
 
   ws.onopen = function () {
@@ -133,7 +133,7 @@ function setUserID() {
 }
 
 function getUserName() {
-  var userName = prompt("Please provide your username:", "");
+  var userName = prompt("What's your full name?", "");
 
   if (userName === null || userName.length < 2 || userName.length > 30) {
     userName = getUserName();
@@ -169,6 +169,6 @@ if (window.WebSocket) {
   $("#start-button .btn").hide();
   $(".hud").hide();
   $("#start-button").append(
-    '<p style="text-align:center;margin-top:2em;">Sorry, your browser isn\'t supported...</p>'
+    '<p style="text-align:center;margin-top:2em;">Sorry, your browser isn\'t supported...</p>',
   );
 }

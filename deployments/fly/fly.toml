@@ -1,0 +1,13 @@
+app = 'bespinian-clong'
+primary_region = 'ams'
+
+[http_service]
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = '256MB'
+  cpu_kind = 'shared'
+  cpus = 1

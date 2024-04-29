@@ -13,9 +13,9 @@ spec:
     spec:
       containers:
         - name: db
-          image: mariadb:latest
+          image: docker.io/library/postgres:latest
           ports:
-            - containerPort: 3306
+            - containerPort: 5432
           env:
             - name: MARIADB_RANDOM_ROOT_PASSWORD
               value: "yes"
