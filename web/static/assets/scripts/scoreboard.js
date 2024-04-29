@@ -33,7 +33,7 @@ function init() {
   // Try to reconnect on close
   ws.onclose = function () {
     $("#scoreboard table").html(
-      '<tr><td style="text-align:center;">Reconnecting...</td></tr>'
+      '<tr><td style="text-align:center;">Reconnecting...</td></tr>',
     );
     setTimeout(init, 3000);
   };
