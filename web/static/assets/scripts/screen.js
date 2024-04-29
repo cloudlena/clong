@@ -16,6 +16,10 @@ var targetTypes = [
     sizeRatio: 1,
   },
   {
+    imgUrl: "/assets/img/rust.svg",
+    sizeRatio: 1,
+  },
+  {
     imgUrl: "/assets/img/java.svg",
     sizeRatio: 1,
   },
@@ -49,6 +53,10 @@ var targetTypes = [
   },
   {
     imgUrl: "/assets/img/kubernetes.svg",
+    sizeRatio: 1,
+  },
+  {
+    imgUrl: "/assets/img/bespinian.svg",
     sizeRatio: 1,
   },
 ];
@@ -85,7 +93,7 @@ function init() {
         window.location.protocol +
         "//" +
         window.location.host +
-        " to play"
+        " to play",
     );
 
     // Trigger forever loops
@@ -190,7 +198,7 @@ function draw() {
       absW(t.posX),
       absH(100 - t.posY),
       absW(t.width),
-      absH(t.height)
+      absH(t.height),
     );
 
     // Invert velocity if target reaches end of screen
