@@ -39,7 +39,10 @@ func main() {
 	if !ok {
 		databaseURL = "postgresql://postgres:clong@?sslmode=disable"
 	}
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminPassword, ok := os.LookupEnv("ADMIN_PASSWORD")
+	if !ok || adminPassword == "" {
+		log.Fatalln("ADMIN_PASSWORD environment variable must be set")
+	}
 
 	// Set up DB
 	db, err := sql.Open("postgres", databaseURL)

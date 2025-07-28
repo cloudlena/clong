@@ -15,9 +15,8 @@ func (s *ScoreStore) ListAll(ctx context.Context) ([]*clong.Score, error) {
 		return nil, fmt.Errorf("error querying DB: %w", err)
 	}
 	defer func() {
-		err = rows.Close()
-		if err != nil {
-			log.Fatal(fmt.Errorf("error closing DB rows: %w", err))
+		if cErr := rows.Close(); cErr != nil {
+			log.Printf("error closing DB rows: %v\n", cErr)
 		}
 	}()
 

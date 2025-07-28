@@ -2,8 +2,8 @@ package clong
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"sync"
 )
 
 // ClientConnection is a connection with a client.
@@ -24,6 +24,7 @@ type Service interface {
 
 // BaseService is a messaging hub.
 type BaseService struct {
+	mu          sync.RWMutex
 	controllers map[ClientConnection]bool
 	screens     map[ClientConnection]bool
 	scores      ScoreStore
@@ -41,34 +42,44 @@ func NewService(scores ScoreStore) *BaseService {
 
 // RegisterController registers a new controller.
 func (s *BaseService) RegisterController(c ClientConnection) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.controllers[c] = true
 }
 
 // UnregisterController removes a controller.
 func (s *BaseService) UnregisterController(c ClientConnection) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	delete(s.controllers, c)
 }
 
 // RegisterScreen registers a new screen.
 func (s *BaseService) RegisterScreen(c ClientConnection) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.screens[c] = true
 }
 
 // UnregisterScreen removes a screen.
 func (s *BaseService) UnregisterScreen(c ClientConnection) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	delete(s.screens, c)
 }
 
 // PublishEvent publishes an event to the messaging bus.
 func (s *BaseService) PublishEvent(_ context.Context, event Event) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for c := range s.controllers {
 		err := c.WriteJSON(event)
 		if err != nil {
 			err = c.Close()
 			if err != nil {
-				log.Fatal(fmt.Errorf("error closing controller connection: %w", err))
+				log.Printf("error closing controller connection: %v\n", err)
 			}
-			s.UnregisterController(c)
+			delete(s.controllers, c)
 		}
 	}
 }
@@ -83,18 +94,20 @@ func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
 		}
 		err := s.scores.Add(ctx, &scr)
 		if err != nil {
-			log.Fatal(fmt.Errorf("error adding score to store: %w", err))
+			log.Printf("error adding score to store: %v\n", err)
 		}
 	}
 
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for scrn := range s.screens {
 		err := scrn.WriteJSON(ctrl)
 		if err != nil {
 			err = scrn.Close()
 			if err != nil {
-				log.Fatal(fmt.Errorf("error closing screen connection: %w", err))
+				log.Printf("error closing screen connection: %v\n", err)
 			}
-			s.UnregisterScreen(scrn)
+			delete(s.screens, scrn)
 		}
 	}
 }
