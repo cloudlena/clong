@@ -2,7 +2,6 @@ package clong
 
 import (
 	"context"
-	"fmt"
 	"log"
 )
 
@@ -66,7 +65,7 @@ func (s *BaseService) PublishEvent(_ context.Context, event Event) {
 		if err != nil {
 			err = c.Close()
 			if err != nil {
-				log.Fatal(fmt.Errorf("error closing controller connection: %w", err))
+				log.Printf("error closing controller connection: %v\n", err)
 			}
 			s.UnregisterController(c)
 		}
@@ -83,7 +82,7 @@ func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
 		}
 		err := s.scores.Add(ctx, &scr)
 		if err != nil {
-			log.Fatal(fmt.Errorf("error adding score to store: %w", err))
+			log.Printf("error adding score to store: %v\n", err)
 		}
 	}
 
@@ -92,7 +91,7 @@ func (s *BaseService) PublishControl(ctx context.Context, ctrl Control) {
 		if err != nil {
 			err = scrn.Close()
 			if err != nil {
-				log.Fatal(fmt.Errorf("error closing screen connection: %w", err))
+				log.Printf("error closing screen connection: %v\n", err)
 			}
 			s.UnregisterScreen(scrn)
 		}

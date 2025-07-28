@@ -14,9 +14,9 @@ lint:
 test:
 	go test -race -cover ./...
 
-.PHONY: build-docker
-build-docker:
-	docker build -t clong .
+.PHONY: build-image
+build-image:
+	podman build -t clong .
 
 .PHONY: deploy-cf
 deploy-cf:
