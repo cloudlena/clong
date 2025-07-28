@@ -20,9 +20,8 @@ func HandleScreenConn(svc clong.Service, up websocket.Upgrader) http.HandlerFunc
 			return
 		}
 		defer func() {
-			err = conn.Close()
-			if err != nil {
-				log.Fatal(fmt.Errorf("error closing websocket: %w", err))
+			if cErr := conn.Close(); cErr != nil {
+				log.Printf("error closing websocket connection: %v\n", cErr)
 			}
 		}()
 		svc.RegisterScreen(conn)

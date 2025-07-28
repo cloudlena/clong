@@ -19,14 +19,15 @@ func (s *ScoreStore) Add(ctx context.Context, scr *clong.Score) error {
 		return fmt.Errorf("error preparing DB statement: %w", err)
 	}
 	defer func() {
-		err = stmt.Close()
-		if err != nil {
-			log.Fatal(fmt.Errorf("error closing DB statement: %w", err))
+		if cErr := stmt.Close(); cErr != nil {
+			log.Printf("error closing DB statemet :%v\n", cErr)
 		}
 	}()
-	_, err = stmt.Exec(scr.Player.ID, scr.Player.Name, scr.FinalScore, scr.Color)
+
+	_, err = stmt.ExecContext(ctx, scr.Player.ID, scr.Player.Name, scr.FinalScore, scr.Color)
 	if err != nil {
 		return fmt.Errorf("error executing DB statement: %w", err)
 	}
+
 	return nil
 }

@@ -1,8 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+:root {
+  --primary-bg: #1a1a2e;
+  --secondary-bg: #16213e;
+  --accent-color: #e94560;
+  --text-color: #e0e0e0;
+  --light-text-color: #a0a0a0;
+}
+
 html,
 body {
-  font-family: sans-serif;
-  background-color: #1c1c1c;
-  color: white;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--primary-bg);
+  color: var(--text-color);
   margin: 0;
   padding: 0;
   touch-action: none;
@@ -19,15 +29,26 @@ body {
   z-index: 999;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .btn {
-  background-color: white;
+  background-color: var(--accent-color);
   border: none;
-  color: black;
-  padding: 1em 2em;
+  color: var(--text-color);
+  padding: 0.8em 1.5em;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 3em;
+  font-size: 2.5em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #c23650; /* A slightly darker shade of accent-color */
 }
 
 .rank {
@@ -37,11 +58,11 @@ body {
 
 .url {
   position: fixed;
-  top: 30vh;
+  top: 20vh;
   width: 100vw;
-  font-size: 3em;
+  font-size: 2.5em;
   text-align: center;
-  color: #666;
+  color: var(--light-text-color);
 }
 
 #score,
@@ -74,10 +95,25 @@ body {
 #spinner {
   position: fixed;
   z-index: 0;
-  font-size: 50vh;
   width: 100vw;
-  text-align: center;
-  margin-top: 15vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid var(--secondary-bg);
+  border-top: 8px solid var(--accent-color);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 #start-button {
@@ -85,12 +121,44 @@ body {
 }
 
 #scoreboard {
-  font-size: 2em;
+  font-size: 1.5em;
   padding-top: 1em;
+  max-width: 800px;
+  margin: 2em auto;
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  padding: 1.5em;
 }
 
 #scoreboard table {
   width: 100%;
+  border-collapse: collapse;
+}
+
+#scoreboard th,
+#scoreboard td {
+  padding: 0.8em;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+#scoreboard th {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  border-radius: 4px 4px 0 0;
+}
+
+#scoreboard tr:nth-child(even) {
+  background-color: #2a2a4a;
+}
+
+#scoreboard tr:hover {
+  background-color: #3a3a5a;
+}
+
+#scoreboard td.rank {
+  font-weight: bold;
+  color: var(--accent-color);
 }
 
 #scoreboard td {
