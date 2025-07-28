@@ -1,6 +1,6 @@
-github.com/cloudlena/adapters v0.0.0-20250326105956-e2708872d0ce h1:rwll6ZZKk3e1EV9MNE1R/ryPPaVpBQukVZ1Gf1iPb1w=
-github.com/cloudlena/adapters v0.0.0-20250326105956-e2708872d0ce/go.mod h1:/OFPssW/8qjSUzH+0IJIefwlJmFzqEZGwqQl1OQQMSk=
+github.com/cloudlena/adapters v0.0.0-20260424231025-0c6d4ff03c90 h1:3G3b70HtU+S00aYVkbN6LBWFm3R56iIU+928pfQiX5g=
+github.com/cloudlena/adapters v0.0.0-20260424231025-0c6d4ff03c90/go.mod h1:5sXy1iUrN47KTOykslytpaiBBluI8sJxFip0ELutY+g=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
-github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
+github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=

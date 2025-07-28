@@ -18,13 +18,13 @@
       <button class="btn" onclick="startGame()">Start Game</button>
     </div>
 
-    <p id="intro" style="text-align: center">
+    <p id="intro" class="text-center">
       Swipe up to shoot balls at targets on big screen
     </p>
     <p
       id="reconnecting-msg"
+      class="text-center"
       style="
-        text-align: center;
         display: none;
         z-index: 9999;
         height: 100vh;
@@ -36,7 +36,7 @@
 
     <div id="main"></div>
 
-    <div id="spinner">X</div>
+    <div id="spinner"><div class="loader"></div></div>
 
     <div class="hud">
       <div id="timer"><span id="sec-num">60</span> sec</div>
