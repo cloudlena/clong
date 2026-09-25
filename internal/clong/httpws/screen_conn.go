@@ -1,41 +1,32 @@
 package httpws
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/cloudlena/clong/internal/clong"
-	"github.com/gorilla/websocket"
 )
 
 // HandleScreenConn handles a WebSocket connection coming from a screen.
-func HandleScreenConn(svc clong.Service, up websocket.Upgrader) http.HandlerFunc {
+func HandleScreenConn(svc *clong.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		conn, err := up.Upgrade(w, r, nil)
+		// The upgrader responds with an HTTP error itself if upgrading fails
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			handleHTTPError(w, fmt.Errorf("error upgrading connection: %w", err))
 			return
 		}
-		defer func() {
-			if cErr := conn.Close(); cErr != nil {
-				log.Printf("error closing websocket connection: %v\n", cErr)
-			}
-		}()
+		defer closeConn(conn)
+
 		svc.RegisterScreen(conn)
+		defer svc.UnregisterScreen(conn)
 
 		for {
 			var evt clong.Event
-			err = conn.ReadJSON(&evt)
-			if err != nil {
-				handleHTTPError(w, fmt.Errorf("error reading JSON: %w", err))
-				svc.UnregisterScreen(conn)
-				break
+			if err := conn.ReadJSON(&evt); err != nil {
+				log.Printf("error reading from screen: %v\n", err)
+				return
 			}
-
-			svc.PublishEvent(ctx, evt)
+			svc.PublishEvent(evt)
 		}
 	}
 }

@@ -1,12 +1,3 @@
-var requestAnimationFrame =
-  window.requestAnimationFrame ||
-  window.mozRequestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.msRequestAnimationFrame;
-
-var cancelAnimationFrame =
-  window.cancelAnimationFrame || window.mozCancelAnimationFrame;
-
 // Convert vertical screen coordinates from relative to absolute
 function absH(rel) {
   return Math.round(h * (rel / 100));
@@ -28,17 +19,13 @@ function relW(abs) {
 }
 
 // Calculate the points a certain target is worth
-function calcPoints(posY, width, height, velocityX) {
-  if (velocityX < 0) {
-    velocityX = -velocityX;
-  }
+function calcPoints(posY, width, velocityX) {
   var bias = 5;
   var posYVal = 10 * (posY / 100);
   var widthVal = 10 * ((13 - width) / 11);
   var heightVal = 3 * ((13 - width) / 11);
-  var velXVal = 25 * (2 * velocityX);
-  var finalVal = Math.round(bias + posYVal + widthVal + heightVal + velXVal);
-  return finalVal;
+  var velXVal = 25 * (2 * Math.abs(velocityX));
+  return Math.round(bias + posYVal + widthVal + heightVal + velXVal);
 }
 
 // Calculate the current screen size
@@ -49,25 +36,13 @@ function calcScreenSize() {
 
 // Check if a ball and a target collide
 function doCollide(t, b) {
-  var xMatch = false;
-  var yMatch = false;
   var verticalRadius = b.radius * (w / h);
-
-  if (b.posX + b.radius >= t.posX && b.posX - b.radius <= t.posX + t.width) {
-    xMatch = true;
-  }
-  if (
+  var xMatch =
+    b.posX + b.radius >= t.posX && b.posX - b.radius <= t.posX + t.width;
+  var yMatch =
     b.posY + verticalRadius >= t.posY - t.height &&
-    b.posY - verticalRadius <= t.posY
-  ) {
-    yMatch = true;
-  }
-
-  if (xMatch && yMatch) {
-    return true;
-  }
-
-  return false;
+    b.posY - verticalRadius <= t.posY;
+  return xMatch && yMatch;
 }
 
 // Generate random integer
@@ -77,14 +52,8 @@ function randInt(min, max) {
 
 // Generate random hex color value
 function randomColor() {
-  var letters = "0123456789ABCDEF";
-  var color = "#";
-
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-
-  return color;
+  var n = Math.floor(Math.random() * 0x1000000);
+  return "#" + n.toString(16).padStart(6, "0");
 }
 
 // Generate a UUID
@@ -94,29 +63,11 @@ function uuid() {
       .toString(16)
       .substring(1);
   }
-  return (
-    s4() +
-    s4() +
-    "-" +
-    s4() +
-    "-" +
-    s4() +
-    "-" +
-    s4() +
-    "-" +
-    s4() +
-    s4() +
-    s4()
-  );
+  return [s4() + s4(), s4(), s4(), s4(), s4() + s4() + s4()].join("-");
 }
 
-// Return correct WebSocket protocol
-function wsProtocol() {
-  var p = "ws";
-
-  if (window.location.protocol === "https:") {
-    p = "wss";
-  }
-
-  return p + ":";
+// Return the WebSocket URL for a path on the current host
+function wsURL(path) {
+  var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return protocol + "//" + window.location.host + path;
 }

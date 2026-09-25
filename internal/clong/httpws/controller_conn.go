@@ -1,70 +1,45 @@
 package httpws
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/cloudlena/clong/internal/clong"
-	"github.com/gorilla/websocket"
 )
 
 // HandleControllerConn handles a WebSocket connection from a controller.
-func HandleControllerConn(svc clong.Service, up websocket.Upgrader) http.HandlerFunc {
+func HandleControllerConn(svc *clong.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		conn, err := up.Upgrade(w, r, nil)
+		userID, err := r.Cookie("userid")
 		if err != nil {
-			handleHTTPError(w, fmt.Errorf("error upgrading connection: %w", err))
+			http.Error(w, "user ID missing", http.StatusUnauthorized)
 			return
 		}
-		defer func() {
-			if cErr := conn.Close(); cErr != nil {
-				log.Printf("error closing websocket connection: %v\n", cErr)
-			}
-		}()
+		userName, err := r.Cookie("username")
+		if err != nil {
+			http.Error(w, "username missing", http.StatusUnauthorized)
+			return
+		}
+		player := clong.User{ID: userID.Value, Name: userName.Value}
+
+		// The upgrader responds with an HTTP error itself if upgrading fails
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer closeConn(conn)
+
 		svc.RegisterController(conn)
+		defer svc.UnregisterController(conn)
 
 		for {
-			userID, ok := cookieVal(r.Cookies(), "userid")
-			if !ok {
-				err := NewUnauthorizedError("user ID missing")
-				handleHTTPError(w, err)
-				svc.UnregisterController(conn)
-				break
-			}
-			userName, ok := cookieVal(r.Cookies(), "username")
-			if !ok {
-				err := NewUnauthorizedError("username missing")
-				handleHTTPError(w, err)
-				svc.UnregisterController(conn)
-				break
-			}
-
 			var ctrl clong.Control
-			err = conn.ReadJSON(&ctrl)
-			if err != nil {
-				handleHTTPError(w, fmt.Errorf("error reading JSON: %w", err))
-				svc.UnregisterController(conn)
-				break
+			if err := conn.ReadJSON(&ctrl); err != nil {
+				log.Printf("error reading from controller: %v\n", err)
+				return
 			}
-			ctrl.Player = clong.User{
-				ID:   userID,
-				Name: userName,
-			}
-
-			svc.PublishControl(ctx, ctrl)
+			ctrl.Player = player
+			svc.PublishControl(r.Context(), ctrl)
 		}
 	}
-}
-
-// cookieVal returns the value of a cookie.
-func cookieVal(cookies []*http.Cookie, name string) (string, bool) {
-	for _, c := range cookies {
-		if c.Name == name {
-			return c.Value, true
-		}
-	}
-	return "", false
 }

@@ -6,72 +6,32 @@ var ballVelocityFactor = 2.5;
 var maxTargets = 5;
 var targetSpawnIntervalMin = 100;
 var targetSpawnIntervalMax = 500;
-var targetTypes = [
-  {
-    imgUrl: "/assets/img/docker.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/go.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/rust.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/java.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/nodejs.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/python.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/ruby.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/mariadb.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/mongodb.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/rabbitmq.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/redis.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/kubernetes.svg",
-    sizeRatio: 1,
-  },
-  {
-    imgUrl: "/assets/img/bespinian.svg",
-    sizeRatio: 1,
-  },
-];
-
-// Initialize target images
-for (var i = 0; i < targetTypes.length; i++) {
-  targetTypes[i].img = new Image();
-  targetTypes[i].img.src = targetTypes[i].imgUrl;
-}
+var targetImages = [
+  "docker",
+  "go",
+  "rust",
+  "java",
+  "nodejs",
+  "python",
+  "ruby",
+  "mariadb",
+  "mongodb",
+  "rabbitmq",
+  "redis",
+  "kubernetes",
+  "bespinian",
+].map(function (name) {
+  var img = new Image();
+  img.src = "/assets/img/" + name + ".svg";
+  return img;
+});
 
 // Initialize global variables
 var ws = null;
 var reqId = null;
 var spawnTargetTimeout = null;
 var canvas = document.getElementById("clong-canvas");
+var gameMsg = document.getElementById("game-msg");
 var ctx = canvas.getContext("2d");
 var lastDrawnTime = Date.now();
 var w = 0;
@@ -84,45 +44,44 @@ function init() {
   window.onresize = calcScreenSize;
 
   // Initialize WebSocket connection
-  ws = new WebSocket(wsProtocol() + "//" + window.location.host + "/ws/screen");
+  ws = new WebSocket(wsURL("/ws/screen"));
 
   ws.onopen = function () {
     // Show game URL on screen
-    $("#game-msg").text(
+    gameMsg.textContent =
       "Visit " +
-        window.location.protocol +
-        "//" +
-        window.location.host +
-        " to play",
-    );
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      " to play";
 
     // Trigger forever loops
-    spawnTarget(randInt(targetSpawnIntervalMin, targetSpawnIntervalMax));
+    spawnTarget();
     reqId = requestAnimationFrame(draw);
   };
 
   // Listen for new balls coming in
   ws.onmessage = function (e) {
     var msg = JSON.parse(e.data);
-    if (msg.type === "BALL_INIT") {
-      if (msg.velocityY > 0) {
-        msg.radius = ballRadius;
-        msg.velocityY = Math.max(msg.velocityY, 0.05) * ballVelocityFactor;
-
-        balls.push(msg);
-      } else {
-        ballDone(msg.player, 0);
-      }
+    if (msg.type !== "BALL_INIT") {
+      return;
     }
+    if (msg.velocityY <= 0) {
+      ballDone(msg.player, 0);
+      return;
+    }
+    msg.radius = ballRadius;
+    msg.velocityY = Math.max(msg.velocityY, 0.05) * ballVelocityFactor;
+    balls.push(msg);
   };
 
   // Try to reconnect on close
   ws.onclose = function () {
-    $("#game-msg").text("Reconnecting...");
+    gameMsg.textContent = "Reconnecting...";
     clearTimeout(spawnTargetTimeout);
+    cancelAnimationFrame(reqId);
     targets = [];
     balls = [];
-    cancelAnimationFrame(reqId);
     setTimeout(init, 3000);
   };
 }
@@ -137,26 +96,25 @@ function ballDone(player, points) {
 }
 
 // Regularly spawn new targets
-function spawnTarget(ms) {
+function spawnTarget() {
+  var delay = randInt(targetSpawnIntervalMin, targetSpawnIntervalMax);
   spawnTargetTimeout = setTimeout(function () {
     if (targets.length < maxTargets) {
-      var type = targetTypes[randInt(0, targetTypes.length)];
       var width = randInt(2, 13);
-      var height = width * type.sizeRatio * (w / h);
+      var height = width * (w / h);
 
       targets.push({
-        img: type.img,
+        img: targetImages[randInt(0, targetImages.length)],
         posX: randInt(20, 80),
         posY: randInt(height, 100),
         velocityX: Math.random() - 0.5,
-        velocityY: 0,
         width: width,
         height: height,
       });
     }
 
-    spawnTarget(randInt(targetSpawnIntervalMin, targetSpawnIntervalMax));
-  }, ms);
+    spawnTarget();
+  }, delay);
 }
 
 // Draw current status onto canvas
@@ -165,34 +123,29 @@ function draw() {
   var dt = (now - lastDrawnTime) / 17;
   lastDrawnTime = now;
 
-  ctx.canvas.width = w;
-  ctx.canvas.height = h;
+  canvas.width = w;
+  canvas.height = h;
+  ctx.clearRect(0, 0, w, h);
 
-  // Clear canvas
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  // Draw balls
-  for (var i = 0; i < balls.length; i++) {
-    var b = balls[i];
-
+  // Draw and move balls, removing the ones that left the screen
+  balls = balls.filter(function (b) {
     ctx.fillStyle = b.color;
     ctx.beginPath();
     ctx.arc(absW(b.posX), absH(100 - b.posY), absW(b.radius), 0, 2 * Math.PI);
     ctx.fill();
 
-    balls[i].posX += b.velocityX * dt;
-    balls[i].posY += b.velocityY * dt;
+    b.posX += b.velocityX * dt;
+    b.posY += b.velocityY * dt;
 
-    if (b.posY >= 100 || b.posX <= 0 || b.posX >= 100) {
+    var isOut = b.posY >= 100 || b.posX <= 0 || b.posX >= 100;
+    if (isOut) {
       ballDone(b.player, 0);
-      balls.splice(i, 1);
     }
-  }
+    return !isOut;
+  });
 
-  // Draw targets
-  for (var i = 0; i < targets.length; i++) {
-    var t = targets[i];
-
+  // Draw and move targets, removing the ones that got hit
+  targets = targets.filter(function (t) {
     ctx.drawImage(
       t.img,
       absW(t.posX),
@@ -206,24 +159,22 @@ function draw() {
       (t.posX <= 0 && t.velocityX < 0) ||
       (t.posX >= 100 - t.width && t.velocityX > 0)
     ) {
-      targets[i].velocityX = -t.velocityX;
+      t.velocityX = -t.velocityX;
     }
+    t.posX += t.velocityX * dt;
 
-    targets[i].posX += t.velocityX * dt;
-    targets[i].posY += t.velocityY * dt;
-
-    for (var j = 0; j < balls.length; j++) {
-      var b = balls[j];
-      if (doCollide(t, b)) {
-        var points = calcPoints(t.posY, t.width, t.height, t.velocityX);
-        ballDone(b.player, points);
-        targets.splice(i, 1);
-        balls.splice(j, 1);
-      }
+    var hit = balls.findIndex(function (b) {
+      return doCollide(t, b);
+    });
+    if (hit === -1) {
+      return true;
     }
-  }
+    ballDone(balls[hit].player, calcPoints(t.posY, t.width, t.velocityX));
+    balls.splice(hit, 1);
+    return false;
+  });
 
-  requestAnimationFrame(draw);
+  reqId = requestAnimationFrame(draw);
 }
 
 init();

@@ -58,13 +58,13 @@ func TestRegisterAndUnregisterController(t *testing.T) {
 	conn := &mockConn{}
 
 	svc.RegisterController(conn)
-	svc.PublishEvent(context.Background(), clong.Event{Type: "ping"})
+	svc.PublishEvent(clong.Event{Type: "ping"})
 	if len(conn.written) != 1 {
 		t.Fatalf("expected 1 message after register, got %d", len(conn.written))
 	}
 
 	svc.UnregisterController(conn)
-	svc.PublishEvent(context.Background(), clong.Event{Type: "ping"})
+	svc.PublishEvent(clong.Event{Type: "ping"})
 	if len(conn.written) != 1 {
 		t.Fatalf("expected no new message after unregister, got %d", len(conn.written))
 	}
@@ -94,7 +94,7 @@ func TestPublishEventBroadcastsToAllControllers(t *testing.T) {
 	svc.RegisterController(c2)
 
 	evt := clong.Event{Type: "test", Points: 5}
-	svc.PublishEvent(context.Background(), evt)
+	svc.PublishEvent(evt)
 
 	if len(c1.written) != 1 {
 		t.Errorf("c1: expected 1 message, got %d", len(c1.written))
@@ -111,14 +111,14 @@ func TestPublishEventRemovesBrokenController(t *testing.T) {
 
 	svc.RegisterController(broken)
 	svc.RegisterController(healthy)
-	svc.PublishEvent(context.Background(), clong.Event{Type: "test"})
+	svc.PublishEvent(clong.Event{Type: "test"})
 
 	if !broken.closed {
 		t.Error("expected broken controller to be closed")
 	}
 
 	// Broken conn is removed; a second publish should only reach healthy.
-	svc.PublishEvent(context.Background(), clong.Event{Type: "test2"})
+	svc.PublishEvent(clong.Event{Type: "test2"})
 	if len(healthy.written) != 2 {
 		t.Errorf("expected 2 messages on healthy conn, got %d", len(healthy.written))
 	}

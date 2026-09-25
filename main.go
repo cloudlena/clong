@@ -7,7 +7,6 @@ package main
 import (
 	"database/sql"
 	"embed"
-	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -18,75 +17,51 @@ import (
 	"github.com/cloudlena/clong/internal/clong"
 	"github.com/cloudlena/clong/internal/clong/httpws"
 	"github.com/cloudlena/clong/internal/clong/pg"
-	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 )
 
-const (
-	kiloByte      = 1024
-	serverTimeout = 5 * time.Second
-)
+const serverTimeout = 5 * time.Second
 
-//go:embed web/static
-var staticFS embed.FS
+// Pages served by their own routes live outside of web/static,
+// so the public file server can't serve them without auth.
+//
+//go:embed web
+var webFS embed.FS
 
 func main() {
-	port, ok := os.LookupEnv("PORT")
-	if !ok {
-		port = "8080"
-	}
-	databaseURL, ok := os.LookupEnv("DATABASE_URL")
-	if !ok {
-		databaseURL = "postgresql://postgres:clong@?sslmode=disable"
-	}
-	adminPassword, ok := os.LookupEnv("ADMIN_PASSWORD")
-	if !ok || adminPassword == "" {
+	port := getenv("PORT", "8080")
+	databaseURL := getenv("DATABASE_URL", "postgresql://postgres:clong@?sslmode=disable")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
 		log.Fatalln("ADMIN_PASSWORD environment variable must be set")
 	}
 
-	// Set up DB
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
-		log.Fatalln(fmt.Errorf("error opening DB connection: %w", err))
+		log.Fatalf("error opening DB connection: %v", err)
 	}
-	defer func() {
-		err = db.Close()
-		if err != nil {
-			log.Fatalln(fmt.Errorf("error closing DB connection: %w", err))
-		}
-	}()
-
-	// Set up WebSocket upgrader
-	up := websocket.Upgrader{
-		ReadBufferSize:  kiloByte,
-		WriteBufferSize: kiloByte,
-	}
-
-	// Set up service
 	scores, err := pg.NewScoreStore(db)
 	if err != nil {
-		log.Fatalln(fmt.Errorf("error creating score store: %w", err))
+		log.Fatalf("error creating score store: %v", err)
 	}
 	svc := clong.NewService(scores)
 
-	// Set up basic auth user for admin endpoints
-	users := []basicauth.User{{Username: "admin", Password: adminPassword}}
-
-	// Set up static files
-	static, err := fs.Sub(staticFS, "web/static")
+	static, err := fs.Sub(webFS, "web/static")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// Set up router
+	// Admin endpoints are protected by basic auth
+	users := []basicauth.User{{Username: "admin", Password: adminPassword}}
+
 	mux := http.NewServeMux()
-	mux.Handle("GET /screen", basicauth.Handler("Clong screen", users)(httpws.HandleScreenView()))
-	mux.Handle("GET /scoreboard", httpws.HandleScoreboardView())
-	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc, up))
-	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc, up))
+	mux.Handle("GET /screen", basicauth.Handler("Clong screen", users)(serveFile(webFS, "web/screen.html")))
+	mux.Handle("GET /scoreboard", serveFile(webFS, "web/scoreboard.html"))
+	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc))
+	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc))
 	mux.Handle("GET /api/scores", httpws.HandleFindScores(scores))
 	mux.Handle("DELETE /api/scores", basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)))
-	mux.Handle("GET /", http.FileServer(http.FS(static)))
+	mux.Handle("GET /", http.FileServerFS(static))
 
 	srv := &http.Server{
 		Addr:         ":" + port,
@@ -95,4 +70,19 @@ func main() {
 		WriteTimeout: serverTimeout,
 	}
 	log.Fatalln(srv.ListenAndServe())
+}
+
+// getenv returns the value of an environment variable or a fallback if it is not set.
+func getenv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+// serveFile serves a single file from a file system.
+func serveFile(fsys fs.FS, name string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, fsys, name)
+	}
 }

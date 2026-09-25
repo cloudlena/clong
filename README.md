@@ -30,13 +30,13 @@ curl -X DELETE localhost:8080/api/scores -u 'admin:PASSWORD'
 
 The image is also available on [Docker Hub](https://hub.docker.com/r/cloudlena/clong/).
 
-1.  Run `make build-docker`
+1.  Run `make build-image`
 
 ## Run on Kubernetes
 
 1. Create a namespace and target it.
-2. Define a USERNAME and a PASSWORD for logging in.
-3. Define a DB_USERNAME and a DB_PASSWORD for clong to access the DB with.
+2. Define a PASSWORD for the `admin` user.
+3. Define a DB_USERNAME and a DB_PASSWORD for clong to access the DB with. Stick to letters and digits, since they end up in the database URL.
 4. Create a secret called `clong-credentials` as follows:
 
 ```shell
@@ -53,9 +53,3 @@ kubectl apply -f deployments/k8s
 ## Run on Fly
 
 1. Run `fly launch --config deployments/fly/fly.toml`
-
-## Run on Cloud Foundry
-
-1.  Create an SQL database service
-1.  Modify `deployments/cf/*` to your liking
-1.  Run `make deploy-cf`

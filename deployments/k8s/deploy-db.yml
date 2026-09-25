@@ -17,16 +17,14 @@ spec:
           ports:
             - containerPort: 5432
           env:
-            - name: MARIADB_RANDOM_ROOT_PASSWORD
-              value: "yes"
-            - name: MARIADB_DATABASE
+            - name: POSTGRES_DB
               value: clong
-            - name: MARIADB_USER
+            - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: clong-credentials
                   key: dbUsername
-            - name: MARIADB_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: clong-credentials

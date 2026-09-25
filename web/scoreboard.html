@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Clong Screen</title>
+    <title>Clong Scoreboard</title>
 
     <meta charset="UTF-8" />
     <meta
@@ -12,17 +12,23 @@
 
     <link rel="stylesheet" href="/assets/styles/styles.css" />
   </head>
-  <body>
-    <canvas id="clong-canvas"></canvas>
+  <body id="scoreboard">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="3" style="text-align: center">No scores yet...</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <p class="url" id="game-msg"></p>
-
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
     <script src="/assets/scripts/helpers.js"></script>
-    <script src="/assets/scripts/screen.js"></script>
+    <script src="/assets/scripts/scoreboard.js"></script>
   </body>
 </html>

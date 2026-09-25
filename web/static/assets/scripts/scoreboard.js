@@ -6,19 +6,22 @@ var maxScores = 10;
 // Initialize global variables
 var ws = null;
 var highScores = [];
+var tbody = document.querySelector("#scoreboard tbody");
 
 function init() {
   // Initialize WebSocket connection
-  ws = new WebSocket(wsProtocol() + "//" + window.location.host + "/ws/screen");
+  ws = new WebSocket(wsURL("/ws/screen"));
 
   ws.onopen = function () {
     // Get existing scores
-    $.get("/api/scores", function (data) {
-      if (data !== null) {
+    fetch("/api/scores")
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
         highScores = data;
         drawScores();
-      }
-    });
+      });
   };
 
   // Listen for new scores coming in
@@ -32,41 +35,58 @@ function init() {
 
   // Try to reconnect on close
   ws.onclose = function () {
-    $("#scoreboard table").html(
-      '<tr><td style="text-align:center;">Reconnecting...</td></tr>',
-    );
+    showMessage("Reconnecting...");
     setTimeout(init, 3000);
   };
 }
 
 function drawScores() {
-  // Sort by final score
+  if (highScores.length === 0) {
+    showMessage("No scores yet...");
+    return;
+  }
+
+  // Keep only the best scores
   highScores.sort(function (a, b) {
     return b.finalScore - a.finalScore;
   });
-
-  // Extract top 10
   highScores = highScores.slice(0, maxScores);
 
-  var htmlString = "";
-  for (var i = 0; i < highScores.length; i++) {
-    htmlString +=
-      "<tr>" +
-      '<td class="rank">' +
-      (i + 1) +
-      ".</td>" +
-      "<td>" +
-      highScores[i].player.name +
-      '<span style="color: ' +
-      highScores[i].color +
-      ';"> &#9679;</span></td>' +
-      "<td>" +
-      highScores[i].finalScore +
-      "</td>" +
-      "</tr>";
-  }
+  tbody.replaceChildren(...highScores.map(scoreRow));
+}
 
-  $("#scoreboard table").html(htmlString);
+// Create a table row for a score
+function scoreRow(score, i) {
+  var rank = cell(i + 1 + ".");
+  rank.className = "rank";
+
+  var dot = document.createElement("span");
+  dot.textContent = " ●";
+  dot.style.color = score.color;
+  var name = cell(score.player.name);
+  name.append(dot);
+
+  var row = document.createElement("tr");
+  row.append(rank, name, cell(score.finalScore));
+  return row;
+}
+
+// Show a message instead of the scores
+function showMessage(text) {
+  var msg = cell(text);
+  msg.colSpan = 3;
+  msg.style.textAlign = "center";
+
+  var row = document.createElement("tr");
+  row.append(msg);
+  tbody.replaceChildren(row);
+}
+
+// Create a table cell containing text
+function cell(text) {
+  var td = document.createElement("td");
+  td.textContent = text;
+  return td;
 }
 
 init();

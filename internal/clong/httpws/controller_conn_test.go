@@ -1,54 +1,33 @@
-package httpws
+package httpws_test
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/cloudlena/clong/internal/clong"
+	"github.com/cloudlena/clong/internal/clong/httpws"
 )
 
-func TestCookieValFound(t *testing.T) {
-	cookies := []*http.Cookie{
-		{Name: "userid", Value: "abc123"},
-		{Name: "username", Value: "Alice"},
+func TestHandleControllerConnMissingCookies(t *testing.T) {
+	tests := map[string][]*http.Cookie{
+		"no cookies":       nil,
+		"missing username": {{Name: "userid", Value: "abc123"}},
+		"missing user ID":  {{Name: "username", Value: "Alice"}},
 	}
 
-	val, ok := cookieVal(cookies, "userid")
-	if !ok {
-		t.Fatal("expected cookie to be found")
-	}
-	if val != "abc123" {
-		t.Errorf("expected 'abc123', got %q", val)
-	}
-}
+	for name, cookies := range tests {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/ws/controller", nil)
+			for _, c := range cookies {
+				req.AddCookie(c)
+			}
+			w := httptest.NewRecorder()
+			httpws.HandleControllerConn(clong.NewService(&mockScoreStore{}))(w, req)
 
-func TestCookieValNotFound(t *testing.T) {
-	cookies := []*http.Cookie{
-		{Name: "userid", Value: "abc123"},
-	}
-
-	_, ok := cookieVal(cookies, "username")
-	if ok {
-		t.Error("expected cookie not to be found")
-	}
-}
-
-func TestCookieValEmptySlice(t *testing.T) {
-	_, ok := cookieVal([]*http.Cookie{}, "userid")
-	if ok {
-		t.Error("expected false for empty cookie slice")
-	}
-}
-
-func TestCookieValReturnsFirstMatch(t *testing.T) {
-	cookies := []*http.Cookie{
-		{Name: "theme", Value: "dark"},
-		{Name: "theme", Value: "light"},
-	}
-
-	val, ok := cookieVal(cookies, "theme")
-	if !ok {
-		t.Fatal("expected cookie to be found")
-	}
-	if val != "dark" {
-		t.Errorf("expected first match 'dark', got %q", val)
+			if w.Code != http.StatusUnauthorized {
+				t.Errorf("expected 401, got %d", w.Code)
+			}
+		})
 	}
 }

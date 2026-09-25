@@ -18,11 +18,6 @@ test:
 build-image:
 	podman build -t clong .
 
-.PHONY: deploy-cf
-deploy-cf:
-	GOOS=linux go build -ldflags="-s -w" -o bin/clong ./cmd/clong
-	cf push -f deployments/cf/manifest.yml
-
 .PHONY: clean
 clean:
 	rm -rf bin
