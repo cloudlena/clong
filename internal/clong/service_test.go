@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	"github.com/cloudlena/clong/internal/clong"
 )
@@ -74,7 +76,9 @@ func TestRegisterAndUnregisterScreen(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
 	conn := &mockConn{}
 
-	svc.RegisterScreen(conn)
+	if err := svc.RegisterScreen(conn); err != nil {
+		t.Fatalf("unexpected error registering screen: %v", err)
+	}
 	svc.PublishControl(context.Background(), clong.Control{Type: "ping"})
 	if len(conn.written) != 1 {
 		t.Fatalf("expected 1 message after register, got %d", len(conn.written))
@@ -124,26 +128,44 @@ func TestPublishEventRemovesBrokenController(t *testing.T) {
 	}
 }
 
-func TestPublishControlBroadcastsToAllScreens(t *testing.T) {
+func TestRegisterScreenRejectsSecondScreen(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
-	s1, s2 := &mockConn{}, &mockConn{}
-	svc.RegisterScreen(s1)
-	svc.RegisterScreen(s2)
+	first, second := &mockConn{}, &mockConn{}
 
-	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE"})
-
-	if len(s1.written) != 1 {
-		t.Errorf("s1: expected 1 message, got %d", len(s1.written))
+	if err := svc.RegisterScreen(first); err != nil {
+		t.Fatalf("unexpected error registering first screen: %v", err)
 	}
-	if len(s2.written) != 1 {
-		t.Errorf("s2: expected 1 message, got %d", len(s2.written))
+	if err := svc.RegisterScreen(second); !errors.Is(err, clong.ErrScreenConnected) {
+		t.Fatalf("expected ErrScreenConnected, got %v", err)
+	}
+
+	// A new screen can connect once the first one is gone.
+	svc.UnregisterScreen(first)
+	if err := svc.RegisterScreen(second); err != nil {
+		t.Fatalf("unexpected error registering screen after unregister: %v", err)
+	}
+}
+
+func TestBrokenScreenFreesSlot(t *testing.T) {
+	svc := clong.NewService(&mockScoreStore{})
+	broken := &mockConn{writeErr: errors.New("write failed")}
+	if err := svc.RegisterScreen(broken); err != nil {
+		t.Fatalf("unexpected error registering screen: %v", err)
+	}
+
+	svc.PublishControl(context.Background(), clong.Control{Type: "BALL_INIT"})
+
+	if err := svc.RegisterScreen(&mockConn{}); err != nil {
+		t.Fatalf("expected broken screen to free its slot, got %v", err)
 	}
 }
 
 func TestPublishControlRemovesBrokenScreen(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
 	broken := &mockConn{writeErr: errors.New("write failed")}
-	svc.RegisterScreen(broken)
+	if err := svc.RegisterScreen(broken); err != nil {
+		t.Fatalf("unexpected error registering screen: %v", err)
+	}
 
 	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE"})
 
@@ -152,31 +174,121 @@ func TestPublishControlRemovesBrokenScreen(t *testing.T) {
 	}
 }
 
-func TestPublishControlGameFinishedSavesScore(t *testing.T) {
-	store := &mockScoreStore{}
-	svc := clong.NewService(store)
-
-	ctrl := clong.Control{
+// playGame starts a game for a player, scores the given points and finishes it after gameLength.
+// It must be called inside a synctest bubble so time passes instantly.
+func playGame(svc *clong.Service, player clong.User, color string, gameLength time.Duration, points ...int64) {
+	svc.PublishControl(context.Background(), clong.Control{Type: "GAME_STARTED", Player: player})
+	for _, p := range points {
+		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: player, Points: p})
+	}
+	time.Sleep(gameLength)
+	svc.PublishControl(context.Background(), clong.Control{
 		Type:       "GAME_FINISHED",
-		Player:     clong.User{ID: "u1", Name: "Alice"},
-		FinalScore: 42,
-		Color:      "red",
-	}
-	svc.PublishControl(context.Background(), ctrl)
+		Player:     player,
+		Color:      color,
+		FinalScore: 9999, // must be ignored in favor of the tallied points
+	})
+}
 
-	if len(store.added) != 1 {
-		t.Fatalf("expected 1 saved score, got %d", len(store.added))
+func TestGameFinishedSavesTalliedScore(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		store := &mockScoreStore{}
+		svc := clong.NewService(store)
+		board := &mockConn{}
+		svc.RegisterScoreboard(board)
+
+		alice := clong.User{ID: "u1", Name: "Alice"}
+		playGame(svc, alice, "#ff0000", 60*time.Second, 10, 0, 32)
+
+		if len(store.added) != 1 {
+			t.Fatalf("expected 1 saved score, got %d", len(store.added))
+		}
+		got := store.added[0]
+		if got.FinalScore != 42 {
+			t.Errorf("FinalScore: expected 42, got %d", got.FinalScore)
+		}
+		if got.Player.Name != "Alice" {
+			t.Errorf("Player.Name: expected Alice, got %s", got.Player.Name)
+		}
+		if got.Color != "#ff0000" {
+			t.Errorf("Color: expected #ff0000, got %s", got.Color)
+		}
+		if len(board.written) != 1 {
+			t.Errorf("expected score to be sent to scoreboard, got %d messages", len(board.written))
+		}
+	})
+}
+
+func TestGameFinishedIgnoresPointsAfterGameEnded(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		store := &mockScoreStore{}
+		svc := clong.NewService(store)
+		alice := clong.User{ID: "u1", Name: "Alice"}
+
+		svc.PublishControl(context.Background(), clong.Control{Type: "GAME_STARTED", Player: alice})
+		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: alice, Points: 10})
+		time.Sleep(2 * time.Minute)
+		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: alice, Points: 50})
+		svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: alice, Color: "#ff0000"})
+
+		if len(store.added) != 1 {
+			t.Fatalf("expected 1 saved score, got %d", len(store.added))
+		}
+		if got := store.added[0].FinalScore; got != 10 {
+			t.Errorf("FinalScore: expected 10, got %d", got)
+		}
+	})
+}
+
+func TestGameFinishedRejectsInvalidGames(t *testing.T) {
+	alice := clong.User{ID: "u1", Name: "Alice"}
+	tests := map[string]func(svc *clong.Service){
+		"never started": func(svc *clong.Service) {
+			svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: alice, Color: "#ff0000"})
+		},
+		"finished too early": func(svc *clong.Service) {
+			playGame(svc, alice, "#ff0000", 10*time.Second, 10)
+		},
+		"invalid color": func(svc *clong.Service) {
+			playGame(svc, alice, "not-a-color", 60*time.Second, 10)
+		},
 	}
-	got := store.added[0]
-	if got.FinalScore != 42 {
-		t.Errorf("FinalScore: expected 42, got %d", got.FinalScore)
+
+	for name, play := range tests {
+		t.Run(name, func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				store := &mockScoreStore{}
+				board := &mockConn{}
+				svc := clong.NewService(store)
+				svc.RegisterScoreboard(board)
+
+				play(svc)
+
+				if len(store.added) != 0 {
+					t.Errorf("expected no saved score, got %d", len(store.added))
+				}
+				if len(board.written) != 0 {
+					t.Errorf("expected nothing sent to scoreboard, got %d messages", len(board.written))
+				}
+			})
+		})
 	}
-	if got.Player.Name != "Alice" {
-		t.Errorf("Player.Name: expected Alice, got %s", got.Player.Name)
-	}
-	if got.Color != "red" {
-		t.Errorf("Color: expected red, got %s", got.Color)
-	}
+}
+
+func TestGameControlsAreNotSentToScreen(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		svc := clong.NewService(&mockScoreStore{})
+		screen := &mockConn{}
+		if err := svc.RegisterScreen(screen); err != nil {
+			t.Fatalf("unexpected error registering screen: %v", err)
+		}
+
+		playGame(svc, clong.User{ID: "u1", Name: "Alice"}, "#ff0000", 60*time.Second)
+
+		if len(screen.written) != 0 {
+			t.Errorf("expected no messages on screen, got %d", len(screen.written))
+		}
+	})
 }
 
 func TestPublishControlNonGameFinishedDoesNotSaveScore(t *testing.T) {

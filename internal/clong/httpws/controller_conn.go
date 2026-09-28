@@ -3,6 +3,7 @@ package httpws
 import (
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/cloudlena/clong/internal/clong"
 )
@@ -20,7 +21,17 @@ func HandleControllerConn(svc *clong.Service) http.HandlerFunc {
 			http.Error(w, "username missing", http.StatusUnauthorized)
 			return
 		}
-		player := clong.User{ID: userID.Value, Name: userName.Value}
+		// Cookie values are URI-encoded by the controller
+		name, err := url.PathUnescape(userName.Value)
+		if err != nil {
+			http.Error(w, "username invalid", http.StatusBadRequest)
+			return
+		}
+		player := clong.User{ID: userID.Value, Name: name}
+		if err := player.Validate(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 		// The upgrader responds with an HTTP error itself if upgrading fails
 		conn, err := upgrader.Upgrade(w, r, nil)

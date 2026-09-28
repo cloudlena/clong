@@ -40,8 +40,8 @@ var balls = [];
 var targets = [];
 
 function init() {
-  calcScreenSize();
-  window.onresize = calcScreenSize;
+  resize();
+  window.onresize = resize;
 
   // Initialize WebSocket connection
   ws = new WebSocket(wsURL("/ws/screen"));
@@ -75,9 +75,9 @@ function init() {
     balls.push(msg);
   };
 
-  // Try to reconnect on close
-  ws.onclose = function () {
-    gameMsg.textContent = "Reconnecting...";
+  // Try to reconnect on close, showing why the server closed the connection if it did
+  ws.onclose = function (e) {
+    gameMsg.textContent = e.reason || "Reconnecting...";
     clearTimeout(spawnTargetTimeout);
     cancelAnimationFrame(reqId);
     targets = [];
@@ -87,12 +87,22 @@ function init() {
 }
 
 function ballDone(player, points) {
+  if (ws.readyState !== WebSocket.OPEN) {
+    return;
+  }
   var msg = {
     type: "BALL_DONE",
     player: player,
     points: points,
   };
   ws.send(JSON.stringify(msg));
+}
+
+// Match the canvas size to the screen size
+function resize() {
+  calcScreenSize();
+  canvas.width = w;
+  canvas.height = h;
 }
 
 // Regularly spawn new targets
@@ -123,8 +133,6 @@ function draw() {
   var dt = (now - lastDrawnTime) / 17;
   lastDrawnTime = now;
 
-  canvas.width = w;
-  canvas.height = h;
   ctx.clearRect(0, 0, w, h);
 
   // Draw and move balls, removing the ones that left the screen

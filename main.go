@@ -59,6 +59,7 @@ func main() {
 	mux.Handle("GET /scoreboard", serveFile(webFS, "web/scoreboard.html"))
 	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc))
 	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc))
+	mux.Handle("GET /ws/scoreboard", httpws.HandleScoreboardConn(svc))
 	mux.Handle("GET /api/scores", httpws.HandleFindScores(scores))
 	mux.Handle("DELETE /api/scores", basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)))
 	mux.Handle("GET /", http.FileServerFS(static))

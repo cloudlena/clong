@@ -56,16 +56,6 @@ function randomColor() {
   return "#" + n.toString(16).padStart(6, "0");
 }
 
-// Generate a UUID
-function uuid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return [s4() + s4(), s4(), s4(), s4(), s4() + s4() + s4()].join("-");
-}
-
 // Return the WebSocket URL for a path on the current host
 function wsURL(path) {
   var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";

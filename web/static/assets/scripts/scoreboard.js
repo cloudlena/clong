@@ -10,7 +10,7 @@ var tbody = document.querySelector("#scoreboard tbody");
 
 function init() {
   // Initialize WebSocket connection
-  ws = new WebSocket(wsURL("/ws/screen"));
+  ws = new WebSocket(wsURL("/ws/scoreboard"));
 
   ws.onopen = function () {
     // Get existing scores
@@ -26,11 +26,8 @@ function init() {
 
   // Listen for new scores coming in
   ws.onmessage = function (e) {
-    var msg = JSON.parse(e.data);
-    if (msg.type === "GAME_FINISHED") {
-      highScores.push(msg);
-      drawScores();
-    }
+    highScores.push(JSON.parse(e.data));
+    drawScores();
   };
 
   // Try to reconnect on close

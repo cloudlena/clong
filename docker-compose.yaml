@@ -4,16 +4,23 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:clong@db?sslmode=disable
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-clong}
   db:
     image: docker.io/library/postgres
     volumes:
       - db-data:/data/postgres
     environment:
       POSTGRES_PASSWORD: clong
-      PG_DATA: /data/postgres
+      PGDATA: /data/postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
 volumes:
   db-data:
