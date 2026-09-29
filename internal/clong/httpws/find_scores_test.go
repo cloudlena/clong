@@ -19,7 +19,7 @@ func TestHandleFindScoresReturnsJSON(t *testing.T) {
 		},
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/scores", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/scores", nil)
 	w := httptest.NewRecorder()
 	httpws.HandleFindScores(store)(w, req)
 
@@ -45,7 +45,7 @@ func TestHandleFindScoresReturnsJSON(t *testing.T) {
 func TestHandleFindScoresEmptyList(t *testing.T) {
 	store := &mockScoreStore{scores: []*clong.Score{}}
 
-	req := httptest.NewRequest(http.MethodGet, "/scores", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/scores", nil)
 	w := httptest.NewRecorder()
 	httpws.HandleFindScores(store)(w, req)
 
@@ -65,7 +65,7 @@ func TestHandleFindScoresEmptyList(t *testing.T) {
 func TestHandleFindScoresStoreError(t *testing.T) {
 	store := &mockScoreStore{listErr: errors.New("db unavailable")}
 
-	req := httptest.NewRequest(http.MethodGet, "/scores", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/scores", nil)
 	w := httptest.NewRecorder()
 	httpws.HandleFindScores(store)(w, req)
 

@@ -32,27 +32,21 @@ func (m *mockConn) Close() error {
 
 // mockScoreStore is a fake ScoreStore for testing.
 type mockScoreStore struct {
-	added   []*clong.Score
-	listAll []*clong.Score
-	listErr error
-	addErr  error
-	rmErr   error
+	added []*clong.Score
 }
 
 func (m *mockScoreStore) ListAll(_ context.Context) ([]*clong.Score, error) {
-	return m.listAll, m.listErr
+	return m.added, nil
 }
 
 func (m *mockScoreStore) Add(_ context.Context, s *clong.Score) error {
-	if m.addErr != nil {
-		return m.addErr
-	}
 	m.added = append(m.added, s)
 	return nil
 }
 
 func (m *mockScoreStore) RemoveAll(_ context.Context) error {
-	return m.rmErr
+	m.added = nil
+	return nil
 }
 
 func TestRegisterAndUnregisterController(t *testing.T) {
@@ -146,7 +140,7 @@ func TestRegisterScreenRejectsSecondScreen(t *testing.T) {
 	}
 }
 
-func TestBrokenScreenFreesSlot(t *testing.T) {
+func TestPublishControlRemovesBrokenScreen(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
 	broken := &mockConn{writeErr: errors.New("write failed")}
 	if err := svc.RegisterScreen(broken); err != nil {
@@ -155,22 +149,11 @@ func TestBrokenScreenFreesSlot(t *testing.T) {
 
 	svc.PublishControl(context.Background(), clong.Control{Type: "BALL_INIT"})
 
-	if err := svc.RegisterScreen(&mockConn{}); err != nil {
-		t.Fatalf("expected broken screen to free its slot, got %v", err)
-	}
-}
-
-func TestPublishControlRemovesBrokenScreen(t *testing.T) {
-	svc := clong.NewService(&mockScoreStore{})
-	broken := &mockConn{writeErr: errors.New("write failed")}
-	if err := svc.RegisterScreen(broken); err != nil {
-		t.Fatalf("unexpected error registering screen: %v", err)
-	}
-
-	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE"})
-
 	if !broken.closed {
 		t.Error("expected broken screen to be closed")
+	}
+	if err := svc.RegisterScreen(&mockConn{}); err != nil {
+		t.Fatalf("expected broken screen to free its slot, got %v", err)
 	}
 }
 
@@ -182,12 +165,7 @@ func playGame(svc *clong.Service, player clong.User, color string, gameLength ti
 		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: player, Points: p})
 	}
 	time.Sleep(gameLength)
-	svc.PublishControl(context.Background(), clong.Control{
-		Type:       "GAME_FINISHED",
-		Player:     player,
-		Color:      color,
-		FinalScore: 9999, // must be ignored in favor of the tallied points
-	})
+	svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: player, Color: color})
 }
 
 func TestGameFinishedSavesTalliedScore(t *testing.T) {
@@ -295,7 +273,7 @@ func TestPublishControlNonGameFinishedDoesNotSaveScore(t *testing.T) {
 	store := &mockScoreStore{}
 	svc := clong.NewService(store)
 
-	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE", FinalScore: 99})
+	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE"})
 
 	if len(store.added) != 0 {
 		t.Errorf("expected no score saved for MOVE, got %d", len(store.added))

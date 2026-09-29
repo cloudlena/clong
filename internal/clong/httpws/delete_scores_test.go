@@ -12,7 +12,7 @@ import (
 func TestHandleDeleteScoresReturnsNoContent(t *testing.T) {
 	store := &mockScoreStore{}
 
-	req := httptest.NewRequest(http.MethodDelete, "/scores", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/scores", nil)
 	w := httptest.NewRecorder()
 	httpws.HandleDeleteScores(store)(w, req)
 
@@ -24,7 +24,7 @@ func TestHandleDeleteScoresReturnsNoContent(t *testing.T) {
 func TestHandleDeleteScoresStoreError(t *testing.T) {
 	store := &mockScoreStore{rmErr: errors.New("db unavailable")}
 
-	req := httptest.NewRequest(http.MethodDelete, "/scores", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/scores", nil)
 	w := httptest.NewRecorder()
 	httpws.HandleDeleteScores(store)(w, req)
 

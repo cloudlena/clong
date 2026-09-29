@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	// gameDuration is how long a game lasts on the controller.
+	// gameDuration is how long a game lasts on the controller (see gameSeconds in controller.js).
 	gameDuration = 60 * time.Second
 	// gameTolerance accounts for network latency and timer drift on the controller.
 	gameTolerance = 3 * time.Second

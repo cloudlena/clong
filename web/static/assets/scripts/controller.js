@@ -1,7 +1,7 @@
 "use strict";
 
 // Set game preferences
-var gameSeconds = 60;
+var gameSeconds = 60; // must match gameDuration on the server
 var ballTimeout = 15000; // ms after which a ball is considered lost
 var swipeMinDistance = 10; // px
 var swipeMinVelocity = 0.3; // px/ms
@@ -34,6 +34,7 @@ var pointerSamples = [];
 ensureCookie("username", askUserName);
 main.style.backgroundColor = myColor;
 spinner.style.color = myColor;
+startButton.querySelector("button").addEventListener("click", startGame);
 
 // Track pointer movements to detect swipes
 main.addEventListener("pointerdown", function (e) {

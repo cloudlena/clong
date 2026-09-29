@@ -23,7 +23,7 @@ import (
 const serverTimeout = 5 * time.Second
 
 // Pages served by their own routes live outside of web/static,
-// so the public file server can't serve them without auth.
+// so the public file server can't bypass their routes, e.g. the auth of /screen.
 //
 //go:embed web
 var webFS embed.FS
@@ -52,16 +52,16 @@ func main() {
 	}
 
 	// Admin endpoints are protected by basic auth
-	users := []basicauth.User{{Username: "admin", Password: adminPassword}}
+	requireAdmin := basicauth.Handler("Clong", []basicauth.User{{Username: "admin", Password: adminPassword}})
 
 	mux := http.NewServeMux()
-	mux.Handle("GET /screen", basicauth.Handler("Clong screen", users)(serveFile(webFS, "web/screen.html")))
+	mux.Handle("GET /screen", requireAdmin(serveFile(webFS, "web/screen.html")))
 	mux.Handle("GET /scoreboard", serveFile(webFS, "web/scoreboard.html"))
 	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc))
 	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc))
 	mux.Handle("GET /ws/scoreboard", httpws.HandleScoreboardConn(svc))
 	mux.Handle("GET /api/scores", httpws.HandleFindScores(scores))
-	mux.Handle("DELETE /api/scores", basicauth.Handler("Clong scores", users)(httpws.HandleDeleteScores(scores)))
+	mux.Handle("DELETE /api/scores", requireAdmin(httpws.HandleDeleteScores(scores)))
 	mux.Handle("GET /", http.FileServerFS(static))
 
 	srv := &http.Server{

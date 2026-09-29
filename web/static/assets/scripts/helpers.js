@@ -8,7 +8,7 @@ function absW(rel) {
   return Math.round(w * (rel / 100));
 }
 
-// Convert vertical screen coordinates from absolute to relative
+// Convert vertical screen coordinates from absolute to relative, pointing upwards
 function relH(abs) {
   return (abs / h) * -100;
 }

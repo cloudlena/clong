@@ -38,8 +38,6 @@ body {
   border: none;
   color: var(--text-color);
   padding: 0.8em 1.5em;
-  text-align: center;
-  text-decoration: none;
   display: inline-block;
   font-size: 2.5em;
   border-radius: 8px;
@@ -56,7 +54,7 @@ body {
   padding-right: 1em;
 }
 
-.url {
+#game-msg {
   position: fixed;
   top: 20vh;
   width: 100vw;
@@ -82,14 +80,18 @@ body {
 
 #start-button {
   position: absolute;
-  margin-top: auto;
-  margin-right: auto;
-  margin-bottom: auto;
-  margin-left: auto;
+  z-index: 999;
+  margin: auto;
   top: 50px;
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+#reconnecting-msg {
+  z-index: 9999;
+  height: 100vh;
+  width: 100vw;
 }
 
 #spinner {
@@ -116,13 +118,8 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-#start-button {
-  z-index: 999;
-}
-
 #scoreboard {
   font-size: 1.5em;
-  padding-top: 1em;
   max-width: 800px;
   margin: 2em auto;
   background-color: var(--secondary-bg);
@@ -142,6 +139,10 @@ body {
   border-bottom: 1px solid #333;
 }
 
+#scoreboard td {
+  padding-bottom: 0.5em;
+}
+
 #scoreboard th {
   background-color: var(--accent-color);
   color: var(--text-color);
@@ -159,8 +160,4 @@ body {
 #scoreboard td.rank {
   font-weight: bold;
   color: var(--accent-color);
-}
-
-#scoreboard td {
-  padding-bottom: 0.5em;
 }

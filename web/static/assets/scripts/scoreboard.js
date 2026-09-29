@@ -86,4 +86,5 @@ function cell(text) {
   return td;
 }
 
+drawScores();
 init();
