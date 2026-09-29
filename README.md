@@ -27,7 +27,7 @@ curl -X DELETE localhost:8080/api/scores -u 'admin:PASSWORD'
 
 ## Run Locally
 
-1. Run `docker compose up`
+1. Run `podman compose up`
 1. Visit <http://localhost:8080> (the admin password is `clong` unless you set `ADMIN_PASSWORD`)
 
 ## Build and Run Binary
