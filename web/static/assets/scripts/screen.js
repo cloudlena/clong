@@ -185,4 +185,40 @@ function draw() {
   reqId = requestAnimationFrame(draw);
 }
 
+// Convert vertical screen coordinates from relative to absolute
+function absH(rel) {
+  return Math.round(h * (rel / 100));
+}
+
+// Convert horizontal screen coordinates from relative to absolute
+function absW(rel) {
+  return Math.round(w * (rel / 100));
+}
+
+// Calculate the points a certain target is worth
+function calcPoints(posY, width, velocityX) {
+  var bias = 5;
+  var posYVal = 10 * (posY / 100);
+  var widthVal = 10 * ((13 - width) / 11);
+  var heightVal = 3 * ((13 - width) / 11);
+  var velXVal = 25 * (2 * Math.abs(velocityX));
+  return Math.round(bias + posYVal + widthVal + heightVal + velXVal);
+}
+
+// Check if a ball and a target collide
+function doCollide(t, b) {
+  var verticalRadius = b.radius * (w / h);
+  var xMatch =
+    b.posX + b.radius >= t.posX && b.posX - b.radius <= t.posX + t.width;
+  var yMatch =
+    b.posY + verticalRadius >= t.posY - t.height &&
+    b.posY - verticalRadius <= t.posY;
+  return xMatch && yMatch;
+}
+
+// Generate random integer
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 init();

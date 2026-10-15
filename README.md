@@ -36,15 +36,13 @@ curl -X DELETE localhost:8080/api/scores -u 'admin:PASSWORD'
 1. Start a PostgreSQL database and set `DATABASE_URL` accordingly if it doesn't match the default
 1. Run `ADMIN_PASSWORD=PASSWORD bin/clong` and visit <http://localhost:8080>
 
-## Run Tests
+## Run Tests and Linter
 
-1. Run `make test`
+Run `make test` and `make lint` (requires [golangci-lint](https://golangci-lint.run)).
 
 ## Build Container Image
 
-The image is also available on [Docker Hub](https://hub.docker.com/r/cloudlena/clong/).
-
-1. Run `make build-image`
+Run `make build-image`. CI doesn't publish images, so push it to a registry yourself if you want to deploy it.
 
 ## Run on Kubernetes
 
@@ -57,6 +55,7 @@ The image is also available on [Docker Hub](https://hub.docker.com/r/cloudlena/c
    kubectl create secret generic clong-credentials --from-literal=adminPassword="${PASSWORD}" --from-literal=dbUsername="${DB_USERNAME}" --from-literal=dbPassword="${DB_PASSWORD}"
    ```
 
+1. Replace the image in `deployments/k8s/deploy-clong.yml` with one you pushed (see above).
 1. Replace the host `clong.local` in `deployments/k8s/ing-clong.yml` with your own host.
 1. Apply the deployment as follows:
 

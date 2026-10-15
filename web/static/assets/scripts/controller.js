@@ -175,16 +175,7 @@ function getCookie(name) {
   var cookie = document.cookie.split("; ").find(function (c) {
     return c.startsWith(prefix);
   });
-  if (!cookie) {
-    return null;
-  }
-  var value = cookie.substring(prefix.length);
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    // Cookies from older versions weren't encoded
-    return value;
-  }
+  return cookie ? decodeURIComponent(cookie.substring(prefix.length)) : null;
 }
 
 // Returns the value of a cookie, creating it first if it doesn't exist yet
@@ -197,11 +188,11 @@ function ensureCookie(name, createValue) {
   return value;
 }
 
-// Asks the user for their name until they enter a valid one
+// Asks the user for their name until they enter one the server accepts (1-30 characters)
 function askUserName() {
-  var userName = null;
-  while (userName === null || userName.length < 2 || userName.length > 30) {
-    userName = prompt("What's your full name?", "");
+  var userName = "";
+  while (userName.length === 0 || [...userName].length > 30) {
+    userName = prompt("What's your full name?", "") || "";
   }
   return userName;
 }
@@ -216,6 +207,22 @@ function unlock() {
   clearTimeout(lockTimeout);
   locked = false;
   main.style.display = "block";
+}
+
+// Convert vertical screen coordinates from absolute to relative, pointing upwards
+function relH(abs) {
+  return (abs / h) * -100;
+}
+
+// Convert horizontal screen coordinates from absolute to relative
+function relW(abs) {
+  return (abs / w) * 100;
+}
+
+// Generate random hex color value
+function randomColor() {
+  var n = Math.floor(Math.random() * 0x1000000);
+  return "#" + n.toString(16).padStart(6, "0");
 }
 
 init();

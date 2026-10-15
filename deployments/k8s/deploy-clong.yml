@@ -13,8 +13,7 @@ spec:
     spec:
       containers:
         - name: clong
-          image: cloudlena/clong:latest
-          imagePullPolicy: Always
+          image: docker.io/cloudlena/clong:latest
           ports:
             - containerPort: 8080
           env:
