@@ -6,6 +6,4 @@ spec:
   selector:
     app.kubernetes.io/name: clong-db
   ports:
-    - protocol: TCP
       port: 5432
-      targetPort: 5432

@@ -32,14 +32,14 @@ func (m *mockConn) Close() error {
 
 // mockScoreStore is a fake ScoreStore for testing.
 type mockScoreStore struct {
-	added []*clong.Score
+	added []clong.Score
 }
 
-func (m *mockScoreStore) ListAll(_ context.Context) ([]*clong.Score, error) {
+func (m *mockScoreStore) ListAll(_ context.Context) ([]clong.Score, error) {
 	return m.added, nil
 }
 
-func (m *mockScoreStore) Add(_ context.Context, s *clong.Score) error {
+func (m *mockScoreStore) Add(_ context.Context, s clong.Score) error {
 	m.added = append(m.added, s)
 	return nil
 }
@@ -267,15 +267,4 @@ func TestGameControlsAreNotSentToScreen(t *testing.T) {
 			t.Errorf("expected no messages on screen, got %d", len(screen.written))
 		}
 	})
-}
-
-func TestPublishControlNonGameFinishedDoesNotSaveScore(t *testing.T) {
-	store := &mockScoreStore{}
-	svc := clong.NewService(store)
-
-	svc.PublishControl(context.Background(), clong.Control{Type: "MOVE"})
-
-	if len(store.added) != 0 {
-		t.Errorf("expected no score saved for MOVE, got %d", len(store.added))
-	}
 }

@@ -170,7 +170,7 @@ func (s *Service) finishGame(ctx context.Context, ctrl Control) {
 		FinalScore: g.points,
 		Color:      ctrl.Color,
 	}
-	if err := s.scores.Add(ctx, &scr); err != nil {
+	if err := s.scores.Add(ctx, scr); err != nil {
 		log.Printf("error adding score to store: %v\n", err)
 		return
 	}

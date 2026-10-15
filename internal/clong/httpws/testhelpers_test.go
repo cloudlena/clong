@@ -7,16 +7,16 @@ import (
 )
 
 type mockScoreStore struct {
-	scores  []*clong.Score
+	scores  []clong.Score
 	listErr error
 	rmErr   error
 }
 
-func (m *mockScoreStore) ListAll(_ context.Context) ([]*clong.Score, error) {
+func (m *mockScoreStore) ListAll(_ context.Context) ([]clong.Score, error) {
 	return m.scores, m.listErr
 }
 
-func (m *mockScoreStore) Add(_ context.Context, s *clong.Score) error {
+func (m *mockScoreStore) Add(_ context.Context, s clong.Score) error {
 	m.scores = append(m.scores, s)
 	return nil
 }

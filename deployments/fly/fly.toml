@@ -1,6 +1,10 @@
 app = 'bespinian-clong'
 primary_region = 'ams'
 
+# Relative to this file
+[build]
+  dockerfile = '../../Containerfile'
+
 [http_service]
   force_https = true
   auto_stop_machines = true

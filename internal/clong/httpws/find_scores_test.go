@@ -13,9 +13,9 @@ import (
 
 func TestHandleFindScoresReturnsJSON(t *testing.T) {
 	store := &mockScoreStore{
-		scores: []*clong.Score{
-			{ID: "1", Player: clong.User{ID: "u1", Name: "Alice"}, FinalScore: 10, Color: "red"},
-			{ID: "2", Player: clong.User{ID: "u2", Name: "Bob"}, FinalScore: 20, Color: "blue"},
+		scores: []clong.Score{
+			{Player: clong.User{ID: "u1", Name: "Alice"}, FinalScore: 10, Color: "red"},
+			{Player: clong.User{ID: "u2", Name: "Bob"}, FinalScore: 20, Color: "blue"},
 		},
 	}
 
@@ -30,7 +30,7 @@ func TestHandleFindScoresReturnsJSON(t *testing.T) {
 		t.Errorf("unexpected Content-Type: %s", ct)
 	}
 
-	var got []*clong.Score
+	var got []clong.Score
 	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
 		t.Fatalf("could not decode response body: %v", err)
 	}
@@ -43,7 +43,7 @@ func TestHandleFindScoresReturnsJSON(t *testing.T) {
 }
 
 func TestHandleFindScoresEmptyList(t *testing.T) {
-	store := &mockScoreStore{scores: []*clong.Score{}}
+	store := &mockScoreStore{scores: []clong.Score{}}
 
 	req := httptest.NewRequest(http.MethodGet, "/api/scores", nil)
 	w := httptest.NewRecorder()
@@ -53,7 +53,7 @@ func TestHandleFindScoresEmptyList(t *testing.T) {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}
 
-	var got []*clong.Score
+	var got []clong.Score
 	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
 		t.Fatalf("could not decode response body: %v", err)
 	}

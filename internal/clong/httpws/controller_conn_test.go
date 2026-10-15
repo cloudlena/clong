@@ -10,47 +10,30 @@ import (
 	"github.com/cloudlena/clong/internal/clong/httpws"
 )
 
-func TestHandleControllerConnMissingCookies(t *testing.T) {
-	tests := map[string][]*http.Cookie{
-		"no cookies":       nil,
-		"missing username": {{Name: "userid", Value: "abc123"}},
-		"missing user ID":  {{Name: "username", Value: "Alice"}},
+func TestHandleControllerConnRejectsBadCookies(t *testing.T) {
+	tests := map[string]struct {
+		cookies []*http.Cookie
+		want    int
+	}{
+		"no cookies":           {nil, http.StatusUnauthorized},
+		"missing username":     {[]*http.Cookie{{Name: "userid", Value: "abc123"}}, http.StatusUnauthorized},
+		"missing user ID":      {[]*http.Cookie{{Name: "username", Value: "Alice"}}, http.StatusUnauthorized},
+		"undecodable username": {[]*http.Cookie{{Name: "userid", Value: "abc123"}, {Name: "username", Value: "Alice%zz"}}, http.StatusBadRequest},
+		"username too long":    {[]*http.Cookie{{Name: "userid", Value: "abc123"}, {Name: "username", Value: strings.Repeat("a", 31)}}, http.StatusBadRequest},
+		"user ID too long":     {[]*http.Cookie{{Name: "userid", Value: strings.Repeat("a", 37)}, {Name: "username", Value: "Alice"}}, http.StatusBadRequest},
 	}
 
-	for name, cookies := range tests {
+	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/ws/controller", nil)
-			for _, c := range cookies {
+			for _, c := range tt.cookies {
 				req.AddCookie(c)
 			}
 			w := httptest.NewRecorder()
 			httpws.HandleControllerConn(clong.NewService(&mockScoreStore{}))(w, req)
 
-			if w.Code != http.StatusUnauthorized {
-				t.Errorf("expected 401, got %d", w.Code)
-			}
-		})
-	}
-}
-
-func TestHandleControllerConnInvalidCookies(t *testing.T) {
-	tests := map[string][]*http.Cookie{
-		"undecodable username": {{Name: "userid", Value: "abc123"}, {Name: "username", Value: "Alice%zz"}},
-		"username too long":    {{Name: "userid", Value: "abc123"}, {Name: "username", Value: strings.Repeat("a", 31)}},
-		"user ID too long":     {{Name: "userid", Value: strings.Repeat("a", 37)}, {Name: "username", Value: "Alice"}},
-	}
-
-	for name, cookies := range tests {
-		t.Run(name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/ws/controller", nil)
-			for _, c := range cookies {
-				req.AddCookie(c)
-			}
-			w := httptest.NewRecorder()
-			httpws.HandleControllerConn(clong.NewService(&mockScoreStore{}))(w, req)
-
-			if w.Code != http.StatusBadRequest {
-				t.Errorf("expected 400, got %d", w.Code)
+			if w.Code != tt.want {
+				t.Errorf("expected %d, got %d", tt.want, w.Code)
 			}
 		})
 	}
