@@ -1,68 +1,64 @@
 "use strict";
 
-// Set game preferences
-var ballRadius = 0.7;
-var ballVelocityFactor = 2.5;
-var maxTargets = 5;
-var targetSpawnIntervalMin = 100;
-var targetSpawnIntervalMax = 500;
-var targetImages = [
-  "docker",
-  "go",
-  "rust",
-  "java",
-  "nodejs",
-  "python",
-  "ruby",
-  "mariadb",
-  "mongodb",
-  "rabbitmq",
-  "redis",
-  "kubernetes",
+// Game preferences
+const ballRadius = 0.7;
+const ballVelocityFactor = 2.5;
+const maxTargets = 5;
+const targetSpawnIntervalMin = 100;
+const targetSpawnIntervalMax = 500;
+const targetWidthMin = 2;
+const targetWidthMax = 13;
+const targetImages = [
+  "anthropic",
   "bespinian",
-].map(function (name) {
-  var img = new Image();
+  "gemini",
+  "go",
+  "kubernetes",
+  "mistral",
+  "nine-dark",
+  "openai",
+  "python",
+  "qwen",
+  "redis",
+  "rust",
+  "stepping-stone",
+].map((name) => {
+  const img = new Image();
   img.src = "/assets/img/" + name + ".svg";
   return img;
 });
 
-// Initialize global variables
-var ws = null;
-var reqId = null;
-var spawnTargetTimeout = null;
-var canvas = document.getElementById("clong-canvas");
-var gameMsg = document.getElementById("game-msg");
-var ctx = canvas.getContext("2d");
-var lastDrawnTime = Date.now();
-var w = 0;
-var h = 0;
-var balls = [];
-var targets = [];
+const canvas = document.getElementById("clong-canvas");
+const gameMsg = document.getElementById("game-msg");
+const ctx = canvas.getContext("2d");
+let ws = null;
+let reqId = null;
+let spawnTargetTimeout = null;
+let lastDrawnTime = Date.now();
+let w = 0;
+let h = 0;
+let balls = [];
+let targets = [];
+
+resize();
+window.onresize = resize;
 
 function init() {
-  resize();
-  window.onresize = resize;
-
-  // Initialize WebSocket connection
   ws = new WebSocket(wsURL("/ws/screen"));
 
-  ws.onopen = function () {
-    // Show game URL on screen
+  ws.onopen = () => {
     gameMsg.textContent =
       "Visit " +
       window.location.protocol +
       "//" +
       window.location.host +
       " to play";
-
-    // Trigger forever loops
     spawnTarget();
     reqId = requestAnimationFrame(draw);
   };
 
-  // Listen for new balls coming in
-  ws.onmessage = function (e) {
-    var msg = JSON.parse(e.data);
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
     if (msg.type !== "BALL_INIT") {
       return;
     }
@@ -70,19 +66,20 @@ function init() {
       ballDone(msg.player, 0);
       return;
     }
+    msg.posY = 0;
     msg.radius = ballRadius;
     msg.velocityY = Math.max(msg.velocityY, 0.05) * ballVelocityFactor;
     balls.push(msg);
   };
 
-  // Try to reconnect on close, showing why the server closed the connection if it did
-  ws.onclose = function (e) {
+  // Show why the server closed the connection, if it did
+  ws.onclose = (e) => {
     gameMsg.textContent = e.reason || "Reconnecting...";
     clearTimeout(spawnTargetTimeout);
     cancelAnimationFrame(reqId);
     targets = [];
     balls = [];
-    setTimeout(init, 3000);
+    setTimeout(init, reconnectDelay);
   };
 }
 
@@ -90,31 +87,32 @@ function ballDone(player, points) {
   if (ws.readyState !== WebSocket.OPEN) {
     return;
   }
-  var msg = {
-    type: "BALL_DONE",
-    player: player,
-    points: points,
-  };
-  ws.send(JSON.stringify(msg));
+  ws.send(
+    JSON.stringify({ type: "BALL_DONE", player: player, points: points }),
+  );
 }
 
 // Match the canvas size to the screen size
 function resize() {
-  calcScreenSize();
+  ({ w, h } = screenSize());
   canvas.width = w;
   canvas.height = h;
 }
 
 // Regularly spawn new targets
 function spawnTarget() {
-  var delay = randInt(targetSpawnIntervalMin, targetSpawnIntervalMax);
-  spawnTargetTimeout = setTimeout(function () {
-    if (targets.length < maxTargets) {
-      var width = randInt(2, 13);
-      var height = width * (w / h);
+  const delay = randInt(targetSpawnIntervalMin, targetSpawnIntervalMax);
+  spawnTargetTimeout = setTimeout(() => {
+    // Skip images that are still loading or failed to load
+    const imgs = targetImages.filter((i) => i.complete && i.naturalWidth > 0);
+    if (targets.length < maxTargets && imgs.length > 0) {
+      const img = imgs[randInt(0, imgs.length)];
+      const width = randInt(targetWidthMin, targetWidthMax);
+      // Keep the image's aspect ratio
+      const height = width * (w / h) * (img.naturalHeight / img.naturalWidth);
 
       targets.push({
-        img: targetImages[randInt(0, targetImages.length)],
+        img: img,
         posX: randInt(20, 80),
         posY: randInt(height, 100),
         velocityX: Math.random() - 0.5,
@@ -127,16 +125,15 @@ function spawnTarget() {
   }, delay);
 }
 
-// Draw current status onto canvas
 function draw() {
-  var now = Date.now();
-  var dt = (now - lastDrawnTime) / 17;
+  const now = Date.now();
+  const dt = (now - lastDrawnTime) / 17;
   lastDrawnTime = now;
 
   ctx.clearRect(0, 0, w, h);
 
   // Draw and move balls, removing the ones that left the screen
-  balls = balls.filter(function (b) {
+  balls = balls.filter((b) => {
     ctx.fillStyle = b.color;
     ctx.beginPath();
     ctx.arc(absW(b.posX), absH(100 - b.posY), absW(b.radius), 0, 2 * Math.PI);
@@ -145,7 +142,7 @@ function draw() {
     b.posX += b.velocityX * dt;
     b.posY += b.velocityY * dt;
 
-    var isOut = b.posY >= 100 || b.posX <= 0 || b.posX >= 100;
+    const isOut = b.posY >= 100 || b.posX <= 0 || b.posX >= 100;
     if (isOut) {
       ballDone(b.player, 0);
     }
@@ -153,7 +150,7 @@ function draw() {
   });
 
   // Draw and move targets, removing the ones that got hit
-  targets = targets.filter(function (t) {
+  targets = targets.filter((t) => {
     ctx.drawImage(
       t.img,
       absW(t.posX),
@@ -171,9 +168,7 @@ function draw() {
     }
     t.posX += t.velocityX * dt;
 
-    var hit = balls.findIndex(function (b) {
-      return doCollide(t, b);
-    });
+    const hit = balls.findIndex((b) => doCollide(t, b));
     if (hit === -1) {
       return true;
     }
@@ -195,28 +190,28 @@ function absW(rel) {
   return Math.round(w * (rel / 100));
 }
 
-// Calculate the points a certain target is worth
+// Calculate the points a target is worth. Higher, smaller and faster targets are worth more.
 function calcPoints(posY, width, velocityX) {
-  var bias = 5;
-  var posYVal = 10 * (posY / 100);
-  var widthVal = 10 * ((13 - width) / 11);
-  var heightVal = 3 * ((13 - width) / 11);
-  var velXVal = 25 * (2 * Math.abs(velocityX));
-  return Math.round(bias + posYVal + widthVal + heightVal + velXVal);
+  const bias = 5;
+  const posYVal = 10 * (posY / 100);
+  const smallnessVal =
+    13 * ((targetWidthMax - width) / (targetWidthMax - targetWidthMin));
+  const velXVal = 50 * Math.abs(velocityX);
+  return Math.round(bias + posYVal + smallnessVal + velXVal);
 }
 
 // Check if a ball and a target collide
 function doCollide(t, b) {
-  var verticalRadius = b.radius * (w / h);
-  var xMatch =
+  const verticalRadius = b.radius * (w / h);
+  const xMatch =
     b.posX + b.radius >= t.posX && b.posX - b.radius <= t.posX + t.width;
-  var yMatch =
+  const yMatch =
     b.posY + verticalRadius >= t.posY - t.height &&
     b.posY - verticalRadius <= t.posY;
   return xMatch && yMatch;
 }
 
-// Generate random integer
+// Generate a random integer in [min, max)
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }

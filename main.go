@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"io/fs"
@@ -30,17 +31,17 @@ var webFS embed.FS
 
 func main() {
 	port := getenv("PORT", "8080")
-	databaseURL := getenv("DATABASE_URL", "postgresql://postgres:clong@?sslmode=disable")
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	databaseURL := getenv("CLONG_DATABASE_URL", "postgresql://postgres:clong@?sslmode=disable")
+	adminPassword := os.Getenv("CLONG_ADMIN_PASSWORD")
 	if adminPassword == "" {
-		log.Fatalln("ADMIN_PASSWORD environment variable must be set")
+		log.Fatalln("CLONG_ADMIN_PASSWORD environment variable must be set")
 	}
 
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		log.Fatalf("error opening DB connection: %v", err)
 	}
-	scores, err := pg.NewScoreStore(db)
+	scores, err := pg.NewScoreStore(context.Background(), db)
 	if err != nil {
 		log.Fatalf("error creating score store: %v", err)
 	}
@@ -55,13 +56,13 @@ func main() {
 	requireAdmin := basicauth.Handler("Clong", []basicauth.User{{Username: "admin", Password: adminPassword}})
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", func(http.ResponseWriter, *http.Request) {})
 	mux.Handle("GET /screen", requireAdmin(serveFile(webFS, "web/screen.html")))
 	mux.Handle("GET /scoreboard", serveFile(webFS, "web/scoreboard.html"))
 	mux.Handle("GET /ws/controller", httpws.HandleControllerConn(svc))
-	mux.Handle("GET /ws/screen", httpws.HandleScreenConn(svc))
+	mux.Handle("GET /ws/screen", requireAdmin(httpws.HandleScreenConn(svc)))
 	mux.Handle("GET /ws/scoreboard", httpws.HandleScoreboardConn(svc))
-	mux.Handle("GET /api/scores", httpws.HandleFindScores(scores))
-	mux.Handle("DELETE /api/scores", requireAdmin(httpws.HandleDeleteScores(scores)))
+	mux.Handle("DELETE /api/scores", requireAdmin(httpws.HandleDeleteScores(svc)))
 	mux.Handle("GET /", http.FileServerFS(static))
 
 	srv := &http.Server{

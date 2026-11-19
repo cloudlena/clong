@@ -1,70 +1,66 @@
 "use strict";
 
-// Set game preferences
-var gameSeconds = 60; // must match gameDuration on the server
-var ballTimeout = 15000; // ms after which a ball is considered lost
-var swipeMinDistance = 10; // px
-var swipeMinVelocity = 0.3; // px/ms
-var swipeVelocityWindow = 50; // ms at the end of a swipe used to measure its velocity
+// Game preferences
+const gameSeconds = 60; // must match gameDuration on the server
+const ballTimeout = 15000; // ms after which a ball is considered lost
+const swipeMinDistance = 10; // px
+const swipeMinVelocity = 0.3; // px/ms
+const swipeVelocityWindow = 50; // ms at the end of a swipe used to measure its velocity
 
-// Initialize global variables
-var ws = null;
-var outbox = [];
-var main = document.getElementById("main");
-var spinner = document.getElementById("spinner");
-var intro = document.getElementById("intro");
-var reconnectingMsg = document.getElementById("reconnecting-msg");
-var startButton = document.getElementById("start-button");
-var secNum = document.getElementById("sec-num");
-var scoreNum = document.getElementById("score-num");
-var w = 0;
-var h = 0;
-var myID = ensureCookie("userid", function () {
-  return crypto.randomUUID();
-});
-var myColor = randomColor();
-var gameRunning = false;
-var locked = false;
-var lockTimeout = null;
-var myPoints = 0;
-var myTime = 0;
-var pointerSamples = [];
+const main = document.getElementById("main");
+const spinner = document.getElementById("spinner");
+const intro = document.getElementById("intro");
+const reconnectingMsg = document.getElementById("reconnecting-msg");
+const startButton = document.getElementById("start-button");
+const secNum = document.getElementById("sec-num");
+const scoreNum = document.getElementById("score-num");
+const myColor = randomColor();
+const outbox = [];
+let ws = null;
+let w = 0;
+let h = 0;
+let gameRunning = false;
+let locked = false;
+let lockTimeout = null;
+let myPoints = 0;
+let myTime = 0;
+let pointerSamples = [];
 
-// Init player
+ensureCookie("userid", () => crypto.randomUUID());
 ensureCookie("username", askUserName);
 main.style.backgroundColor = myColor;
 spinner.style.color = myColor;
 startButton.querySelector("button").addEventListener("click", startGame);
+resize();
+window.onresize = resize;
 
 // Track pointer movements to detect swipes
-main.addEventListener("pointerdown", function (e) {
+main.addEventListener("pointerdown", (e) => {
   if (e.isPrimary) {
     main.setPointerCapture(e.pointerId);
     pointerSamples = [pointerSample(e)];
   }
 });
-main.addEventListener("pointermove", function (e) {
+main.addEventListener("pointermove", (e) => {
   if (e.isPrimary && pointerSamples.length > 0) {
     pointerSamples.push(pointerSample(e));
   }
 });
-main.addEventListener("pointercancel", function () {
+main.addEventListener("pointercancel", () => {
   pointerSamples = [];
 });
-main.addEventListener("pointerup", function (e) {
+main.addEventListener("pointerup", (e) => {
   if (!e.isPrimary || pointerSamples.length === 0) {
     return;
   }
-  var end = pointerSample(e);
-  var start = pointerSamples[0];
+  const end = pointerSample(e);
+  const start = pointerSamples[0];
   // Flicks accelerate, so velocity is measured at the end of the swipe
-  var recent = pointerSamples.find(function (s) {
-    return end.t - s.t <= swipeVelocityWindow;
-  });
+  const recent = pointerSamples.find((s) => end.t - s.t <= swipeVelocityWindow);
   pointerSamples = [];
 
-  var distance = Math.hypot(end.x - start.x, end.y - start.y);
-  var duration = end.t - start.t;
+  const distance = Math.hypot(end.x - start.x, end.y - start.y);
+  const duration = end.t - start.t;
   if (
     !recent ||
     end.t === recent.t ||
@@ -101,33 +97,28 @@ function shoot(x, velocityX, velocityY) {
 }
 
 function init() {
-  calcScreenSize();
-  window.onresize = calcScreenSize;
-
-  // Initialize WebSocket connection
   ws = new WebSocket(wsURL("/ws/controller"));
 
-  ws.onopen = function () {
+  ws.onopen = () => {
     unlock();
     reconnectingMsg.hidden = true;
     flushOutbox();
   };
 
-  // Listen for when ball is done to unlock screen
-  ws.onmessage = function (e) {
-    var msg = JSON.parse(e.data);
-    if (gameRunning && msg.type === "BALL_DONE" && msg.player.id === myID) {
+  // Unlock when our ball is done (the server only sends our own balls)
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (gameRunning && msg.type === "BALL_DONE") {
       myPoints += msg.points;
       scoreNum.textContent = myPoints;
       unlock();
     }
   };
 
-  // Try to reconnect on close
-  ws.onclose = function () {
+  ws.onclose = () => {
     lock();
     reconnectingMsg.hidden = false;
-    setTimeout(init, 3000);
+    setTimeout(init, reconnectDelay);
   };
 }
 
@@ -139,7 +130,7 @@ function startGame() {
   scoreNum.textContent = myPoints;
   gameRunning = true;
   send({ type: "GAME_STARTED" });
-  var gameLoop = setInterval(function () {
+  const gameLoop = setInterval(() => {
     myTime--;
     secNum.textContent = myTime;
     if (myTime <= 0) {
@@ -164,33 +155,31 @@ function flushOutbox() {
   }
 }
 
+function resize() {
+  ({ w, h } = screenSize());
+}
+
 // Record the position of a pointer at the current time
 function pointerSample(e) {
   return { x: e.clientX, y: e.clientY, t: e.timeStamp };
 }
 
-// Gets a cookie from the cookie jar
 function getCookie(name) {
-  var prefix = name + "=";
-  var cookie = document.cookie.split("; ").find(function (c) {
-    return c.startsWith(prefix);
-  });
+  const prefix = name + "=";
+  const cookie = document.cookie.split("; ").find((c) => c.startsWith(prefix));
   return cookie ? decodeURIComponent(cookie.substring(prefix.length)) : null;
 }
 
-// Returns the value of a cookie, creating it first if it doesn't exist yet
+// Create a cookie if it doesn't exist yet
 function ensureCookie(name, createValue) {
-  var value = getCookie(name);
-  if (value === null) {
-    value = createValue();
-    document.cookie = name + "=" + encodeURIComponent(value);
+  if (getCookie(name) === null) {
+    document.cookie = name + "=" + encodeURIComponent(createValue());
   }
-  return value;
 }
 
-// Asks the user for their name until they enter one the server accepts (1-30 characters)
+// Ask the user for their name until they enter one the server accepts (1-30 characters)
 function askUserName() {
-  var userName = "";
+  let userName = "";
   while (userName.length === 0 || [...userName].length > 30) {
     userName = prompt("What's your full name?", "") || "";
   }
@@ -219,9 +208,9 @@ function relW(abs) {
   return (abs / w) * 100;
 }
 
-// Generate random hex color value
+// Generate a random hex color
 function randomColor() {
-  var n = Math.floor(Math.random() * 0x1000000);
+  const n = Math.floor(Math.random() * 0x1000000);
   return "#" + n.toString(16).padStart(6, "0");
 }
 

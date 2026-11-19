@@ -9,13 +9,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const closeTimeout = time.Second
-
 // HandleScreenConn handles a WebSocket connection coming from a screen.
 func HandleScreenConn(svc *clong.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// The upgrader responds with an HTTP error itself if upgrading fails
-		conn, err := upgrader.Upgrade(w, r, nil)
+		conn, err := upgrade(w, r)
 		if err != nil {
 			return
 		}
@@ -24,8 +21,8 @@ func HandleScreenConn(svc *clong.Service) http.HandlerFunc {
 		// Rejected screens are told why, since browsers can't read the status of a failed upgrade
 		if err := svc.RegisterScreen(conn); err != nil {
 			msg := websocket.FormatCloseMessage(websocket.CloseTryAgainLater, err.Error())
-			if err := conn.WriteControl(websocket.CloseMessage, msg, time.Now().Add(closeTimeout)); err != nil {
-				log.Printf("error rejecting screen: %v\n", err)
+			if err := conn.WriteControl(websocket.CloseMessage, msg, time.Now().Add(writeTimeout)); err != nil {
+				log.Printf("error rejecting screen: %v", err)
 			}
 			return
 		}
@@ -34,7 +31,7 @@ func HandleScreenConn(svc *clong.Service) http.HandlerFunc {
 		for {
 			var evt clong.Event
 			if err := conn.ReadJSON(&evt); err != nil {
-				log.Printf("error reading from screen: %v\n", err)
+				log.Printf("error reading from screen: %v", err)
 				return
 			}
 			svc.PublishEvent(evt)

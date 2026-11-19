@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1 AS builder
+FROM docker.io/library/golang:1.27 AS builder
 WORKDIR /usr/src/app
 COPY . ./
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/clong

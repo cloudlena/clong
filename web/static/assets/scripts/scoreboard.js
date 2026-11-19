@@ -1,90 +1,64 @@
 "use strict";
 
-// Set game preferences
-var maxScores = 10;
-
-// Initialize global variables
-var ws = null;
-var highScores = [];
-var tbody = document.querySelector("#scoreboard tbody");
+const tbody = document.querySelector("#scoreboard tbody");
 
 function init() {
-  // Initialize WebSocket connection
-  ws = new WebSocket(wsURL("/ws/scoreboard"));
+  const ws = new WebSocket(wsURL("/ws/scoreboard"));
 
-  ws.onopen = function () {
-    // Get existing scores
-    fetch("/api/scores")
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (data) {
-        highScores = data;
-        drawScores();
-      });
-  };
+  // The server sends the best scores, best first, on connect and whenever they change
+  ws.onmessage = (e) => drawScores(JSON.parse(e.data));
 
-  // Listen for new scores coming in
-  ws.onmessage = function (e) {
-    highScores.push(JSON.parse(e.data));
-    drawScores();
-  };
-
-  // Try to reconnect on close
-  ws.onclose = function () {
+  ws.onclose = () => {
     showMessage("Reconnecting...");
-    setTimeout(init, 3000);
+    setTimeout(init, reconnectDelay);
   };
 }
 
-function drawScores() {
-  if (highScores.length === 0) {
+function drawScores(scores) {
+  if (scores.length === 0) {
     showMessage("No scores yet...");
     return;
   }
 
-  // Keep only the best scores
-  highScores.sort(function (a, b) {
-    return b.finalScore - a.finalScore;
-  });
-  highScores = highScores.slice(0, maxScores);
-
-  tbody.replaceChildren(...highScores.map(scoreRow));
+  tbody.replaceChildren(...scores.map(scoreRow));
 }
 
 // Create a table row for a score
 function scoreRow(score, i) {
-  var rank = cell(i + 1 + ".");
+  const rank = cell(i + 1 + ".");
   rank.className = "rank";
 
-  var dot = document.createElement("span");
-  dot.textContent = " ●";
-  dot.style.color = score.color;
-  var name = cell(score.player.name);
-  name.append(dot);
+  const dot = document.createElement("span");
+  dot.className = "dot";
+  dot.style.backgroundColor = score.color;
+  const name = cell(score.playerName);
+  name.prepend(dot);
 
-  var row = document.createElement("tr");
-  row.append(rank, name, cell(score.finalScore));
+  const points = cell(score.finalScore);
+  points.className = "score";
+
+  const row = document.createElement("tr");
+  row.append(rank, name, points);
   return row;
 }
 
 // Show a message instead of the scores
 function showMessage(text) {
-  var msg = cell(text);
+  const msg = cell(text);
   msg.colSpan = 3;
-  msg.style.textAlign = "center";
+  msg.className = "msg";
 
-  var row = document.createElement("tr");
+  const row = document.createElement("tr");
   row.append(msg);
   tbody.replaceChildren(row);
 }
 
 // Create a table cell containing text
 function cell(text) {
-  var td = document.createElement("td");
+  const td = document.createElement("td");
   td.textContent = text;
   return td;
 }
 
-drawScores();
+drawScores([]);
 init();

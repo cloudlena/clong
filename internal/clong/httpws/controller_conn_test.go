@@ -1,4 +1,4 @@
-package httpws_test
+package httpws
 
 import (
 	"net/http"
@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/cloudlena/clong/internal/clong"
-	"github.com/cloudlena/clong/internal/clong/httpws"
 )
 
 func TestHandleControllerConnRejectsBadCookies(t *testing.T) {
@@ -30,7 +29,7 @@ func TestHandleControllerConnRejectsBadCookies(t *testing.T) {
 				req.AddCookie(c)
 			}
 			w := httptest.NewRecorder()
-			httpws.HandleControllerConn(clong.NewService(&mockScoreStore{}))(w, req)
+			HandleControllerConn(clong.NewService(&mockScoreStore{}))(w, req)
 
 			if w.Code != tt.want {
 				t.Errorf("expected %d, got %d", tt.want, w.Code)

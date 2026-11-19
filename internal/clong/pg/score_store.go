@@ -1,4 +1,4 @@
-// Package pg allows to interact with a PostgreSQL database.
+// Package pg stores data in a PostgreSQL database.
 package pg
 
 import (
@@ -15,52 +15,51 @@ type ScoreStore struct {
 	db *sql.DB
 }
 
-// NewScoreStore creates a new score store.
-func NewScoreStore(db *sql.DB) (*ScoreStore, error) {
-	// Check if DB connection is healthy
-	err := db.Ping()
-	if err != nil {
+// NewScoreStore creates a new score store, creating its table if needed.
+func NewScoreStore(ctx context.Context, db *sql.DB) (*ScoreStore, error) {
+	if err := db.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("error pinging DB: %w", err)
 	}
 
-	// Create score table if it doesn't exist yet
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS score (
+	if _, err := db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS score (
 		score_id SERIAL NOT NULL PRIMARY KEY,
 		player_id VARCHAR(36) NOT NULL,
 		player_name VARCHAR(30) NOT NULL,
 		final_score INT NOT NULL,
 		color VARCHAR(7) NOT NULL
-	)`)
-	if err != nil {
+	)`); err != nil {
 		return nil, fmt.Errorf("error executing DB statement: %w", err)
 	}
 
 	return &ScoreStore{db: db}, nil
 }
 
-// ListAll retrieves all scores from the DB.
-func (s *ScoreStore) ListAll(ctx context.Context) ([]clong.Score, error) {
-	rows, err := s.db.QueryContext(ctx, "SELECT player_id, player_name, final_score, color FROM score")
+// ListTop retrieves the best scores from the DB, best first. Ties go to the earlier score.
+func (s *ScoreStore) ListTop(ctx context.Context, limit int) ([]clong.Score, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT player_name, final_score, color FROM score
+		ORDER BY final_score DESC, score_id
+		LIMIT $1
+	`, limit)
 	if err != nil {
 		return nil, fmt.Errorf("error querying DB: %w", err)
 	}
 	defer func() {
-		if cErr := rows.Close(); cErr != nil {
-			log.Printf("error closing DB rows: %v\n", cErr)
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing DB rows: %v", err)
 		}
 	}()
 
+	// Not nil, so it's encoded as an empty JSON array
 	scrs := make([]clong.Score, 0)
 	for rows.Next() {
 		var scr clong.Score
-		err = rows.Scan(&scr.Player.ID, &scr.Player.Name, &scr.FinalScore, &scr.Color)
-		if err != nil {
+		if err := rows.Scan(&scr.PlayerName, &scr.FinalScore, &scr.Color); err != nil {
 			return nil, fmt.Errorf("error scanning DB rows: %w", err)
 		}
 		scrs = append(scrs, scr)
 	}
-	err = rows.Err()
-	if err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error in DB rows: %w", err)
 	}
 
@@ -69,12 +68,11 @@ func (s *ScoreStore) ListAll(ctx context.Context) ([]clong.Score, error) {
 
 // Add adds a new score to the DB.
 func (s *ScoreStore) Add(ctx context.Context, scr clong.Score) error {
-	_, err := s.db.ExecContext(ctx, `
+	if _, err := s.db.ExecContext(ctx, `
 		INSERT INTO score
 		(player_id, player_name, final_score, color)
 		VALUES ($1, $2, $3, $4)
-	`, scr.Player.ID, scr.Player.Name, scr.FinalScore, scr.Color)
-	if err != nil {
+	`, scr.PlayerID, scr.PlayerName, scr.FinalScore, scr.Color); err != nil {
 		return fmt.Errorf("error executing DB statement: %w", err)
 	}
 	return nil
@@ -82,8 +80,7 @@ func (s *ScoreStore) Add(ctx context.Context, scr clong.Score) error {
 
 // RemoveAll removes all scores from the DB.
 func (s *ScoreStore) RemoveAll(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, "DELETE FROM score")
-	if err != nil {
+	if _, err := s.db.ExecContext(ctx, "DELETE FROM score"); err != nil {
 		return fmt.Errorf("error executing DB statement: %w", err)
 	}
 	return nil

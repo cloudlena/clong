@@ -6,5 +6,5 @@ spec:
   selector:
     app.kubernetes.io/name: clong
   ports:
-      port: 80
+    - port: 80
       targetPort: 8080

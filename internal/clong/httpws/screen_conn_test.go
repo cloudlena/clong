@@ -1,23 +1,22 @@
-package httpws_test
+package httpws
 
 import (
 	"errors"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cloudlena/clong/internal/clong"
-	"github.com/cloudlena/clong/internal/clong/httpws"
 	"github.com/gorilla/websocket"
 )
 
 func TestHandleScreenConnRejectsSecondScreen(t *testing.T) {
-	srv := httptest.NewServer(httpws.HandleScreenConn(clong.NewService(&mockScoreStore{})))
+	srv := httptest.NewServer(HandleScreenConn(clong.NewService(&mockScoreStore{})))
 	defer srv.Close()
-	url := "ws" + strings.TrimPrefix(srv.URL, "http")
 
-	dialScreen(t, url)
-	second := dialScreen(t, url)
+	dial(t, wsURL(srv.URL))
+	second := dial(t, wsURL(srv.URL))
 
 	_, _, err := second.ReadMessage()
 	var closeErr *websocket.CloseError
@@ -26,17 +25,23 @@ func TestHandleScreenConnRejectsSecondScreen(t *testing.T) {
 	}
 }
 
-// dialScreen connects to a screen WebSocket and closes the connection when the test ends.
-func dialScreen(t *testing.T, url string) *websocket.Conn {
-	t.Helper()
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
-	if err != nil {
-		t.Fatalf("error connecting screen: %v", err)
+func TestHandleScreenConnRejectsOversizedMessages(t *testing.T) {
+	srv := httptest.NewServer(HandleScreenConn(clong.NewService(&mockScoreStore{})))
+	defer srv.Close()
+	conn := dial(t, wsURL(srv.URL))
+
+	// A valid event, so the connection can only be closed because of its size
+	evt := `{"type":"` + strings.Repeat("a", 8192) + `"}`
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(evt)); err != nil {
+		t.Fatalf("error writing message: %v", err)
 	}
-	t.Cleanup(func() {
-		if err := conn.Close(); err != nil {
-			t.Errorf("error closing screen connection: %v", err)
-		}
-	})
-	return conn
+
+	if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+		t.Fatalf("error setting read deadline: %v", err)
+	}
+	_, _, err := conn.ReadMessage()
+	var closeErr *websocket.CloseError
+	if !errors.As(err, &closeErr) || closeErr.Code != websocket.CloseMessageTooBig {
+		t.Fatalf("expected close with code %d, got %v", websocket.CloseMessageTooBig, err)
+	}
 }

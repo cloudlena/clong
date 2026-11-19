@@ -3,6 +3,7 @@ package clong
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"regexp"
 	"sync"
@@ -16,6 +17,8 @@ const (
 	gameTolerance = 3 * time.Second
 	// staleGameAge is the age after which unfinished games are discarded.
 	staleGameAge = 10 * time.Minute
+	// maxScores is how many scores scoreboards show.
+	maxScores = 10
 )
 
 // ErrScreenConnected is returned when a screen registers while another one is connected.
@@ -38,17 +41,20 @@ type game struct {
 // Service is a messaging hub between controllers, screens and scoreboards.
 type Service struct {
 	mu          sync.Mutex
-	controllers map[ClientConnection]bool
-	screens     map[ClientConnection]bool // holds at most one screen
-	scoreboards map[ClientConnection]bool
-	games       map[string]*game // by player ID
-	scores      ScoreStore
+	controllers map[string]map[ClientConnection]bool // by player ID
+	screens     map[ClientConnection]bool            // holds at most one screen
+	games       map[string]*game                     // by player ID
+
+	// scoreboardsMu also serializes sending scores, so scoreboards end up with the latest ones.
+	scoreboardsMu sync.Mutex
+	scoreboards   map[ClientConnection]bool
+	scores        ScoreStore
 }
 
 // NewService creates a new service.
 func NewService(scores ScoreStore) *Service {
 	return &Service{
-		controllers: make(map[ClientConnection]bool),
+		controllers: make(map[string]map[ClientConnection]bool),
 		screens:     make(map[ClientConnection]bool),
 		scoreboards: make(map[ClientConnection]bool),
 		games:       make(map[string]*game),
@@ -56,18 +62,24 @@ func NewService(scores ScoreStore) *Service {
 	}
 }
 
-// RegisterController registers a new controller.
-func (s *Service) RegisterController(c ClientConnection) {
+// RegisterController registers a new controller of a player.
+func (s *Service) RegisterController(playerID string, c ClientConnection) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.controllers[c] = true
+	if s.controllers[playerID] == nil {
+		s.controllers[playerID] = make(map[ClientConnection]bool)
+	}
+	s.controllers[playerID][c] = true
 }
 
-// UnregisterController removes a controller.
-func (s *Service) UnregisterController(c ClientConnection) {
+// UnregisterController removes a controller of a player.
+func (s *Service) UnregisterController(playerID string, c ClientConnection) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.controllers, c)
+	delete(s.controllers[playerID], c)
+	if len(s.controllers[playerID]) == 0 {
+		delete(s.controllers, playerID)
+	}
 }
 
 // RegisterScreen registers a new screen. Only one screen can be connected at a time.
@@ -88,40 +100,70 @@ func (s *Service) UnregisterScreen(c ClientConnection) {
 	delete(s.screens, c)
 }
 
-// RegisterScoreboard registers a new scoreboard.
-func (s *Service) RegisterScoreboard(c ClientConnection) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// RegisterScoreboard sends the best scores to a new scoreboard and registers it to receive updates.
+func (s *Service) RegisterScoreboard(ctx context.Context, c ClientConnection) error {
+	s.scoreboardsMu.Lock()
+	defer s.scoreboardsMu.Unlock()
+	scrs, err := s.scores.ListTop(ctx, maxScores)
+	if err != nil {
+		return fmt.Errorf("error listing scores: %w", err)
+	}
+	if err := c.WriteJSON(scrs); err != nil {
+		return fmt.Errorf("error sending scores: %w", err)
+	}
 	s.scoreboards[c] = true
+	return nil
 }
 
 // UnregisterScoreboard removes a scoreboard.
 func (s *Service) UnregisterScoreboard(c ClientConnection) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.scoreboardsMu.Lock()
+	defer s.scoreboardsMu.Unlock()
 	delete(s.scoreboards, c)
 }
 
-// PublishEvent sends an event to all controllers and tallies the points of running games.
+// ResetScores removes all scores and clears all scoreboards.
+func (s *Service) ResetScores(ctx context.Context) error {
+	if err := s.scores.RemoveAll(ctx); err != nil {
+		return fmt.Errorf("error removing all scores from store: %w", err)
+	}
+	s.publishScores(ctx)
+	return nil
+}
+
+// publishScores sends the best scores to all scoreboards.
+func (s *Service) publishScores(ctx context.Context) {
+	s.scoreboardsMu.Lock()
+	defer s.scoreboardsMu.Unlock()
+	scrs, err := s.scores.ListTop(ctx, maxScores)
+	if err != nil {
+		log.Printf("error listing scores: %v", err)
+		return
+	}
+	broadcast(s.scoreboards, scrs)
+}
+
+// PublishEvent sends an event to the controllers of its player and tallies the points of running games.
+// Events aren't sent to other players, so they can't learn each other's IDs and interfere with each other's games.
 func (s *Service) PublishEvent(event Event) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if event.Type == "BALL_DONE" {
+	if event.Type == EventBallDone {
 		g, ok := s.games[event.Player.ID]
 		if ok && time.Since(g.started) <= gameDuration+gameTolerance {
 			g.points += event.Points
 		}
 	}
-	broadcast(s.controllers, event)
+	broadcast(s.controllers[event.Player.ID], event)
 }
 
 // PublishControl handles a control from a controller.
 // Game controls are handled by the service, all others are sent to the screen.
 func (s *Service) PublishControl(ctx context.Context, ctrl Control) {
 	switch ctrl.Type {
-	case "GAME_STARTED":
+	case ControlGameStarted:
 		s.startGame(ctrl.Player)
-	case "GAME_FINISHED":
+	case ControlGameFinished:
 		s.finishGame(ctx, ctrl)
 	default:
 		s.mu.Lock()
@@ -145,7 +187,7 @@ func (s *Service) startGame(player User) {
 	s.games[player.ID] = &game{started: time.Now()}
 }
 
-// finishGame saves the tallied score of a player's game and sends it to all scoreboards.
+// finishGame saves the tallied score of a player's game and updates all scoreboards.
 func (s *Service) finishGame(ctx context.Context, ctrl Control) {
 	s.mu.Lock()
 	g, ok := s.games[ctrl.Player.ID]
@@ -153,31 +195,29 @@ func (s *Service) finishGame(ctx context.Context, ctrl Control) {
 	s.mu.Unlock()
 
 	if !ok {
-		log.Printf("ignoring finished game of %s: game was never started\n", ctrl.Player.ID)
+		log.Printf("ignoring finished game of %s: game was never started", ctrl.Player.ID)
 		return
 	}
 	if time.Since(g.started) < gameDuration-gameTolerance {
-		log.Printf("ignoring finished game of %s: game finished too early\n", ctrl.Player.ID)
+		log.Printf("ignoring finished game of %s: game finished too early", ctrl.Player.ID)
 		return
 	}
 	if !colorPattern.MatchString(ctrl.Color) {
-		log.Printf("ignoring finished game of %s: invalid color %q\n", ctrl.Player.ID, ctrl.Color)
+		log.Printf("ignoring finished game of %s: invalid color %q", ctrl.Player.ID, ctrl.Color)
 		return
 	}
 
 	scr := Score{
-		Player:     ctrl.Player,
+		PlayerID:   ctrl.Player.ID,
+		PlayerName: ctrl.Player.Name,
 		FinalScore: g.points,
 		Color:      ctrl.Color,
 	}
 	if err := s.scores.Add(ctx, scr); err != nil {
-		log.Printf("error adding score to store: %v\n", err)
+		log.Printf("error adding score to store: %v", err)
 		return
 	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	broadcast(s.scoreboards, scr)
+	s.publishScores(ctx)
 }
 
 // broadcast sends a message to all connections and removes the ones that fail.
@@ -185,7 +225,7 @@ func broadcast(conns map[ClientConnection]bool, msg any) {
 	for c := range conns {
 		if err := c.WriteJSON(msg); err != nil {
 			if err := c.Close(); err != nil {
-				log.Printf("error closing connection: %v\n", err)
+				log.Printf("error closing connection: %v", err)
 			}
 			delete(conns, c)
 		}

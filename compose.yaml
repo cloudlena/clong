@@ -7,15 +7,14 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://postgres:clong@db?sslmode=disable
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-clong}
+      CLONG_DATABASE_URL: postgresql://postgres:clong@db?sslmode=disable
+      CLONG_ADMIN_PASSWORD: ${CLONG_ADMIN_PASSWORD:-clong}
   db:
-    image: docker.io/library/postgres
+    image: docker.io/library/postgres:18
     volumes:
-      - db-data:/data/postgres
+      - db-data:/var/lib/postgresql
     environment:
       POSTGRES_PASSWORD: clong
-      PGDATA: /data/postgres
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 2s

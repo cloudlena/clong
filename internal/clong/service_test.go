@@ -32,10 +32,12 @@ func (m *mockConn) Close() error {
 
 // mockScoreStore is a fake ScoreStore for testing.
 type mockScoreStore struct {
-	added []clong.Score
+	added     []clong.Score
+	lastLimit int
 }
 
-func (m *mockScoreStore) ListAll(_ context.Context) ([]clong.Score, error) {
+func (m *mockScoreStore) ListTop(_ context.Context, limit int) ([]clong.Score, error) {
+	m.lastLimit = limit
 	return m.added, nil
 }
 
@@ -52,15 +54,16 @@ func (m *mockScoreStore) RemoveAll(_ context.Context) error {
 func TestRegisterAndUnregisterController(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
 	conn := &mockConn{}
+	alice := clong.User{ID: "u1", Name: "Alice"}
 
-	svc.RegisterController(conn)
-	svc.PublishEvent(clong.Event{Type: "ping"})
+	svc.RegisterController(alice.ID, conn)
+	svc.PublishEvent(clong.Event{Type: "ping", Player: alice})
 	if len(conn.written) != 1 {
 		t.Fatalf("expected 1 message after register, got %d", len(conn.written))
 	}
 
-	svc.UnregisterController(conn)
-	svc.PublishEvent(clong.Event{Type: "ping"})
+	svc.UnregisterController(alice.ID, conn)
+	svc.PublishEvent(clong.Event{Type: "ping", Player: alice})
 	if len(conn.written) != 1 {
 		t.Fatalf("expected no new message after unregister, got %d", len(conn.written))
 	}
@@ -85,20 +88,23 @@ func TestRegisterAndUnregisterScreen(t *testing.T) {
 	}
 }
 
-func TestPublishEventBroadcastsToAllControllers(t *testing.T) {
+func TestPublishEventOnlyReachesControllersOfPlayer(t *testing.T) {
 	svc := clong.NewService(&mockScoreStore{})
-	c1, c2 := &mockConn{}, &mockConn{}
-	svc.RegisterController(c1)
-	svc.RegisterController(c2)
+	alice1, alice2, bob := &mockConn{}, &mockConn{}, &mockConn{}
+	svc.RegisterController("alice", alice1)
+	svc.RegisterController("alice", alice2)
+	svc.RegisterController("bob", bob)
 
-	evt := clong.Event{Type: "test", Points: 5}
-	svc.PublishEvent(evt)
+	svc.PublishEvent(clong.Event{Type: "test", Player: clong.User{ID: "alice"}, Points: 5})
 
-	if len(c1.written) != 1 {
-		t.Errorf("c1: expected 1 message, got %d", len(c1.written))
+	if len(alice1.written) != 1 {
+		t.Errorf("alice1: expected 1 message, got %d", len(alice1.written))
 	}
-	if len(c2.written) != 1 {
-		t.Errorf("c2: expected 1 message, got %d", len(c2.written))
+	if len(alice2.written) != 1 {
+		t.Errorf("alice2: expected 1 message, got %d", len(alice2.written))
+	}
+	if len(bob.written) != 0 {
+		t.Errorf("bob: expected no message, got %d", len(bob.written))
 	}
 }
 
@@ -107,16 +113,18 @@ func TestPublishEventRemovesBrokenController(t *testing.T) {
 	broken := &mockConn{writeErr: errors.New("write failed")}
 	healthy := &mockConn{}
 
-	svc.RegisterController(broken)
-	svc.RegisterController(healthy)
-	svc.PublishEvent(clong.Event{Type: "test"})
+	alice := clong.User{ID: "u1", Name: "Alice"}
+
+	svc.RegisterController(alice.ID, broken)
+	svc.RegisterController(alice.ID, healthy)
+	svc.PublishEvent(clong.Event{Type: "test", Player: alice})
 
 	if !broken.closed {
 		t.Error("expected broken controller to be closed")
 	}
 
 	// Broken conn is removed; a second publish should only reach healthy.
-	svc.PublishEvent(clong.Event{Type: "test2"})
+	svc.PublishEvent(clong.Event{Type: "test2", Player: alice})
 	if len(healthy.written) != 2 {
 		t.Errorf("expected 2 messages on healthy conn, got %d", len(healthy.written))
 	}
@@ -157,23 +165,73 @@ func TestPublishControlRemovesBrokenScreen(t *testing.T) {
 	}
 }
 
+func TestRegisterScoreboardSendsBestScores(t *testing.T) {
+	store := &mockScoreStore{added: []clong.Score{{PlayerName: "Alice", FinalScore: 42, Color: "#ff0000"}}}
+	svc := clong.NewService(store)
+	board := &mockConn{}
+
+	if err := svc.RegisterScoreboard(context.Background(), board); err != nil {
+		t.Fatalf("unexpected error registering scoreboard: %v", err)
+	}
+
+	if store.lastLimit != 10 {
+		t.Errorf("expected top 10 scores to be listed, got top %d", store.lastLimit)
+	}
+	if len(board.written) != 1 {
+		t.Fatalf("expected 1 message, got %d", len(board.written))
+	}
+	if sent := board.written[0].([]clong.Score); len(sent) != 1 || sent[0] != store.added[0] {
+		t.Errorf("expected scoreboard to receive %+v, got %+v", store.added, sent)
+	}
+}
+
+func TestResetScoresClearsScoreboards(t *testing.T) {
+	store := &mockScoreStore{added: []clong.Score{{PlayerName: "Alice", FinalScore: 42, Color: "#ff0000"}}}
+	svc := clong.NewService(store)
+	board := registerScoreboard(t, svc)
+
+	if err := svc.ResetScores(context.Background()); err != nil {
+		t.Fatalf("unexpected error resetting scores: %v", err)
+	}
+
+	if len(store.added) != 0 {
+		t.Errorf("expected store to be empty, got %d scores", len(store.added))
+	}
+	if len(board.written) != 1 {
+		t.Fatalf("expected 1 message, got %d", len(board.written))
+	}
+	if sent := board.written[0].([]clong.Score); len(sent) != 0 {
+		t.Errorf("expected scoreboard to receive no scores, got %+v", sent)
+	}
+}
+
+// registerScoreboard registers a scoreboard and discards the scores sent on registration.
+func registerScoreboard(t *testing.T, svc *clong.Service) *mockConn {
+	t.Helper()
+	board := &mockConn{}
+	if err := svc.RegisterScoreboard(context.Background(), board); err != nil {
+		t.Fatalf("unexpected error registering scoreboard: %v", err)
+	}
+	board.written = nil
+	return board
+}
+
 // playGame starts a game for a player, scores the given points and finishes it after gameLength.
 // It must be called inside a synctest bubble so time passes instantly.
 func playGame(svc *clong.Service, player clong.User, color string, gameLength time.Duration, points ...int64) {
-	svc.PublishControl(context.Background(), clong.Control{Type: "GAME_STARTED", Player: player})
+	svc.PublishControl(context.Background(), clong.Control{Type: clong.ControlGameStarted, Player: player})
 	for _, p := range points {
-		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: player, Points: p})
+		svc.PublishEvent(clong.Event{Type: clong.EventBallDone, Player: player, Points: p})
 	}
 	time.Sleep(gameLength)
-	svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: player, Color: color})
+	svc.PublishControl(context.Background(), clong.Control{Type: clong.ControlGameFinished, Player: player, Color: color})
 }
 
 func TestGameFinishedSavesTalliedScore(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		store := &mockScoreStore{}
 		svc := clong.NewService(store)
-		board := &mockConn{}
-		svc.RegisterScoreboard(board)
+		board := registerScoreboard(t, svc)
 
 		alice := clong.User{ID: "u1", Name: "Alice"}
 		playGame(svc, alice, "#ff0000", 60*time.Second, 10, 0, 32)
@@ -185,14 +243,17 @@ func TestGameFinishedSavesTalliedScore(t *testing.T) {
 		if got.FinalScore != 42 {
 			t.Errorf("FinalScore: expected 42, got %d", got.FinalScore)
 		}
-		if got.Player.Name != "Alice" {
-			t.Errorf("Player.Name: expected Alice, got %s", got.Player.Name)
+		if got.PlayerID != "u1" || got.PlayerName != "Alice" {
+			t.Errorf("Player: expected u1/Alice, got %s/%s", got.PlayerID, got.PlayerName)
 		}
 		if got.Color != "#ff0000" {
 			t.Errorf("Color: expected #ff0000, got %s", got.Color)
 		}
 		if len(board.written) != 1 {
-			t.Errorf("expected score to be sent to scoreboard, got %d messages", len(board.written))
+			t.Fatalf("expected scores to be sent to scoreboard, got %d messages", len(board.written))
+		}
+		if sent := board.written[0].([]clong.Score); len(sent) != 1 || sent[0] != got {
+			t.Errorf("expected scoreboard to receive %+v, got %+v", got, sent)
 		}
 	})
 }
@@ -203,11 +264,11 @@ func TestGameFinishedIgnoresPointsAfterGameEnded(t *testing.T) {
 		svc := clong.NewService(store)
 		alice := clong.User{ID: "u1", Name: "Alice"}
 
-		svc.PublishControl(context.Background(), clong.Control{Type: "GAME_STARTED", Player: alice})
-		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: alice, Points: 10})
+		svc.PublishControl(context.Background(), clong.Control{Type: clong.ControlGameStarted, Player: alice})
+		svc.PublishEvent(clong.Event{Type: clong.EventBallDone, Player: alice, Points: 10})
 		time.Sleep(2 * time.Minute)
-		svc.PublishEvent(clong.Event{Type: "BALL_DONE", Player: alice, Points: 50})
-		svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: alice, Color: "#ff0000"})
+		svc.PublishEvent(clong.Event{Type: clong.EventBallDone, Player: alice, Points: 50})
+		svc.PublishControl(context.Background(), clong.Control{Type: clong.ControlGameFinished, Player: alice, Color: "#ff0000"})
 
 		if len(store.added) != 1 {
 			t.Fatalf("expected 1 saved score, got %d", len(store.added))
@@ -222,7 +283,7 @@ func TestGameFinishedRejectsInvalidGames(t *testing.T) {
 	alice := clong.User{ID: "u1", Name: "Alice"}
 	tests := map[string]func(svc *clong.Service){
 		"never started": func(svc *clong.Service) {
-			svc.PublishControl(context.Background(), clong.Control{Type: "GAME_FINISHED", Player: alice, Color: "#ff0000"})
+			svc.PublishControl(context.Background(), clong.Control{Type: clong.ControlGameFinished, Player: alice, Color: "#ff0000"})
 		},
 		"finished too early": func(svc *clong.Service) {
 			playGame(svc, alice, "#ff0000", 10*time.Second, 10)
@@ -236,9 +297,8 @@ func TestGameFinishedRejectsInvalidGames(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			synctest.Test(t, func(t *testing.T) {
 				store := &mockScoreStore{}
-				board := &mockConn{}
 				svc := clong.NewService(store)
-				svc.RegisterScoreboard(board)
+				board := registerScoreboard(t, svc)
 
 				play(svc)
 

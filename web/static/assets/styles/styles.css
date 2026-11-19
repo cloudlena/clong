@@ -1,16 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
 
 :root {
   --primary-bg: #1a1a2e;
+  --display-bg: rgb(15, 18, 24);
   --secondary-bg: #16213e;
   --accent-color: #e94560;
+  --accent-hover-color: #c23650;
   --text-color: #e0e0e0;
   --light-text-color: #a0a0a0;
+  --border-color: #333;
+  --row-alt-bg: rgba(255, 255, 255, 0.03);
 }
 
 html,
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background-color: var(--primary-bg);
   color: var(--text-color);
   margin: 0;
@@ -21,12 +25,19 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+.display,
+.display body {
+  background-color: var(--display-bg);
+}
+
 .hud {
   font-size: 1.3em;
   position: fixed;
   bottom: 0;
   width: 100%;
   z-index: 999;
+  /* Keeps the text readable on light player colors */
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .text-center {
@@ -46,12 +57,7 @@ body {
 }
 
 .btn:hover {
-  background-color: #c23650; /* A slightly darker shade of accent-color */
-}
-
-.rank {
-  text-align: right;
-  padding-right: 1em;
+  background-color: var(--accent-hover-color);
 }
 
 #game-msg {
@@ -81,6 +87,8 @@ body {
 #start-button {
   position: absolute;
   z-index: 999;
+  width: fit-content;
+  height: fit-content;
   margin: auto;
   top: 50px;
   right: 0;
@@ -113,17 +121,22 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 #scoreboard {
-  font-size: 1.5em;
-  max-width: 800px;
+  box-sizing: border-box;
+  width: min(800px, 100% - 2em);
   margin: 2em auto;
+  padding: 1.5em;
+  font-size: 1.5em;
   background-color: var(--secondary-bg);
   border-radius: 8px;
-  padding: 1.5em;
 }
 
 #scoreboard table {
@@ -131,32 +144,70 @@ body {
   border-collapse: collapse;
 }
 
+/* rem keeps header and cells aligned despite their different font sizes */
 #scoreboard th,
 #scoreboard td {
-  padding: 0.8em;
+  padding: 0.6em 1.2rem;
   text-align: left;
-  border-bottom: 1px solid #333;
-}
-
-#scoreboard td {
-  padding-bottom: 0.5em;
 }
 
 #scoreboard th {
-  background-color: var(--accent-color);
-  color: var(--text-color);
-  border-radius: 4px 4px 0 0;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--light-text-color);
+  border-bottom: 2px solid var(--accent-color);
 }
 
-#scoreboard tr:nth-child(even) {
-  background-color: #2a2a4a;
+#scoreboard tbody tr {
+  border-bottom: 1px solid var(--border-color);
 }
 
-#scoreboard tr:hover {
-  background-color: #3a3a5a;
+#scoreboard tbody tr:last-child {
+  border-bottom: none;
+}
+
+#scoreboard tbody tr:nth-child(even) {
+  background-color: var(--row-alt-bg);
+}
+
+#scoreboard .rank {
+  width: 1%;
 }
 
 #scoreboard td.rank {
   font-weight: bold;
   color: var(--accent-color);
+}
+
+#scoreboard .score {
+  text-align: right;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+#scoreboard .dot {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-right: 0.6em;
+  border-radius: 50%;
+}
+
+#scoreboard td.msg {
+  text-align: center;
+  color: var(--light-text-color);
+}
+
+@media (max-width: 600px) {
+  #scoreboard {
+    margin: 1em auto;
+    padding: 0.8em;
+    font-size: 1.1em;
+  }
+
+  #scoreboard th,
+  #scoreboard td {
+    padding-inline: 0.5rem;
+  }
 }

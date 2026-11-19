@@ -13,8 +13,8 @@ A multiplayer game where players have to throw balls at targets from their smart
 
 Clong is configured through the following environment variables:
 
-- `ADMIN_PASSWORD` (required): Password of the `admin` user, which is needed to open `/screen` and to reset scores
-- `DATABASE_URL`: URL of the PostgreSQL database (defaults to `postgresql://postgres:clong@?sslmode=disable`)
+- `CLONG_ADMIN_PASSWORD` (required): Password of the `admin` user, which is needed to open `/screen` and to reset scores
+- `CLONG_DATABASE_URL`: URL of the PostgreSQL database (defaults to `postgresql://postgres:clong@?sslmode=disable`)
 - `PORT`: Port to listen on (defaults to `8080`)
 
 ## Resetting Scores
@@ -28,13 +28,13 @@ curl -X DELETE localhost:8080/api/scores -u 'admin:PASSWORD'
 ## Run Locally
 
 1. Run `podman compose up`
-1. Visit <http://localhost:8080> (the admin password is `clong` unless you set `ADMIN_PASSWORD`)
+1. Visit <http://localhost:8080> (the admin password is `clong` unless you set `CLONG_ADMIN_PASSWORD`)
 
 ## Build and Run Binary
 
 1. Run `make`
-1. Start a PostgreSQL database and set `DATABASE_URL` accordingly if it doesn't match the default
-1. Run `ADMIN_PASSWORD=PASSWORD bin/clong` and visit <http://localhost:8080>
+1. Start a PostgreSQL database and set `CLONG_DATABASE_URL` accordingly if it doesn't match the default
+1. Run `CLONG_ADMIN_PASSWORD=PASSWORD bin/clong` and visit <http://localhost:8080>
 
 ## Run Tests and Linter
 
@@ -68,4 +68,4 @@ The database doesn't use a persistent volume, so scores are lost when its pod re
 ## Run on Fly
 
 1. Run `fly launch --config deployments/fly/fly.toml`
-1. Create a PostgreSQL database and set the `DATABASE_URL` and `ADMIN_PASSWORD` secrets with `fly secrets set`
+1. Create a PostgreSQL database and set the `CLONG_DATABASE_URL` and `CLONG_ADMIN_PASSWORD` secrets with `fly secrets set`

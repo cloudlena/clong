@@ -16,8 +16,16 @@ spec:
           image: docker.io/cloudlena/clong:latest
           ports:
             - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
           env:
-            - name: ADMIN_PASSWORD
+            - name: CLONG_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: clong-credentials
@@ -32,5 +40,5 @@ spec:
                 secretKeyRef:
                   name: clong-credentials
                   key: dbPassword
-            - name: DATABASE_URL
-              value: postgresql://$(DB_USERNAME):$(DB_PASSWORD)@clong-db/clong?sslmode=disable
+            - name: CLONG_DATABASE_URL
+              value: postgresql://$(DB_USERNAME):$(DB_PASSWORD)@clong-db?sslmode=disable

@@ -33,20 +33,19 @@ func HandleControllerConn(svc *clong.Service) http.HandlerFunc {
 			return
 		}
 
-		// The upgrader responds with an HTTP error itself if upgrading fails
-		conn, err := upgrader.Upgrade(w, r, nil)
+		conn, err := upgrade(w, r)
 		if err != nil {
 			return
 		}
 		defer closeConn(conn)
 
-		svc.RegisterController(conn)
-		defer svc.UnregisterController(conn)
+		svc.RegisterController(player.ID, conn)
+		defer svc.UnregisterController(player.ID, conn)
 
 		for {
 			var ctrl clong.Control
 			if err := conn.ReadJSON(&ctrl); err != nil {
-				log.Printf("error reading from controller: %v\n", err)
+				log.Printf("error reading from controller: %v", err)
 				return
 			}
 			ctrl.Player = player

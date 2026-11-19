@@ -1,4 +1,4 @@
-package httpws_test
+package httpws
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cloudlena/clong/internal/clong/httpws"
+	"github.com/cloudlena/clong/internal/clong"
 )
 
 func TestHandleDeleteScoresReturnsNoContent(t *testing.T) {
@@ -14,7 +14,7 @@ func TestHandleDeleteScoresReturnsNoContent(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodDelete, "/api/scores", nil)
 	w := httptest.NewRecorder()
-	httpws.HandleDeleteScores(store)(w, req)
+	HandleDeleteScores(clong.NewService(store))(w, req)
 
 	if w.Code != http.StatusNoContent {
 		t.Fatalf("expected 204, got %d", w.Code)
@@ -26,7 +26,7 @@ func TestHandleDeleteScoresStoreError(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodDelete, "/api/scores", nil)
 	w := httptest.NewRecorder()
-	httpws.HandleDeleteScores(store)(w, req)
+	HandleDeleteScores(clong.NewService(store))(w, req)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500, got %d", w.Code)
